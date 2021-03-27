@@ -4,6 +4,7 @@ import { Rectangle } from "../models/Rectangle";
 export class RandomBSP {
     children: RandomBSP[] = [];
     rect: Rectangle;
+    isLeaf: boolean = false;
 
     constructor(
     coords: Point, 
@@ -11,11 +12,29 @@ export class RandomBSP {
         this.rect =  new Rectangle(coords, size);
     }
 
+    // removes leaves by a function
+    prune(pruneFN: (bsp: RandomBSP) => boolean) {
+        const toRemove: RandomBSP[] = [];
+        this.children.forEach((child) => {
+            child.prune(pruneFN);
+            if(pruneFN(child) || (!child.isLeaf && child.children.length === 0)) {
+                toRemove.push(child);
+            }
+        });
+
+        if(toRemove.length === this.children.length) {
+            this.children = [];
+        } else {
+            this.children = this.children.filter((child) => !toRemove.includes(child));
+        }
+    }
+
     // returns true if it has at least one terminal leaf
     split(minSize: number, maxSize: number): boolean {
         // this rectangle can contain a room - don't try to split it
         if(this.rect.size.x <= maxSize && this.rect.size.x >= minSize &&
             this.rect.size.y <= maxSize && this.rect.size.y >= minSize) {
+            this.isLeaf = true;
             return true;
         }
 
@@ -24,6 +43,8 @@ export class RandomBSP {
         let splitSize: Point;
         const otherCoords: Point = this.rect.location;
         let otherSize: Point;
+
+        //our particular tiles are larger in the y than the x, so add a factor to get "squarer" looking rooms
         if(this.rect.size.x > this.rect.size.y * 1.5) {
             splitCoords.y = this.rect.location.y;
             const xOffset = this.getSplitPoint(this.rect.size.x, minSize);

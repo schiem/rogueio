@@ -11,8 +11,10 @@ const viewport = new ViewPort({x: 256, y: 128}, spriteSheet, canvas);
 spriteSheet.onReady(() => {
     const bsp: RandomBSP = new RandomBSP({x: 0, y: 0}, {x: viewport.size.x - 1, y: viewport.size.y - 1});
     bsp.split(8, 16);
+    bsp.prune((bsp) => {
+        return bsp.isLeaf && Math.random() > 0.5;
+    });
     const rectangles = bsp.getChildRectangles();
-    console.log(rectangles.length);
     rectangles.forEach((rectangle) => {
         spriteSheet.drawRectangle(3, rectangle, viewport.ctx); 
     });
