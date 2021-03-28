@@ -4,15 +4,12 @@ export class Rectangle {
     location: Point;
     size: Point;
 
-    topLeft: Point;
-    bottomRight: Point;
+    get topLeft(): Point { return this.location };
+    get bottomRight(): Point { return {x: this.location.x + this.size.x, y: this.location.y + this.size.y }};
 
     constructor(location: Point, size: Point) {
         this.location = location;
         this.size = size;
-
-        this.topLeft = location;
-        this.bottomRight = {x: location.x + size.x, y: location.y + size.y};
     }
 
     overlapsWith(other: Rectangle): boolean {

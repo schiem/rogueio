@@ -1,5 +1,6 @@
 import { Point } from "../types/Points";
 import { Rectangle } from "../models/Rectangle";
+import { random } from "./MathUtils";
 
 export class RandomBSP {
     children: RandomBSP[] = [];
@@ -13,7 +14,7 @@ export class RandomBSP {
     }
 
     // removes leaves by a function
-    prune(pruneFN: (bsp: RandomBSP) => boolean) {
+    prune(pruneFN: (bsp: RandomBSP) => boolean): void {
         const toRemove: RandomBSP[] = [];
         this.children.forEach((child) => {
             child.prune(pruneFN);
@@ -29,11 +30,21 @@ export class RandomBSP {
         }
     }
 
+    transform(transformFN: (bsp: RandomBSP) => void): void {
+        if (this.isLeaf) {
+            transformFN(this);
+        } else {
+            this.children.forEach((child) => {
+                child.transform(transformFN);
+            });
+        }
+    }
+
     // returns true if it has at least one terminal leaf
-    split(minSize: number, maxSize: number): boolean {
+    split(minSize: Point, maxSize: Point): boolean {
         // this rectangle can contain a room - don't try to split it
-        if(this.rect.size.x <= maxSize && this.rect.size.x >= minSize &&
-            this.rect.size.y <= maxSize && this.rect.size.y >= minSize) {
+        if(this.rect.size.x <= maxSize.x && this.rect.size.x >= minSize.x &&
+            this.rect.size.y <= maxSize.y && this.rect.size.y >= minSize.y) {
             this.isLeaf = true;
             return true;
         }
@@ -45,26 +56,26 @@ export class RandomBSP {
         let otherSize: Point;
 
         //our particular tiles are larger in the y than the x, so add a factor to get "squarer" looking rooms
-        if(this.rect.size.x > this.rect.size.y * 1.5) {
+        if(this.rect.size.x > (this.rect.size.y * (maxSize.x / maxSize.y))) {
             splitCoords.y = this.rect.location.y;
-            const xOffset = this.getSplitPoint(this.rect.size.x, minSize);
+            const xOffset = this.getSplitPoint(this.rect.size.x, minSize.x);
             splitCoords.x = xOffset + this.rect.location.x;
             splitSize = {x: this.rect.size.x - xOffset, y: this.rect.size.y};
             otherSize = {x: this.rect.size.x - splitSize.x, y: this.rect.size.y}
         } else {
             splitCoords.x = this.rect.location.x;
-            const yOffset = this.getSplitPoint(this.rect.size.y, minSize);
+            const yOffset = this.getSplitPoint(this.rect.size.y, minSize.y);
             splitCoords.y = yOffset + this.rect.location.y;
             splitSize = {x: this.rect.size.x, y: this.rect.size.y - yOffset};
             otherSize = {x: this.rect.size.x, y: this.rect.size.y - splitSize.y}
         }
 
         let children: RandomBSP[] = [];
-        if(splitSize.x > minSize && splitSize.y > minSize) {
+        if(splitSize.x > minSize.x && splitSize.y > minSize.y) {
             children.push(new RandomBSP(splitCoords, splitSize));
         }
 
-        if(otherSize.x > minSize && otherSize.y > minSize) {
+        if(otherSize.x > minSize.x && otherSize.y > minSize.y) {
             children.push(new RandomBSP(otherCoords, otherSize));
         }
 
@@ -104,7 +115,6 @@ export class RandomBSP {
             floor = Math.floor(minSize / 2);
             ceil = Math.ceil(size - minSize / 2);
         }
-        const range = ceil - floor;
-        return Math.floor(Math.random() * range) + floor;
+        return random(floor, ceil);
     }
 }
