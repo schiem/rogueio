@@ -4,12 +4,13 @@ export declare class SpriteSheet {
     spriteWidth: number;
     spriteHeight: number;
     spriteSheetSrc: string;
+    spriteNames: Record<string, number>;
     sheetElement: HTMLImageElement;
     numSprites: number;
     ready: boolean;
     onReadyFunctions: (() => void)[];
-    constructor(spriteWidth: number, spriteHeight: number, spriteSheetSrc: string);
+    constructor(spriteWidth: number, spriteHeight: number, spriteSheetSrc: string, spriteNames: Record<string, number>);
     onReady(func: () => void): void;
-    drawRectangle(sprite: number, rect: Rectangle, ctx: CanvasRenderingContext2D, fill?: boolean): void;
-    drawSprite(sprite: number, location: Point, ctx: CanvasRenderingContext2D): void;
+    drawRectangle(sprite: string, rect: Rectangle, ctx: CanvasRenderingContext2D, fill?: boolean): void;
+    drawSprite(sprite: string, location: Point, ctx: CanvasRenderingContext2D): void;
 }

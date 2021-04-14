@@ -1,7 +1,7 @@
 import { Item } from "./Item";
 
 import { Character } from "./Character";
-import { Tile } from "../types/Tile";
+import { Tile, TileFactory } from "../types/Tile";
 import { tileDefinitions } from "../consts/TileDefinitions";
 import { Point } from "../types/Points";
 import { QuadTree } from "../utils/QuadTree";
@@ -13,10 +13,10 @@ import { start } from "repl";
 export class Dungeon {
     items: Item[] = [];
     characters: Character[] = [];
-    tiles: (Tile | undefined)[][];
+    tiles: (Tile | undefined)[][] = [];
+    rooms: Room[] = [];
 
-    constructor(tiles: (Tile | undefined)[][], public rooms: Room[]) {
-        this.tiles = tiles;
+    constructor(public size: Point) {
     }
 }
 
@@ -28,75 +28,62 @@ export class DungeonGenerator {
         public minRoomSpacing: number,
         public maxRoomSpacing: number,
         public roomCreateAttempts: number,
-    ) {}
+    ) { }
 
     generate(): Dungeon {
         const wallTile = tileDefinitions.wall;
         //Dungeon generation happens here
 
         //generate the first room
-        const rooms = this.generateRooms();
-        console.log(rooms);
+        const dungeon = new Dungeon(this.dungeonSize);
+        dungeon.tiles = new Array(this.dungeonSize.x);
+        for (let i = 0; i < dungeon.tiles.length; i++) {
+            dungeon.tiles[i] = new Array(this.dungeonSize.y).map((undef, j) => {
+                return TileFactory.generateTile(wallTile, { x: i, y: j });
+            });
+        }
+        this.generateDungeonRooms(dungeon);
 
-        return new Dungeon([], rooms.rooms);
+        return dungeon;
+
     }
 
-    generateRooms(): {rooms: Room[], connections: [Room, Room][]} {
-        const rooms: Room[] = [];
-        const connections: [Room, Room][] = [];
+    generateDungeonRooms(dungeon: Dungeon): void {
         const possibleRooms: Room[] = [];
 
-        for(let i = 0; i < this.roomCreateAttempts; i++) {
-            if(rooms.length === 0) {
+        for (let i = 0; i < this.roomCreateAttempts; i++) {
+            if (dungeon.rooms.length === 0) {
                 //generate the first room 
                 const size = {
-                    x: random(this.minRoomSize.x, this.maxRoomSize.x), 
+                    x: random(this.minRoomSize.x, this.maxRoomSize.x),
                     y: random(this.minRoomSize.y, this.maxRoomSize.y)
                 };
 
                 const location = {
-                    x: random(0, this.dungeonSize.x - size.x), 
+                    x: random(0, this.dungeonSize.x - size.x),
                     y: random(0, this.dungeonSize.y - size.y)
                 };
                 const room = new Room(
                     new Rectangle(location, size)
                 );
-                rooms.push(room);
+                dungeon.rooms.push(room);
                 possibleRooms.push(room);
             } else {
                 //generate a random room
                 //get a random room to start from
-                const startIndex = random(0, rooms.length);
+                const startIndex = random(0, possibleRooms.length);
                 const startRoom = possibleRooms[startIndex];
 
                 //generate the size first
                 const size = {
-                    x: random(this.minRoomSize.x, this.maxRoomSize.x), 
+                    x: random(this.minRoomSize.x, this.maxRoomSize.x),
                     y: random(this.minRoomSize.y, this.maxRoomSize.y)
                 };
-
-                // fetch a random point on the perimeter
-                const perimPoint = this.randomPerimeterPoint(startRoom.rect);
 
                 //generate how far away the room is from the point
                 const dist = random(this.minRoomSpacing, this.maxRoomSpacing);
 
-                //draw a line from the center of the rectangle through the perimeter point, and then keep going X distance
-                const center = startRoom.rect.center;
-                const riseRun = {
-                    x: perimPoint.x - center.x,
-                    y: perimPoint.y - center.y
-                }
-                const hypotenuse = Math.sqrt(riseRun.x * riseRun.x + riseRun.y * riseRun.y);
-                const ratio = dist / hypotenuse;
-                const offset = {
-                    x: Math.round(riseRun.x * ratio),
-                    y: Math.round(riseRun.y * ratio)
-                };
-                const newPoint = {
-                    x: perimPoint.x + offset.x,
-                    y: perimPoint.y + offset.y
-                }
+                const newPoint = this.pointAtDistance(startRoom.rect, dist);
 
                 // construct a new rectangle
                 const newRect = new Rectangle(
@@ -116,26 +103,46 @@ export class DungeonGenerator {
                 //at a glance, this appears to be N^2
                 //the aggressive pruning actually results in this being nlog(n)
                 //making it much faster than a quad tree
-                const overlappingRect = rooms.find((room) => {
+                const overlappingRect = dungeon.rooms.find((room) => {
                     return room.rect.distanceTo(newRect) < 2;
                 });
 
-                if(overlappingRect === undefined) {
+                if (overlappingRect === undefined) {
                     //no rectangles overlapping, add this point to the list
                     const room = new Room(newRect);
-                    rooms.push(room);
+                    dungeon.rooms.push(room);
                     possibleRooms.push(room);
                     room.connections.push(startRoom);
                     startRoom.connections.push(room);
-                    connections.push([startRoom, room]);
                     if (startRoom.connections.length >= 3) {
                         possibleRooms.slice(startIndex, 1);
                     }
                 }
             }
         }
+    }
 
-        return {rooms, connections};
+    private pointAtDistance(rect: Rectangle, dist: number): Point {
+        // fetch a random point on the perimeter
+        const perimPoint = this.randomPerimeterPoint(rect);
+
+        //draw a line from the center of the rectangle through the perimeter point, and then keep going X distance
+        const center = rect.center;
+        const riseRun = {
+            x: perimPoint.x - center.x,
+            y: perimPoint.y - center.y
+        }
+        const hypotenuse = Math.sqrt(riseRun.x * riseRun.x + riseRun.y * riseRun.y);
+        const ratio = dist / hypotenuse;
+        const offset = {
+            x: Math.round(riseRun.x * ratio),
+            y: Math.round(riseRun.y * ratio)
+        };
+
+        return {
+            x: perimPoint.x + offset.x,
+            y: perimPoint.y + offset.y
+        };
     }
 
     private randomPerimeterPoint(rect: Rectangle): Point {
@@ -147,13 +154,13 @@ export class DungeonGenerator {
         //  4567
         const perimeterLength = (rect.size.x * 2 + rect.size.y * 2) - 4;
         const flattenedPerimPoint = random(0, perimeterLength);
-        const perimPoint = {x: 0, y: 0};
+        const perimPoint = { x: 0, y: 0 };
 
         //determine which side the point is on
         const diff = flattenedPerimPoint - rect.size.x * 2;
-        if(diff < 0) {
+        if (diff < 0) {
             //either on the top or bottom - y will be either 0 or max, x will be the modulo of the index
-            perimPoint.y  = flattenedPerimPoint < rect.size.x - 1 ? 0 : rect.size.y - 1;
+            perimPoint.y = flattenedPerimPoint < rect.size.x - 1 ? 0 : rect.size.y - 1;
             perimPoint.x = flattenedPerimPoint % rect.size.x;
         } else {
             //either on the left or right - x will be either 0 or max, y will be module of the diff
@@ -163,8 +170,8 @@ export class DungeonGenerator {
             perimPoint.y = (diff % (rect.size.y - 2)) + 1;
         }
         return {
-           x: perimPoint.x + rect.location.x,
-           y: perimPoint.y + rect.location.y
+            x: perimPoint.x + rect.location.x,
+            y: perimPoint.y + rect.location.y
         };
     }
 }

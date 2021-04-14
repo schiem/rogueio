@@ -10,7 +10,8 @@ export class SpriteSheet {
     constructor(
         public spriteWidth: number,
         public spriteHeight: number,
-        public spriteSheetSrc: string
+        public spriteSheetSrc: string,
+        public spriteNames: Record<string, number>
     ) {
         this.sheetElement = new Image();
         this.sheetElement.src = spriteSheetSrc;
@@ -31,7 +32,7 @@ export class SpriteSheet {
         }
     }
 
-    drawRectangle(sprite: number, rect: Rectangle, ctx: CanvasRenderingContext2D, fill: boolean = false) {
+    drawRectangle(sprite: string, rect: Rectangle, ctx: CanvasRenderingContext2D, fill: boolean = false) {
         if(fill) {
             for(let x = rect.topLeft.x; x <= rect.bottomRight.x; x++) {
                 for(let y = rect.topLeft.y; y <= rect.bottomRight.y; y++) {
@@ -53,13 +54,14 @@ export class SpriteSheet {
         }
     }
 
-    drawSprite(sprite: number, location: Point, ctx: CanvasRenderingContext2D): void {
-        if(!this.ready || sprite > this.numSprites) {
+    drawSprite(sprite: string, location: Point, ctx: CanvasRenderingContext2D): void {
+        const spriteNum = this.spriteNames[sprite];
+        if(!this.ready || spriteNum > this.numSprites) {
             throw new Error('Could not draw the sprite, either they have not been loaded or the sprite does not exist.')
         }
         const x = location.x *  this.spriteWidth;
         const y = location.y * this.spriteHeight;
         ctx.clearRect(x, y, this.spriteWidth, this.spriteHeight);
-        ctx.drawImage(this.sheetElement, this.spriteWidth * sprite, 0, this.spriteWidth, this.spriteHeight, x, y, this.spriteWidth, this.spriteHeight);
+        ctx.drawImage(this.sheetElement, this.spriteWidth * spriteNum, 0, this.spriteWidth, this.spriteHeight, x, y, this.spriteWidth, this.spriteHeight);
     }
 }
