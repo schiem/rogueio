@@ -4,16 +4,14 @@ import { Character } from "./Character";
 import { Tile, TileFactory } from "../types/Tile";
 import { tileDefinitions } from "../consts/TileDefinitions";
 import { Point } from "../types/Points";
-import { QuadTree } from "../utils/QuadTree";
 import { Rectangle } from "./Rectangle";
 import { Room } from "./Room";
 import { random } from "../utils/MathUtils";
-import { start } from "repl";
 
 export class Dungeon {
     items: Item[] = [];
     characters: Character[] = [];
-    tiles: (Tile | undefined)[][] = [];
+    tiles: Tile[][] = [];
     rooms: Room[] = [];
 
     constructor(public size: Point) {
@@ -38,9 +36,10 @@ export class DungeonGenerator {
         const dungeon = new Dungeon(this.dungeonSize);
         dungeon.tiles = new Array(this.dungeonSize.x);
         for (let i = 0; i < dungeon.tiles.length; i++) {
-            dungeon.tiles[i] = new Array(this.dungeonSize.y).map((undef, j) => {
-                return TileFactory.generateTile(wallTile, { x: i, y: j });
-            });
+            dungeon.tiles[i] = (new Array(this.dungeonSize.y));
+            for (let j = 0; j < dungeon.tiles[i].length; j++) {
+                dungeon.tiles[i][j] = TileFactory.generateTile({ x: i, y: j }, wallTile);
+            }
         }
         this.generateDungeonRooms(dungeon);
 
@@ -66,7 +65,7 @@ export class DungeonGenerator {
                 const room = new Room(
                     new Rectangle(location, size)
                 );
-                dungeon.rooms.push(room);
+                this.addRoomToDungeon(room, dungeon);
                 possibleRooms.push(room);
             } else {
                 //generate a random room
@@ -110,15 +109,101 @@ export class DungeonGenerator {
                 if (overlappingRect === undefined) {
                     //no rectangles overlapping, add this point to the list
                     const room = new Room(newRect);
-                    dungeon.rooms.push(room);
                     possibleRooms.push(room);
-                    room.connections.push(startRoom);
-                    startRoom.connections.push(room);
                     if (startRoom.connections.length >= 3) {
                         possibleRooms.slice(startIndex, 1);
                     }
+                    this.addRoomToDungeon(room, dungeon, startRoom);
                 }
             }
+        }
+    }
+
+    private addRoomToDungeon(room: Room, dungeon: Dungeon, startRoom?: Room): void {
+        dungeon.rooms.push(room);
+        const bottomRight = room.rect.bottomRight;
+        for(let x = room.rect.location.x; x < bottomRight.x; x++) {
+            for(let y = room.rect.location.y; y < bottomRight.y; y++) {
+                dungeon.tiles[x][y].definition = undefined;
+            }
+        }
+
+        if(startRoom !== undefined) {
+            room.connections.push(startRoom);
+            startRoom.connections.push(room);
+
+            // choose a random spot on the start room
+            // 2 scenarios
+            //   * rooms overlap in one dimension 
+            //   * rooms have no overlap
+            const startBr = startRoom.rect.bottomRight;
+            const startPoint: Point = {x: 0, y: 0};
+            const endPoint: Point = {x: 0, y: 0};
+            const nextDirection: Point = {x: 0, y: 0};
+            // 0 = x, 1 = y
+            let generateDirection: number;
+            if(
+                startBr.x >= room.rect.topLeft.x && startRoom.rect.topLeft.x <= bottomRight.x
+            ) {
+                //rooms overlap in the x
+                generateDirection = 0;
+            } else if(
+                startBr.y >= room.rect.topLeft.y && startRoom.rect.topLeft.y <= bottomRight.y
+            ) {
+                //rooms overlap in the y
+                generateDirection = 1;
+            } else {
+                generateDirection = random(0, 2);
+            }
+
+            if(generateDirection === 0) {
+                startPoint.x = random(startRoom.rect.location.x + 1, startBr.x - 1);
+                endPoint.x = random(room.rect.location.x + 1, bottomRight.x - 1); 
+                if (startRoom.rect.location.y < room.rect.location.y) {
+                    //bottom of the start room connects to top of the end room
+                    startPoint.y = startBr.y;
+                    endPoint.y = room.rect.location.y;
+                    nextDirection.y = 1;
+                } else {
+                    //top of the start room connects to bottom of the end room
+                    startPoint.y = startRoom.rect.location.y;
+                    endPoint.y = bottomRight.y;
+                    nextDirection.y = -1;
+                }
+            } else {
+                startPoint.y = random(startRoom.rect.location.y + 1, startBr.y - 1);
+                endPoint.y = random(room.rect.location.y + 1, bottomRight.y - 1);
+                if (startRoom.rect.location.x < room.rect.location.x) {
+                    //right of the start room connects to the left of the end room
+                    startPoint.x = startBr.x;
+                    endPoint.x = room.rect.location.x;
+                    nextDirection.x = 1;
+                } else {
+                    //left of the start room connects to the right of the end room
+                    startPoint.x = startRoom.rect.location.x;
+                    endPoint.x = bottomRight.x;
+                    nextDirection.x = -1;
+                }
+            }
+
+            // connect them
+            const points: Point[] = [];
+            let newPoint = startPoint;
+            while(newPoint.x !== endPoint.x || newPoint.y !== endPoint.y) {
+                dungeon.tiles[newPoint.x][newPoint.y].definition = undefined;
+                points.push(newPoint);
+                newPoint = {x: newPoint.x + nextDirection.x, y: newPoint.y + nextDirection.y}
+
+                if(nextDirection.x !== 0 && newPoint.x === endPoint.x) {
+                    nextDirection.x = 0;
+                    nextDirection.y = newPoint.y < endPoint.y ? 1 : -1;
+                } else if(nextDirection.y !== 0 && newPoint.y === endPoint.y) {
+                    nextDirection.y = 0;
+                    nextDirection.x = newPoint.x < endPoint.x ? 1 : -1;
+                }
+            }
+            points.push(endPoint);
+            dungeon.tiles[endPoint.x][endPoint.y].definition = undefined;
         }
     }
 
