@@ -5,7 +5,7 @@ import { Tile, TileFactory } from "../types/Tile";
 import { tileDefinitions } from "../consts/TileDefinitions";
 import { Point } from "../types/Points";
 import { Rectangle } from "./Rectangle";
-import { Room } from "./Room";
+import { Room, Condition } from "./Room";
 import { random } from "../utils/MathUtils";
 
 export class Dungeon {
@@ -41,10 +41,56 @@ export class DungeonGenerator {
                 dungeon.tiles[i][j] = TileFactory.generateTile({ x: i, y: j }, wallTile);
             }
         }
+
         this.generateDungeonRooms(dungeon);
+
+        this.ageDungeon(dungeon);
 
         return dungeon;
 
+    }
+
+    ageDungeon(dungeon: Dungeon): void {
+        const roomsToAge = [dungeon.rooms[random(0, dungeon.rooms.length)]];
+
+        // set it to the maximum age
+        const checked: Record<string, boolean> = { 
+            [roomsToAge[0].id()]: true
+        }
+        roomsToAge[0].age = 4;
+        let index = 0;
+        do {
+            const startRoom = roomsToAge[index];
+            startRoom.connections.forEach((room) => {
+                const roomId = room.id();
+                if(checked[roomId]) {
+                    //aready aged this room, don't try again
+                    return;
+                }
+                checked[roomId] = true;
+
+                const ageDifference = random(-1, 2);
+                room.age = Math.min(startRoom.age + ageDifference, 4) as Condition;
+                 
+                if(room.age > 1) {
+                    roomsToAge.push(room);
+                }
+            });
+            index++;
+        } while(index < roomsToAge.length)
+
+        roomsToAge.forEach((room) => {
+            // gives a range of 0% - 50% chance of changing a tile
+            const factor = (room.age - 1) / 6;
+            const bottomRight = room.rect.bottomRight;
+            for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
+                for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
+                    if(Math.random() < factor) {
+                        dungeon.tiles[x][y].definition = tileDefinitions.wall;
+                    }
+                }
+            }
+        });
     }
 
     generateDungeonRooms(dungeon: Dungeon): void {
