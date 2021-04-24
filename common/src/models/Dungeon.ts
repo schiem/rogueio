@@ -13,6 +13,7 @@ export class Dungeon {
     characters: Character[] = [];
     tiles: Tile[][] = [];
     rooms: Room[] = [];
+    connections: [Room, Room][] = [];
 
     constructor(public size: Point) {
     }
@@ -45,6 +46,8 @@ export class DungeonGenerator {
         this.generateDungeonRooms(dungeon);
 
         this.ageDungeon(dungeon);
+
+        this.connectRooms(dungeon);
 
         return dungeon;
 
@@ -85,12 +88,40 @@ export class DungeonGenerator {
             const bottomRight = room.rect.bottomRight;
             for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                 for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
-                    if(Math.random() < factor) {
+                   if(Math.random() < factor) {
                         dungeon.tiles[x][y].definition = tileDefinitions.wall;
                     }
                 }
             }
+
+            if(room.age > 2) {
+                for(let pass = 0; pass < 2; pass++) {
+                    for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
+                        for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
+                            this.runCellularAutomata(x, y, dungeon);
+                        }
+                    }
+                }
+            }
         });
+    }
+
+    runCellularAutomata(x: number, y: number, dungeon: Dungeon) {
+        let neighborCount = 0;
+        for(let newX = x - 1; newX <= x + 1; newX++) {
+            for(let newY = y - 1; newY <= y + 1; newY++) {
+                if (
+                    (newX === x && newY === y) 
+                    || dungeon.tiles[newX] === undefined
+                    || dungeon.tiles[newX][newY] === undefined
+                    || dungeon.tiles[newX][newY].definition === undefined
+                ) {
+                    continue;
+                }
+                neighborCount++;
+            }
+        }
+        dungeon.tiles[x][y].definition = neighborCount > 4 ? tileDefinitions.wall : undefined;
     }
 
     generateDungeonRooms(dungeon: Dungeon): void {
@@ -177,15 +208,37 @@ export class DungeonGenerator {
         if(startRoom !== undefined) {
             room.connections.push(startRoom);
             startRoom.connections.push(room);
+            dungeon.connections.push([room, startRoom]);
+        }
+    }
 
+    private connectRooms(dungeon: Dungeon): void {
+        dungeon.connections.forEach((rooms) => {
+            const room = rooms[0];
+            const startRoom = rooms[1];
             // choose a random spot on the start room
             // 2 scenarios
             //   * rooms overlap in one dimension 
             //   * rooms have no overlap
             const startBr = startRoom.rect.bottomRight;
-            const startPoint: Point = {x: 0, y: 0};
-            const endPoint: Point = {x: 0, y: 0};
+            const bottomRight = room.rect.bottomRight;
+            let startPoint: Point;
+            let endPoint: Point;
             const nextDirection: Point = {x: 0, y: 0};
+            const roomCenter = {x: Math.floor(room.rect.center.x), y: Math.floor(room.rect.center.y)};
+            const startCenter = {x: Math.floor(startRoom.rect.center.x), y: Math.floor(startRoom.rect.center.y)};
+            if(room.age > 1) {
+                endPoint = roomCenter;
+            } else {
+                endPoint = {x: 0, y: 0};
+            }
+
+            if(startRoom.age > 1) {
+                startPoint = startCenter;
+            } else {
+                startPoint = {x: 0, y: 0};
+            }
+
             // 0 = x, 1 = y
             let generateDirection: number;
             if(
@@ -203,41 +256,39 @@ export class DungeonGenerator {
             }
 
             if(generateDirection === 0) {
-                startPoint.x = random(startRoom.rect.location.x + 1, startBr.x - 1);
-                endPoint.x = random(room.rect.location.x + 1, bottomRight.x - 1); 
+                startPoint.x = startPoint.x || random(startRoom.rect.location.x + 1, startBr.x - 1);
+                endPoint.x = endPoint.x || random(room.rect.location.x + 1, bottomRight.x - 1); 
                 if (startRoom.rect.location.y < room.rect.location.y) {
                     //bottom of the start room connects to top of the end room
-                    startPoint.y = startBr.y;
-                    endPoint.y = room.rect.location.y;
+                    startPoint.y = startPoint.y || startBr.y;
+                    endPoint.y = endPoint.y || room.rect.location.y;
                     nextDirection.y = 1;
                 } else {
                     //top of the start room connects to bottom of the end room
-                    startPoint.y = startRoom.rect.location.y;
-                    endPoint.y = bottomRight.y;
+                    startPoint.y = startPoint.y || startRoom.rect.location.y;
+                    endPoint.y = endPoint.y || bottomRight.y;
                     nextDirection.y = -1;
                 }
             } else {
-                startPoint.y = random(startRoom.rect.location.y + 1, startBr.y - 1);
-                endPoint.y = random(room.rect.location.y + 1, bottomRight.y - 1);
+                startPoint.y = startPoint.y || random(startRoom.rect.location.y + 1, startBr.y - 1);
+                endPoint.y = endPoint.y || random(room.rect.location.y + 1, bottomRight.y - 1);
                 if (startRoom.rect.location.x < room.rect.location.x) {
                     //right of the start room connects to the left of the end room
-                    startPoint.x = startBr.x;
-                    endPoint.x = room.rect.location.x;
+                    startPoint.x = startPoint.x || startBr.x;
+                    endPoint.x = endPoint.x || room.rect.location.x;
                     nextDirection.x = 1;
                 } else {
                     //left of the start room connects to the right of the end room
-                    startPoint.x = startRoom.rect.location.x;
-                    endPoint.x = bottomRight.x;
+                    startPoint.x = startPoint.x || startRoom.rect.location.x;
+                    endPoint.x = endPoint.x || bottomRight.x;
                     nextDirection.x = -1;
                 }
             }
 
             // connect them
-            const points: Point[] = [];
             let newPoint = startPoint;
             while(newPoint.x !== endPoint.x || newPoint.y !== endPoint.y) {
                 dungeon.tiles[newPoint.x][newPoint.y].definition = undefined;
-                points.push(newPoint);
                 newPoint = {x: newPoint.x + nextDirection.x, y: newPoint.y + nextDirection.y}
 
                 if(nextDirection.x !== 0 && newPoint.x === endPoint.x) {
@@ -248,9 +299,8 @@ export class DungeonGenerator {
                     nextDirection.x = newPoint.x < endPoint.x ? 1 : -1;
                 }
             }
-            points.push(endPoint);
             dungeon.tiles[endPoint.x][endPoint.y].definition = undefined;
-        }
+        });
     }
 
     private pointAtDistance(rect: Rectangle, dist: number): Point {

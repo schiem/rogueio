@@ -26,4 +26,7 @@ spriteSheet.onReady(() => {
             }
         }
     }
+    dungeon.rooms.forEach((room) => {
+        //spriteSheet.drawRectangle('floor', room.rect, viewport.ctx, false);
+    });
 });
