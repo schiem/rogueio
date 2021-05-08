@@ -18,7 +18,7 @@
   },
   "include": [
     "src/**/*",
-    "../common/src/**/*"
+    "../common/src/**/*",
   ],
   "exclude": [
     ".git",

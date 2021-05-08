@@ -2,7 +2,7 @@ import { Rectangle } from "./Rectangle";
 
 export type Condition = 1 | 2 | 3 | 4;
 export class Room {
-    connections: Room[] = [];
+    connections: number[] = [];
     age: Condition;
 
     constructor(public rect: Rectangle) {
