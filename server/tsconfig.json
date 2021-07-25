@@ -12,6 +12,7 @@
     ],
     "strict": true,
     "noUnusedLocals": true,
+    "strictPropertyInitialization": false,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true

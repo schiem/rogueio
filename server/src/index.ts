@@ -1,10 +1,16 @@
 import * as WebSocket from 'ws';
-import { Game } from "./models/Game";
+import { ServerGame } from './models/ServerGame';
+import { InitEvent } from '../../common/src/events/server/InitEvent';
 
-const game = new Game();
+const game = new ServerGame();
 const wss = new WebSocket.Server({ port: 8888});
 
 wss.on('connection', (ws) => {
     console.log('client connected');
-    ws.send(JSON.stringify(game.currentDungeon)); 
+    const playerId = game.playerConnected();
+    ws.send(
+        JSON.stringify(
+            new InitEvent(game, playerId)
+        )
+    ); 
 });

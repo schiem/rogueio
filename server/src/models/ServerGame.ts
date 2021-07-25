@@ -1,16 +1,14 @@
-import { Dungeon } from "../../../common/src/models/Dungeon";
 import { Player } from "../../../common/src/models/Player";
 import { DungeonGenerator } from "../generators/DungeonGenerator";
+import { Game } from "../../../common/src/models/Game";
+import { v4 as uuidv4 } from 'uuid';
 
-export class Game {
-    dungeonX = 256;
-    dungeonY = 128;
-
-    currentDungeon?: Dungeon;
+export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
-    players: Player[] = [];
+    players: Record<string, Player> = {};
 
     constructor() {
+        super();
         const maxRoomSize = {x: 30, y: 16};
         const minRoomSize = {x: 8, y: 4};
         const minRoomSpacing = 6;
@@ -22,5 +20,17 @@ export class Game {
 
     newDungeon() {
         this.currentDungeon = this.dungeonGenerator.generate();
+    }
+
+    playerConnected(playerId?: string): string {
+        if (playerId === undefined) {
+            playerId = uuidv4();
+        }
+        const player = new Player(playerId);
+        this.players[playerId] = player;
+
+        this.currentDungeon.characters.push(player.character);
+
+        return playerId;
     }
 }

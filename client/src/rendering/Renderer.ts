@@ -9,6 +9,6 @@ export class Renderer {
         public canvas: HTMLCanvasElement, 
         public spriteSheet: SpriteSheet) {
             const viewportSize: Point = {x: 256 * spriteSheet.spriteWidth, y: 128 * spriteSheet.spriteHeight }
-            this.viewPort = new ViewPort(viewportSize, spriteSheet, canvas);
+            this.viewPort = new ViewPort(viewportSize, canvas, spriteSheet);
     }
 }

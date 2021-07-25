@@ -1,8 +1,7 @@
-import { Dungeon } from "./Dungeon";
-import { Player } from "./Player";
+import { Dungeon } from "../../../common/src/models/Dungeon";
 export declare class Game {
     dungeonX: number;
     dungeonY: number;
-    currentDungeon?: Dungeon;
-    players: Player[];
+    currentDungeon: Dungeon;
+    constructor();
 }
