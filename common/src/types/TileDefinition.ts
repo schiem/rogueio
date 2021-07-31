@@ -1,4 +1,6 @@
 export type TileDefinition = {
-    movable: boolean;
+    blocks: BlockLayer[];
     spriteName: string
 }
+
+export type BlockLayer = 'character' | 'item';

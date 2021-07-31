@@ -13,4 +13,8 @@ wss.on('connection', (ws) => {
             new InitEvent(game, playerId)
         )
     ); 
+
+    ws.on('close', () => {
+        game.playerDisconnected(playerId);
+    });
 });

@@ -5,7 +5,7 @@ import { ServerGame } from "../../../../server/src/models/ServerGame";
 
 type InitData = {
     dungeon: Dungeon;
-    players: Player[];
+    players: Record<string, Player>;
     playerId: string;
 };
 
@@ -16,7 +16,7 @@ export class InitEvent extends ServerEvent {
     constructor(game: ServerGame, playerId: string) {
         super();
         this.data = {
-            players: Object.keys(game.players).map(x => game.players[x]),
+            players: game.players,
             playerId: playerId,
             dungeon: game.currentDungeon
         };

@@ -1,1 +1,1 @@
-{"version":3,"file":"TileDefinitions.js","sourceRoot":"","sources":["../../../../../common/src/consts/TileDefinitions.ts"],"names":[],"mappings":";;;AAEa,QAAA,eAAe,GAAG;IAC3B,IAAI,EAAE,EAAC,OAAO,EAAE,KAAK,EAAE,UAAU,EAAE,MAAM,EAAC;CAC7C,CAAC"}
+{"version":3,"file":"TileDefinitions.js","sourceRoot":"","sources":["../../../../../common/src/consts/TileDefinitions.ts"],"names":[],"mappings":";;;AAEa,QAAA,eAAe,GAAmC;IAC3D,IAAI,EAAE,EAAC,MAAM,EAAE,CAAC,WAAW,EAAE,MAAM,CAAC,EAAE,UAAU,EAAE,MAAM,EAAC;CAC5D,CAAC"}

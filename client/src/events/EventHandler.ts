@@ -11,9 +11,9 @@ export class EventHandler {
 
     private static eventHandlers = {
         [ServerEventType.init]: (game: ClientGame, event: InitEvent): void => {
-            game.initDungeon(event.data.dungeon);
-            game.players = event.data.players;
             game.currentPlayerId = event.data.playerId;
+            game.players = event.data.players;
+            game.renderDungeon(event.data.dungeon);
         },
         [ServerEventType.message]: (game: ClientGame, event: any): void => {
         },

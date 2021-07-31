@@ -2,10 +2,11 @@ import { Player } from "../../../common/src/models/Player";
 import { DungeonGenerator } from "../generators/DungeonGenerator";
 import { Game } from "../../../common/src/models/Game";
 import { v4 as uuidv4 } from 'uuid';
+import { ServerDungeon } from "./ServerDungeon";
 
 export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
-    players: Record<string, Player> = {};
+    currentDungeon: ServerDungeon;
 
     constructor() {
         super();
@@ -29,8 +30,16 @@ export class ServerGame extends Game {
         const player = new Player(playerId);
         this.players[playerId] = player;
 
-        this.currentDungeon.characters.push(player.character);
+        const spawnLocation = this.currentDungeon.spawnCharacter(player.character);
+        if (spawnLocation) {
+            player.location = spawnLocation;
+        }
 
         return playerId;
+    }
+
+    playerDisconnected(playerId: string): void {
+        this.currentDungeon.removeCharacterAt(this.players[playerId].location)
+        delete this.players[playerId];
     }
 }

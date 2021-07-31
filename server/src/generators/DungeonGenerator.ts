@@ -1,10 +1,11 @@
 import { Point } from "../../../common/src/types/Points";
-import { Dungeon } from "../../../common/src/models/Dungeon";
+import { ServerDungeon } from "../models/ServerDungeon";
 import { tileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { TileFactory } from "../../../common/src/types/Tile";
 import { random } from "../../../common/src/utils/MathUtils";
 import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
+import { TileDefinition } from "../../../common/src/types/TileDefinition";
 
 export class DungeonGenerator {
     constructor(
@@ -16,12 +17,12 @@ export class DungeonGenerator {
         public roomCreateAttempts: number,
     ) { }
 
-    generate(): Dungeon {
+    generate(): ServerDungeon {
         const wallTile = tileDefinitions.wall;
         //Dungeon generation happens here
 
         //generate the first room
-        const dungeon = new Dungeon(this.dungeonSize);
+        const dungeon = new ServerDungeon(this.dungeonSize);
         dungeon.tiles = new Array(this.dungeonSize.x);
         for (let i = 0; i < dungeon.tiles.length; i++) {
             dungeon.tiles[i] = (new Array(this.dungeonSize.y));
@@ -36,18 +37,49 @@ export class DungeonGenerator {
 
         this.connectRooms(dungeon);
 
+        this.setSpawnPoints(dungeon);
+
         return dungeon;
 
     }
 
-    ageDungeon(dungeon: Dungeon): void {
+    setSpawnPoints(dungeon: ServerDungeon): void {
+        dungeon.rooms.forEach((room) => {
+            const numSpawns = random(1, room.maxSpawnTiles + 1);
+            if (room.age === 1) {
+                for(let i = 0; i < numSpawns; i++) {
+                    room.spawnTiles.push({x: random(room.rect.topLeft.x, room.rect.bottomRight.x), y: random(room.rect.topLeft.y, room.rect.bottomRight.y)});
+                }
+            } else {
+                const bottomRight = room.rect.bottomRight;
+                const openSpaces: Point[] = [];
+                for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
+                    for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
+                        // check if it's the final pass and the square is open
+                        const tileDef = dungeon.tiles[x][y].definition;
+                        if (tileDef === undefined) {
+                            openSpaces.push({x, y});
+                        }
+                    }
+                }
+
+                while(room.spawnTiles.length < numSpawns && openSpaces.length > 0) {
+                    const index = random(0, openSpaces.length);
+                    room.spawnTiles.push(openSpaces[index]);
+                    openSpaces.splice(index, 1);
+                }
+            }
+        });
+    }
+
+    ageDungeon(dungeon: ServerDungeon): void {
         const roomsToAge = [dungeon.rooms[random(0, dungeon.rooms.length)]];
 
         // set it to the maximum age
         const checked: Record<string, boolean> = { 
             [roomsToAge[0].id()]: true
         }
-        roomsToAge[0].age = 4;
+        roomsToAge[0].age = 3;
         let index = 0;
         do {
             const startRoom = roomsToAge[index];
@@ -70,20 +102,27 @@ export class DungeonGenerator {
             index++;
         } while(index < roomsToAge.length)
 
+        const passes = 2;
         roomsToAge.forEach((room) => {
             // gives a range of 0% - 50% chance of changing a tile
             const factor = (room.age - 1) / 6;
             const bottomRight = room.rect.bottomRight;
+            const openSpaces: Point[] = [];
             for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                 for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                    if(Math.random() < factor) {
                         dungeon.tiles[x][y].definition = tileDefinitions.wall;
+                    } else if (room.age === 2) {
+                        // rooms that are exactly '2' don't have any additional transforms
+                        // the open spaces can be filled directly
+                        openSpaces.push({x, y});
                     }
                 }
             }
 
+            // perform the cellular automata
             if(room.age > 2) {
-                for(let pass = 0; pass < 2; pass++) {
+                for(let pass = 0; pass < passes; pass++) {
                     for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                         for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                             this.runCellularAutomata(x, y, dungeon);
@@ -94,7 +133,7 @@ export class DungeonGenerator {
         });
     }
 
-    runCellularAutomata(x: number, y: number, dungeon: Dungeon) {
+    runCellularAutomata(x: number, y: number, dungeon: ServerDungeon): TileDefinition | undefined {
         let neighborCount = 0;
         for(let newX = x - 1; newX <= x + 1; newX++) {
             for(let newY = y - 1; newY <= y + 1; newY++) {
@@ -110,9 +149,10 @@ export class DungeonGenerator {
             }
         }
         dungeon.tiles[x][y].definition = neighborCount > 4 ? tileDefinitions.wall : undefined;
+        return dungeon.tiles[x][y].definition;
     }
 
-    generateDungeonRooms(dungeon: Dungeon): void {
+    generateDungeonRooms(dungeon: ServerDungeon): void {
         const possibleRooms: Room[] = [];
 
         for (let i = 0; i < this.roomCreateAttempts; i++) {
@@ -184,7 +224,7 @@ export class DungeonGenerator {
         }
     }
 
-    private addRoomToDungeon(room: Room, dungeon: Dungeon, startRoomIndex?: number): void {
+    private addRoomToDungeon(room: Room, dungeon: ServerDungeon, startRoomIndex?: number): void {
         dungeon.rooms.push(room);
         const bottomRight = room.rect.bottomRight;
         for(let x = room.rect.location.x; x < bottomRight.x; x++) {
@@ -201,7 +241,7 @@ export class DungeonGenerator {
         }
     }
 
-    private connectRooms(dungeon: Dungeon): void {
+    private connectRooms(dungeon: ServerDungeon): void {
         dungeon.connections.forEach((rooms) => {
             const room = dungeon.rooms[rooms[0]];
             const startRoom = dungeon.rooms[rooms[1]];
