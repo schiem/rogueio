@@ -1,2 +1,5 @@
 **/node_modules
-**/dist
+**/dist/client
+**/dist/server
+**/dist/common
+**/dist/**/*.js
