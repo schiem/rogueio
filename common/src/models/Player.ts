@@ -1,10 +1,5 @@
-import { Point } from "../types/Points";
-import { Character } from "./Character";
-
 export class Player  {
-    character: Character;
-    location: Point;
+    characterId: number;
     constructor(public id: string) {
-        this.character = new Character('player');
     }
 }

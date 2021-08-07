@@ -1,6 +1,4 @@
 export type TileDefinition = {
-    blocks: BlockLayer[];
+    blocks: number[];
     spriteName: string
 }
-
-export type BlockLayer = 'character' | 'item';

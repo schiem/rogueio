@@ -1,12 +1,13 @@
 import { Point } from "../../../common/src/types/Points";
-import { ServerDungeon } from "../models/ServerDungeon";
-import { tileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { TileFactory } from "../../../common/src/types/Tile";
 import { random } from "../../../common/src/utils/MathUtils";
 import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
-import { TileDefinition } from "../../../common/src/types/TileDefinition";
+import { Dungeon } from "../../../common/src/models/Dungeon";
 
+/**
+ * Generates a dungeon, given a space to fill and the size of the rooms to fill it with.
+ */
 export class DungeonGenerator {
     constructor(
         public dungeonSize: Point,
@@ -17,17 +18,16 @@ export class DungeonGenerator {
         public roomCreateAttempts: number,
     ) { }
 
-    generate(): ServerDungeon {
-        const wallTile = tileDefinitions.wall;
+    generate(): Dungeon {
         //Dungeon generation happens here
 
         //generate the first room
-        const dungeon = new ServerDungeon(this.dungeonSize);
+        const dungeon = new Dungeon(this.dungeonSize);
         dungeon.tiles = new Array(this.dungeonSize.x);
         for (let i = 0; i < dungeon.tiles.length; i++) {
             dungeon.tiles[i] = (new Array(this.dungeonSize.y));
             for (let j = 0; j < dungeon.tiles[i].length; j++) {
-                dungeon.tiles[i][j] = TileFactory.generateTile({ x: i, y: j }, wallTile);
+                dungeon.tiles[i][j] = TileFactory.generateTile({ x: i, y: j }, 'wall');
             }
         }
 
@@ -43,7 +43,7 @@ export class DungeonGenerator {
 
     }
 
-    setSpawnPoints(dungeon: ServerDungeon): void {
+    setSpawnPoints(dungeon: Dungeon): void {
         dungeon.rooms.forEach((room) => {
             const numSpawns = random(1, room.maxSpawnTiles + 1);
             if (room.age === 1) {
@@ -72,7 +72,7 @@ export class DungeonGenerator {
         });
     }
 
-    ageDungeon(dungeon: ServerDungeon): void {
+    ageDungeon(dungeon: Dungeon): void {
         const roomsToAge = [dungeon.rooms[random(0, dungeon.rooms.length)]];
 
         // set it to the maximum age
@@ -111,7 +111,7 @@ export class DungeonGenerator {
             for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                 for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                    if(Math.random() < factor) {
-                        dungeon.tiles[x][y].definition = tileDefinitions.wall;
+                        dungeon.tiles[x][y].definition = 'wall';
                     } else if (room.age === 2) {
                         // rooms that are exactly '2' don't have any additional transforms
                         // the open spaces can be filled directly
@@ -133,7 +133,7 @@ export class DungeonGenerator {
         });
     }
 
-    runCellularAutomata(x: number, y: number, dungeon: ServerDungeon): TileDefinition | undefined {
+    runCellularAutomata(x: number, y: number, dungeon: Dungeon): string | undefined {
         let neighborCount = 0;
         for(let newX = x - 1; newX <= x + 1; newX++) {
             for(let newY = y - 1; newY <= y + 1; newY++) {
@@ -148,11 +148,11 @@ export class DungeonGenerator {
                 neighborCount++;
             }
         }
-        dungeon.tiles[x][y].definition = neighborCount > 4 ? tileDefinitions.wall : undefined;
+        dungeon.tiles[x][y].definition = neighborCount > 4 ? 'wall' : undefined;
         return dungeon.tiles[x][y].definition;
     }
 
-    generateDungeonRooms(dungeon: ServerDungeon): void {
+    generateDungeonRooms(dungeon: Dungeon): void {
         const possibleRooms: Room[] = [];
 
         for (let i = 0; i < this.roomCreateAttempts; i++) {
@@ -224,7 +224,7 @@ export class DungeonGenerator {
         }
     }
 
-    private addRoomToDungeon(room: Room, dungeon: ServerDungeon, startRoomIndex?: number): void {
+    private addRoomToDungeon(room: Room, dungeon: Dungeon, startRoomIndex?: number): void {
         dungeon.rooms.push(room);
         const bottomRight = room.rect.bottomRight;
         for(let x = room.rect.location.x; x < bottomRight.x; x++) {
@@ -241,7 +241,7 @@ export class DungeonGenerator {
         }
     }
 
-    private connectRooms(dungeon: ServerDungeon): void {
+    private connectRooms(dungeon: Dungeon): void {
         dungeon.connections.forEach((rooms) => {
             const room = dungeon.rooms[rooms[0]];
             const startRoom = dungeon.rooms[rooms[1]];

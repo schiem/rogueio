@@ -2,7 +2,7 @@ import { ViewPort } from "./rendering/ViewPort";
 import { SpriteSheet } from "./rendering/SpriteSheet";
 import { sprites } from "./rendering/Sprites";
 import { ClientGame } from "./models/ClientGame";
-import { EventHandler } from "./events/EventHandler";
+import { NetworkEventHandler } from "./events/NetworkEventHandler";
 
 const viewportCanvas: HTMLCanvasElement = document.getElementById('viewport') as HTMLCanvasElement;
 const spriteWidth = 14;
@@ -15,13 +15,11 @@ const game = new ClientGame(virtualCanvas, spriteSheet, viewport);
 virtualCanvas.width = spriteWidth * game.dungeonX;
 virtualCanvas.height = spriteHeight * game.dungeonY;
 
-document.body.append(virtualCanvas);
-
 spriteSheet.onReady(() => {
     const ws = new WebSocket('ws://localhost:8888');
 
     ws.onmessage = (eventJson) => {
         const event = JSON.parse(eventJson.data);
-        EventHandler.handleEvent(game, event);
+        NetworkEventHandler.handleEvent(game, event);
     };
 });

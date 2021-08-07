@@ -1,11 +1,9 @@
 import { ServerEvent, ServerEventType } from "./ServerEvent";
-import { Dungeon } from "../../models/Dungeon";
-import { Player } from "../../models/Player";
 import { ServerGame } from "../../../../server/src/models/ServerGame";
+import { Game } from "../../models/Game";
 
 type InitData = {
-    dungeon: Dungeon;
-    players: Record<string, Player>;
+    game: Game,
     playerId: string;
 };
 
@@ -16,9 +14,8 @@ export class InitEvent extends ServerEvent {
     constructor(game: ServerGame, playerId: string) {
         super();
         this.data = {
-            players: game.players,
+            game,
             playerId: playerId,
-            dungeon: game.currentDungeon
         };
     }
 }

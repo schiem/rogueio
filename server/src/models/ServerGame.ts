@@ -2,11 +2,10 @@ import { Player } from "../../../common/src/models/Player";
 import { DungeonGenerator } from "../generators/DungeonGenerator";
 import { Game } from "../../../common/src/models/Game";
 import { v4 as uuidv4 } from 'uuid';
-import { ServerDungeon } from "./ServerDungeon";
+import { generatePlayerCharacter } from "../../../common/src/entities/EntityGenerators";
 
 export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
-    currentDungeon: ServerDungeon;
 
     constructor() {
         super();
@@ -20,7 +19,7 @@ export class ServerGame extends Game {
     }
 
     newDungeon() {
-        this.currentDungeon = this.dungeonGenerator.generate();
+        this.currentLevel = this.dungeonGenerator.generate();
     }
 
     playerConnected(playerId?: string): string {
@@ -28,18 +27,27 @@ export class ServerGame extends Game {
             playerId = uuidv4();
         }
         const player = new Player(playerId);
+        player.characterId = this.entityManager.addNextEntity();
         this.players[playerId] = player;
 
-        const spawnLocation = this.currentDungeon.spawnCharacter(player.character);
-        if (spawnLocation) {
-            player.location = spawnLocation;
-        }
+        generatePlayerCharacter(player.characterId, this.systems, this.currentLevel);
 
         return playerId;
     }
 
     playerDisconnected(playerId: string): void {
-        this.currentDungeon.removeCharacterAt(this.players[playerId].location)
+        this.entityManager.removeEntity(this.players[playerId].characterId);
         delete this.players[playerId];
+    }
+
+    toJSON(): any {
+        return {
+            dungeonX: this.dungeonX,
+            dungeonY: this.dungeonY,
+            currentLevel: this.currentLevel,
+            systems: this.systems,
+            players: this.players,
+            entityManager: this.entityManager
+        } as Game;
     }
 }
