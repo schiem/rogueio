@@ -14,6 +14,12 @@ export class LocationSystem extends ComponentSystem {
     entities: Record<number, LocationComponent>;
     locationCache: number[][][];
 
+    componentPropertyUpdaters = {
+        location: (id: number, component: LocationComponent, newValue: Point) => {
+            this.moveEntity(id, newValue, false);
+        }
+    };
+
     constructor(
         entityManager: EntityManager,
         public size: Point
@@ -55,22 +61,21 @@ export class LocationSystem extends ComponentSystem {
      * Moves an entity to a new location. Only checks collisions if @param {collide} is true.
      * Returns whether the entity was successfully moved.
      */
-    moveEntity(id: number, amount: Point, collide: boolean = true): boolean {
+    moveEntity(id: number, location: Point, collide: boolean = true): boolean {
         const component = this.getComponent(id);
         if (component === undefined) {
             return false;
         }
-        const newLocation = { x: component.location.x + amount.x, y: component.location.y + amount.y };
 
         // check if there are any collisions
         if (collide) {
-            if (this.isCollision(component, newLocation)) {
+            if (this.isCollision(component, location)) {
                 return false;
             }
         }
 
         this.removeComponentFromLocation(id);
-        component.location = newLocation;
+        component.location = location;
         this.addComponentToLocationCache(id, component)
         return true;
     }

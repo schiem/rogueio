@@ -1,21 +1,21 @@
 import { ServerEvent, ServerEventType } from "./ServerEvent";
 
-export type UpdateData = {
+export type UpdateEntityData = {
     id: number;
-    property: string;
-    value: any;
+    system: string;
+    properties: Record<string, any>
 };
 
-export class UpdateEvent extends ServerEvent {
+export class UpdateEntityEvent extends ServerEvent {
     type = ServerEventType.update;
-    data: UpdateData;
+    data: UpdateEntityData;
 
-    constructor(id: number, property: string, value: any) {
+    constructor(id: number, system: string, properties: Record<string, any>) {
         super();
         this.data = {
             id,
-            property,
-            value
+            system: system,
+            properties
         };
     }
 }

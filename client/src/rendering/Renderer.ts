@@ -58,7 +58,7 @@ export class Renderer {
     }
 
     clearSquare(location: Point): void {
-        this.ctx.clearRect(location.x, location.y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
+        this.ctx.clearRect(location.x * this.spriteSheet.spriteSize.x, location.y * this.spriteSheet.spriteSize.y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
     }
 
     centerViewPortOn(location: Point) : void {
@@ -68,20 +68,14 @@ export class Renderer {
             y: this.canvas.height / this.spriteSheet.spriteSize.y
         };
 
-        console.log(location);
-
 
         let center: Point = {
             x: location.x - (this.viewPort.size.x / 2),
             y: location.y - (this.viewPort.size.y / 2)
         };
 
-        console.log(center);
-
         center.x = clamp(center.x, 0, maxSize.x - this.viewPort.size.x);
         center.y = clamp(center.y, 0, maxSize.y - this.viewPort.size.y);
-
-        console.log(center);
 
         this.viewPort.offset = center;
     }
