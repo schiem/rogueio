@@ -3,7 +3,13 @@ import * as WebSocket from 'ws';
 import { ClientEvent, ClientEventType } from "../../../common/src/events/client/ClientEvent";
 import { Game, GameSystems } from "../../../common/src/models/Game";
 import { MoveEvent } from "../../../common/src/events/client/MoveEvent";
-import { UpdateEntityEvent } from "../../../common/src/events/server/UpdateEvent";
+import { UpdateEntityEvent } from "../../../common/src/events/server/UpdateEntityEvent";
+import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
+import { AddEntityComponentEvent } from "../../../common/src/events/server/AddEntityComponentEvent";
+import { RemoveEntityComponentEvent } from "../../../common/src/events/server/RemoveEntityComponentEvent";
+import { EntityManager } from "../../../common/src/entities/EntityManager";
+import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
+import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
 
 /**
  * Handles both incoming and outgoing events.
@@ -17,8 +23,35 @@ export class NetworkEventManager {
         }
     }
     constructor(
-        public systems: GameSystems
+        public systems: GameSystems,
+        public entityManager: EntityManager
     ) {
+        entityManager.entityAddedEmitter.subscribe((entity) => {
+            this.eventQueue.push(new AddEntityEvent(entity));
+        });
+
+        // TODO - removing an entity removes all it's components - shouldn't fire events for those
+        entityManager.entityRemovedEmitter.subscribe((entity) => {
+            this.eventQueue.push(new RemoveEntityEvent(entity));
+        });
+
+
+        Object.keys(systems).forEach((systemName) => {
+            const system: ComponentSystem = (systems as any)[systemName];
+            // if the system isn't set up to reflect, then ignore adding / removing components
+            if (system.reflection !== 'all') {
+                return;
+            }
+
+            // any time a component is added / removed, reflect it across the network
+            system.addedComponentEmitter.subscribe((data) => {
+                this.eventQueue.push(new AddEntityComponentEvent(data.id, systemName, data.component));
+            });
+
+            system.removedComponentEmitter.subscribe((id) => {
+                this.eventQueue.push(new RemoveEntityComponentEvent(id, systemName));
+            });
+        });
         this.bindLocationSystem();
     }
 

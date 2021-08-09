@@ -1,4 +1,7 @@
 import { EntityManager } from "../entities/EntityManager";
+import { EventEmitter } from "../events/EventEmitter";
+
+export type SystemReflection = 'all' | 'owner' | 'none';
 
 /**
  * The base component system.
@@ -6,11 +9,16 @@ import { EntityManager } from "../entities/EntityManager";
  * components removed from the core entity manager are automatically removed
  * from the system.
  */
+// TODO - add checks everywhere to make sure the entity exists
 export abstract class ComponentSystem {
     // A mapping of entities that this system manages to the component
     // that this sytem manages
     entities: Record<number, any> = {}
-    componentPropertyUpdaters: Record<string, (entityId: number, component: any, newValue: any) => void>;
+    componentPropertyUpdaters: Record<string, (id: number, component: any, newValue: any) => void>;
+    reflection: SystemReflection = 'all';
+
+    addedComponentEmitter = new EventEmitter<{id: number, component: any}>();
+    removedComponentEmitter = new EventEmitter<number>();
 
     constructor(entityManager: EntityManager) {
         entityManager.entityRemovedEmitter.subscribe((entityId) => {
@@ -54,6 +62,7 @@ export abstract class ComponentSystem {
      */
     addComponentForEntity(id: number, component: any): void {
         this.entities[id] = component;
+        this.addedComponentEmitter.emit({id, component});
     }
 
     /**
@@ -61,6 +70,7 @@ export abstract class ComponentSystem {
      */
     removeComponentFromEntity(id: number): void {
         delete this.entities[id];
+        this.removedComponentEmitter.emit(id);
     }
 
     /**

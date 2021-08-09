@@ -6,6 +6,7 @@ import { EventEmitter } from "../events/EventEmitter";
  */
 export class EntityManager {
     entityRemovedEmitter = new EventEmitter<number>();
+    entityAddedEmitter = new EventEmitter<number>();
     private entities: Record<number, boolean> = {};
     private currentEntity = 0;
 
@@ -24,6 +25,7 @@ export class EntityManager {
 
     addEntity(entityId: number): void {
         this.entities[entityId] = true;
+        this.entityAddedEmitter.emit(entityId);
     }
 
     removeEntity(entityId: number): void {

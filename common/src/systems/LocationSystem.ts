@@ -36,8 +36,8 @@ export class LocationSystem extends ComponentSystem {
      * Associates the passed in component with the given entity. 
      */
     addComponentForEntity(id: number, component: LocationComponent): void {
-        this.addComponentToLocationCache(id, component);
         super.addComponentForEntity(id, component);
+        this.addComponentToLocationCache(id, component);
     }
 
     /**

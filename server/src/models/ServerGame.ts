@@ -16,7 +16,7 @@ export class ServerGame extends Game {
     constructor() {
         super();
 
-        this.networkEventManager = new NetworkEventManager(this.systems);
+        this.networkEventManager = new NetworkEventManager(this.systems, this.entityManager);
 
         const maxRoomSize = {x: 30, y: 16};
         const minRoomSize = {x: 8, y: 4};
