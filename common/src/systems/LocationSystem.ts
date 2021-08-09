@@ -4,6 +4,7 @@ import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
 import { random } from "../utils/MathUtils";
 import { ComponentSystem } from "./ComponentSystem";
+import { EventEmitter } from "../events/EventEmitter";
 
 /**
  * The system responsible for handling anything that can have a location.
@@ -13,10 +14,13 @@ import { ComponentSystem } from "./ComponentSystem";
 export class LocationSystem extends ComponentSystem {
     entities: Record<number, LocationComponent>;
     locationCache: number[][][];
+    locationAddedEmitter = new EventEmitter<Point>();
+    locationRemovedEmitter = new EventEmitter<Point>();
+    locationMovedEmitter = new EventEmitter<{id: number, oldLocation: Point, newLocation: Point}>();
 
     componentPropertyUpdaters = {
         location: (id: number, component: LocationComponent, newValue: Point) => {
-            this.moveEntity(id, newValue, false);
+            this.moveEntity(id, newValue);
         }
     };
 
@@ -40,7 +44,7 @@ export class LocationSystem extends ComponentSystem {
      * Removes the given component from the entity.
      */
     removeComponentFromEntity(id: number): void {
-        this.removeComponentFromLocation(id);
+        this.removeComponentFromLocationCache(id);
         super.removeComponentFromEntity(id);
     }
 
@@ -61,22 +65,18 @@ export class LocationSystem extends ComponentSystem {
      * Moves an entity to a new location. Only checks collisions if @param {collide} is true.
      * Returns whether the entity was successfully moved.
      */
-    moveEntity(id: number, location: Point, collide: boolean = true): boolean {
-        const component = this.getComponent(id);
+    moveAndCollideEntity(id: number, location: Point, dungeon: Dungeon): boolean {
+        const component: LocationComponent = this.getComponent(id);
         if (component === undefined) {
             return false;
         }
 
         // check if there are any collisions
-        if (collide) {
-            if (this.isCollision(component, location)) {
-                return false;
-            }
+        if (!this.canMoveTo(component, location, dungeon)) {
+            return false;
         }
 
-        this.removeComponentFromLocation(id);
-        component.location = location;
-        this.addComponentToLocationCache(id, component)
+        this.moveEntity(id, location);
         return true;
     }
 
@@ -107,11 +107,16 @@ export class LocationSystem extends ComponentSystem {
         return bestComponent;
     }
 
+    canMoveTo(component: LocationComponent, location: Point, dungeon: Dungeon): boolean {
+        return !dungeon.tileIsBlocked(location, component.collisionLayer) && !this.isCollision(component, location);
+    }
+
     postDeserialize(): void {
         this.resetLocationCache();
-        console.log(this.entities);
-        Object.keys(this.entities).forEach((entity: any) => {
-            this.addComponentToLocationCache(entity);
+        Object.keys(this.entities).forEach((entity) => {
+            // All keys in javascript are a string - who knows why
+            const entityId = parseInt(entity);
+            this.addComponentToLocationCache(entityId);
         });
     }
 
@@ -121,10 +126,25 @@ export class LocationSystem extends ComponentSystem {
         };
     }
 
+    private moveEntity(id: number, newLocation: Point) {
+        const component: LocationComponent = this.getComponent(id);
+        if (component === undefined) {
+            return false;
+        }
+
+        const oldLocation = component.location;
+        this.removeComponentFromLocationCache(id);
+        component.location = newLocation;
+        this.addComponentToLocationCache(id, component)
+        this.locationMovedEmitter.emit({id, oldLocation, newLocation});
+        return true;
+
+    }
+
     private isCollision(component: LocationComponent, location: Point): boolean {
         const components = this.locationCache[location.x][location.y];
         // check if any of the components at this location collide with the current component
-        return components.find(
+        return components?.find(
             (compId: number) => { 
                 const comp: LocationComponent | undefined = this.getComponent(compId);
                 if (!comp) {
@@ -175,9 +195,10 @@ export class LocationSystem extends ComponentSystem {
         } else {
             this.locationCache[component.location.x][component.location.y].push(id);
         }
+        this.locationAddedEmitter.emit(component.location);
     }
 
-    private removeComponentFromLocation(id: number) {
+    private removeComponentFromLocationCache(id: number) {
         const component = this.getComponent(id);
         if (component === undefined) {
             return;
@@ -188,6 +209,7 @@ export class LocationSystem extends ComponentSystem {
         if (idx !== -1) {
             this.locationCache[component.location.x][component.location.y].splice(idx, 1);
         }
+        this.locationRemovedEmitter.emit(component.location);
     }
 
     private resetLocationCache(): void {

@@ -1,4 +1,5 @@
 import { LocationComponent, LocationComponentLayers } from "../components/LocationComponent";
+import { MovementComponent } from "../components/MovementComponent";
 import { BlockLayers } from "../consts/TileDefinitions";
 import { Dungeon } from "../models/Dungeon";
 import { GameSystems } from "../models/Game";
@@ -10,11 +11,16 @@ import { GameSystems } from "../models/Game";
 
 export const generatePlayerCharacter = (entityId: number, systems: GameSystems, dungeon: Dungeon): void => {
     const locationComponent = {
-        spriteName: 'player',
-         collidesWith: [BlockLayers.character],
-         collisionLayer: BlockLayers.character,
-         spawns: [1, 2],
-         layer: LocationComponentLayers.character
+        sprite: {
+            name: 'player',
+            color: 'brown'
+        },
+        collidesWith: [BlockLayers.character],
+        collisionLayer: BlockLayers.character,
+        spawns: [1, 2],
+        layer: LocationComponentLayers.character
     } as LocationComponent;
     systems.location.spawnComponentForEntity(entityId, locationComponent, dungeon);
+
+    systems.movement.addComponentForEntity(entityId, { minMovementDelay: 30 } as MovementComponent);
 };

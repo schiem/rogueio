@@ -6,4 +6,5 @@ export enum ClientEventType {
 export class ClientEvent extends NetworkEvent {
     type: ClientEventType;
     clientId: string;
+    data: any;
 }

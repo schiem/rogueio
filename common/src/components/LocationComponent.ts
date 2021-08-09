@@ -1,5 +1,6 @@
 import { Condition } from "../models/Room";
 import { Point } from "../types/Points";
+import { Sprite } from "../types/Sprite";
 
 export const LocationComponentLayers = {
     item: 1,
@@ -7,7 +8,7 @@ export const LocationComponentLayers = {
 }
 
 export type LocationComponent = {
-    spriteName: string;
+    sprite: Sprite;
     collidesWith: number[];
     collisionLayer: number;
     location: Point;

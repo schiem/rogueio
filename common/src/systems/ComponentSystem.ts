@@ -10,7 +10,7 @@ export abstract class ComponentSystem {
     // A mapping of entities that this system manages to the component
     // that this sytem manages
     entities: Record<number, any> = {}
-    componentPropertyUpdaters: Record<string, (entityId: number, component: any, oldValue: any, newValue: any) => void>;
+    componentPropertyUpdaters: Record<string, (entityId: number, component: any, newValue: any) => void>;
 
     constructor(entityManager: EntityManager) {
         entityManager.entityRemovedEmitter.subscribe((entityId) => {
@@ -38,8 +38,10 @@ export abstract class ComponentSystem {
 
         for (let key in properties) {
             if (this.componentPropertyUpdaters[key] !== undefined) {
-                
+                // If there's a "special" handling case, then allow the specific system to handle it
+                this.componentPropertyUpdaters[key](id, component, properties[key]);
             } else {
+                // Just update the property without fanfare
                 component[key] = properties[key];
             }
         }

@@ -2,9 +2,11 @@ import { LocationSystem } from "../systems/LocationSystem";
 import { Dungeon } from "./Dungeon";
 import { EntityManager } from "../entities/EntityManager";
 import { Player } from "./Player";
+import { MovementSystem } from "../systems/MovementSystem";
 
 export type GameSystems = {
     location: LocationSystem
+    movement: MovementSystem;
 }
 
 export class Game {
@@ -16,9 +18,11 @@ export class Game {
 
     entityManager = new EntityManager();
 
-    systems: GameSystems = {
-        location: new LocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY })
-    };
+    systems: GameSystems = {} as GameSystems;
 
-    constructor() {}
+    constructor() {
+        this.systems.location = new LocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.movement = new MovementSystem(this.systems.location, this.entityManager);
+
+    }
 }

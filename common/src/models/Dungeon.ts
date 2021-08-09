@@ -21,6 +21,18 @@ export class Dungeon {
             return false;
         }
         const def = TileDefinitions[tile.definition];
-        return def.blocks.indexOf(blockLayer) === -1;
+        return def.blocks.indexOf(blockLayer) !== -1;
+    }
+
+    hasOpenTileAround(point: Point): boolean {
+        for(let x = point.x - 1; x <= point.x + 1; x++) {
+            for(let y = point.y - 1; y <= point.y + 1; y++) {
+                if (this.tiles[x]?.[y]?.definition === undefined) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

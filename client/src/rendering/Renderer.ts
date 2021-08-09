@@ -1,5 +1,6 @@
 import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Point } from "../../../common/src/types/Points";
+import { Sprite } from "../../../common/src/types/Sprite";
 import { clamp } from "../../../common/src/utils/MathUtils";
 import { SpriteSheet } from "./SpriteSheet";
 import { ViewPort } from "./ViewPort";
@@ -15,7 +16,7 @@ export class Renderer {
             this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     }
 
-    drawRectangle(sprite: string, rect: Rectangle, fill: boolean = false) {
+    drawRectangle(sprite: Sprite, rect: Rectangle, fill: boolean = false) {
         if(fill) {
             for(let x = rect.topLeft.x; x <= rect.bottomRight.x; x++) {
                 for(let y = rect.topLeft.y; y <= rect.bottomRight.y; y++) {
@@ -37,16 +38,31 @@ export class Renderer {
         }
     }
 
-    drawSprite(sprite: string, location: Point): void {
-        const spriteNum = this.spriteSheet.spriteNames[sprite];
+    drawSprite(sprite: Sprite, location: Point): void {
+        const spriteNum = this.spriteSheet.spriteNames[sprite.name];
         if(!this.spriteSheet.ready || spriteNum > this.spriteSheet.numSprites) {
             throw new Error('Could not draw the sprite, either they have not been loaded or the sprite does not exist.')
         }
+        if (spriteNum === -1) {
+            // special case - fill in the entire block
+            this.clearSquare(location, sprite.color);
+            return;
+        }
+
+        // find the element to draw from
+        let elementToDraw: HTMLCanvasElement ;
+        if (this.spriteSheet.tintedSheets[sprite.color] !== undefined) {
+            elementToDraw = this.spriteSheet.tintedSheets[sprite.color];
+        } else {
+            throw new Error('Invalid sprite color');
+        }
+
+        // clear the square and draw the sprite
         const x = location.x *  this.spriteSheet.spriteSize.x;
         const y = location.y * this.spriteSheet.spriteSize.y;
-        this.ctx.clearRect(x, y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
+        this.clearSquare(location);
         this.ctx.drawImage(
-            this.spriteSheet.sheetElement, 
+            elementToDraw,
             this.spriteSheet.spriteSize.x * spriteNum, 
             0, 
             this.spriteSheet.spriteSize.x, 
@@ -57,8 +73,9 @@ export class Renderer {
             this.spriteSheet.spriteSize.y);
     }
 
-    clearSquare(location: Point): void {
-        this.ctx.clearRect(location.x * this.spriteSheet.spriteSize.x, location.y * this.spriteSheet.spriteSize.y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
+    clearSquare(location: Point, color = 'black'): void {
+        this.ctx.fillStyle = this.spriteSheet.spriteColors[color];
+        this.ctx.fillRect(location.x * this.spriteSheet.spriteSize.x, location.y * this.spriteSheet.spriteSize.y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
     }
 
     centerViewPortOn(location: Point) : void {
