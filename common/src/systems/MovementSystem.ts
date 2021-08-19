@@ -4,12 +4,11 @@ import { EntityManager } from "../entities/EntityManager";
 import { Dungeon } from "../models/Dungeon";
 import { Point } from "../types/Points";
 import { clamp } from "../utils/MathUtils";
-import { ComponentSystem, SystemReflection } from "./ComponentSystem";
+import { ComponentSystem } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
 
 export class MovementSystem extends ComponentSystem {
     entities: Record<number, MovementComponent>;
-    reflection: SystemReflection = 'none';
 
     constructor(public locationSystem: LocationSystem, entityManager: EntityManager) {
         super(entityManager);
@@ -43,4 +42,11 @@ export class MovementSystem extends ComponentSystem {
     }
 
     postDeserialize(): void {}
+
+    toJSON(): any {
+        return {
+            entities: this.entities
+        };
+    }
+
 }

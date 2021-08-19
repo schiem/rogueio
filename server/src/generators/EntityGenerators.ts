@@ -1,8 +1,9 @@
-import { LocationComponent, LocationComponentLayers } from "../components/LocationComponent";
-import { MovementComponent } from "../components/MovementComponent";
-import { BlockLayers } from "../consts/TileDefinitions";
-import { Dungeon } from "../models/Dungeon";
-import { GameSystems } from "../models/Game";
+import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
+import { MovementComponent } from "../../../common/src/components/MovementComponent";
+import { VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
+import { BlockLayers } from "../../../common/src/consts/TileDefinitions";
+import { Dungeon } from "../../../common/src/models/Dungeon";
+import { GameSystems } from "../../../common/src/models/Game";
 
 /**
  * Takes an entity ID and adds all the necessary components to it
@@ -23,4 +24,7 @@ export const generatePlayerCharacter = (entityId: number, systems: GameSystems, 
     systems.location.spawnComponentForEntity(entityId, locationComponent, dungeon);
 
     systems.movement.addComponentForEntity(entityId, { minMovementDelay: 30 } as MovementComponent);
+
+    systems.visibility.addComponentForEntity(entityId, {sharedComponentId: 0, sightRadius: 4, visible: {}} as VisiblityComponent)
+    console.log(systems.visibility.entities);
 };

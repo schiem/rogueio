@@ -1,8 +1,6 @@
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
 
-export type SystemReflection = 'all' | 'owner' | 'none';
-
 /**
  * The base component system.
  * Handles adding and removing components.  Includes a subscriber so 
@@ -15,7 +13,6 @@ export abstract class ComponentSystem {
     // that this sytem manages
     entities: Record<number, any> = {}
     componentPropertyUpdaters: Record<string, (id: number, component: any, newValue: any) => void>;
-    reflection: SystemReflection = 'all';
 
     addedComponentEmitter = new EventEmitter<{id: number, component: any}>();
     removedComponentEmitter = new EventEmitter<number>();
@@ -79,4 +76,5 @@ export abstract class ComponentSystem {
      * requests smaller. This function will reconstruct them.
      */
     abstract postDeserialize(): void;
+    abstract toJSON(): any;
 }

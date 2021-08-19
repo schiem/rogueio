@@ -14,8 +14,8 @@ import { EventEmitter } from "../events/EventEmitter";
 export class LocationSystem extends ComponentSystem {
     entities: Record<number, LocationComponent>;
     locationCache: number[][][];
-    locationAddedEmitter = new EventEmitter<Point>();
-    locationRemovedEmitter = new EventEmitter<Point>();
+    locationAddedEmitter = new EventEmitter<{id: number, location: Point}>();
+    locationRemovedEmitter = new EventEmitter<{id: number, location: Point}>();
     locationMovedEmitter = new EventEmitter<{id: number, oldLocation: Point, newLocation: Point}>();
 
     componentPropertyUpdaters = {
@@ -92,15 +92,15 @@ export class LocationSystem extends ComponentSystem {
      * If multiple entities are present, this will return in the order they were added. 
      * This returns the component instead of the entity because nobody cares about the entity.
      */
-    getHighestComponentAtLocation(point: Point): LocationComponent | undefined {
+    getHighestComponentAtLocation(point: Point): {id: number, component: LocationComponent} | undefined {
         const entities = this.getEntitiesAtLocation(point);
         let highest: number | undefined = undefined;
-        let bestComponent: LocationComponent | undefined;
+        let bestComponent: {id: number, component: LocationComponent} | undefined;
         entities.forEach((entity) => {
             const component: LocationComponent = this.getComponent(entity);
             if (highest === undefined || component.layer > highest) {
                 highest = component.layer;
-                bestComponent = component;
+                bestComponent = {id: entity, component};
             }
         });
 
@@ -195,7 +195,7 @@ export class LocationSystem extends ComponentSystem {
         } else {
             this.locationCache[component.location.x][component.location.y].push(id);
         }
-        this.locationAddedEmitter.emit(component.location);
+        this.locationAddedEmitter.emit({id, location: component.location});
     }
 
     private removeComponentFromLocationCache(id: number) {
@@ -209,7 +209,7 @@ export class LocationSystem extends ComponentSystem {
         if (idx !== -1) {
             this.locationCache[component.location.x][component.location.y].splice(idx, 1);
         }
-        this.locationRemovedEmitter.emit(component.location);
+        this.locationRemovedEmitter.emit({id, location: component.location});
     }
 
     private resetLocationCache(): void {

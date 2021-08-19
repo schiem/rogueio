@@ -9,6 +9,9 @@ import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
+import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
+import { SharedVisibilityComponent, VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
+import { spriteColors } from "../rendering/Sprites";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
@@ -22,15 +25,17 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
+        this.systems.visibility = new VisiblitySystem(this.entityManager, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
+
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);
 
-        this.systems.location.locationAddedEmitter.subscribe((location) => {
-            this.renderDungeonTileAtLocation(location);
+        this.systems.location.locationAddedEmitter.subscribe((data) => {
+            this.renderDungeonTileAtLocation(data.location);
             this.renderer.renderViewPort();
         });
-        this.systems.location.locationRemovedEmitter.subscribe((location) => {
-            this.renderDungeonTileAtLocation(location);
+        this.systems.location.locationRemovedEmitter.subscribe((data) => {
+            this.renderDungeonTileAtLocation(data.location);
             this.renderer.renderViewPort();
         });
 
@@ -38,6 +43,11 @@ export class ClientGame extends Game {
             if (data.id === this.players[this.currentPlayerId].characterId) {
                 this.recenterViewPort();
             }
+            this.renderer.renderViewPort();
+        });
+
+        this.systems.visibility.singleVisionPointChanged.subscribe((data) =>  {
+            this.renderDungeonTileAtLocation(data);
             this.renderer.renderViewPort();
         });
     }
@@ -55,31 +65,47 @@ export class ClientGame extends Game {
         // deserialize all the systems
         this.systems.location = Object.assign(this.systems.location, event.data.game.systems.location);
         this.systems.location.postDeserialize();
+
+        this.systems.visibility = Object.assign(this.systems.visibility, event.data.game.systems.visibility);
     }
 
     renderDungeonTileAtLocation(point: Point): void {
         const dungeon = this.currentLevel;
         // render characters on top
         let sprite: Sprite | undefined;
-        let highestComponent: LocationComponent | undefined;
-        let tileDefName: string | undefined;
 
-        // TODO - remove this once we have vision
-        if (!dungeon.hasOpenTileAround(point)) {
+        // if the tile was never seen, then it should never render
+        const playerId = this.currentPlayerId;
+        const characterVisionComponent: VisiblityComponent = this.systems.visibility.getComponent(this.players[playerId].characterId);
+        if (!characterVisionComponent) {
             return;
         }
         
-        if (highestComponent = this.systems.location.getHighestComponentAtLocation(point)) {
-            // if there's something there, draw that
-            sprite = highestComponent.sprite;
-        } else if (tileDefName = dungeon.tiles[point.x][point.y]?.definition) {
+        if (!this.systems.visibility.tileWasSeen(characterVisionComponent.sharedComponentId, point)) {
+            return;
+        }
+
+        const tile = dungeon.tiles[point.x][point.y];
+        const isVisible = this.systems.visibility.sharedTileIsVisible(characterVisionComponent.sharedComponentId, point);
+        let colorOverride;
+        if (!isVisible) {
+            colorOverride = 'grey';
+        }
+
+        let highestComponent;
+        if (isVisible && (highestComponent = this.systems.location.getHighestComponentAtLocation(point))) {
+            // draw an entity that's on the location
+            // but only if the tile is visible - TODO: Draw already seen items
+            sprite = highestComponent.component.sprite;
+        } else if (tile.definition) {
             // draw the tile underneath
-            sprite = TileDefinitions[tileDefName].sprite;
+            sprite = TileDefinitions[tile.definition].sprite;
         } else {
+            // draw the default floor tile
             sprite = TileDefinitions['floor'].sprite;
         }
 
-        this.renderer.drawSprite(sprite, point);
+        this.renderer.drawSprite(sprite, point, colorOverride);
     }
 
     /**

@@ -1,5 +1,4 @@
 import { Point } from "../../../common/src/types/Points";
-import { TileFactory } from "../../../common/src/types/Tile";
 import { random } from "../../../common/src/utils/MathUtils";
 import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
@@ -27,7 +26,7 @@ export class DungeonGenerator {
         for (let i = 0; i < dungeon.tiles.length; i++) {
             dungeon.tiles[i] = (new Array(this.dungeonSize.y));
             for (let j = 0; j < dungeon.tiles[i].length; j++) {
-                dungeon.tiles[i][j] = TileFactory.generateTile({ x: i, y: j }, 'wall');
+                dungeon.tiles[i][j] = {coords: { x: i, y: j }, definition : 'wall'};
             }
         }
 

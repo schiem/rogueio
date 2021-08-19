@@ -38,10 +38,6 @@ export class NetworkEventManager {
 
         Object.keys(systems).forEach((systemName) => {
             const system: ComponentSystem = (systems as any)[systemName];
-            // if the system isn't set up to reflect, then ignore adding / removing components
-            if (system.reflection !== 'all') {
-                return;
-            }
 
             // any time a component is added / removed, reflect it across the network
             system.addedComponentEmitter.subscribe((data) => {
@@ -53,6 +49,7 @@ export class NetworkEventManager {
             });
         });
         this.bindLocationSystem();
+        this.bindVisibilitySystem();
     }
 
     /**
@@ -78,7 +75,14 @@ export class NetworkEventManager {
 
     private bindLocationSystem(): void {
         this.systems.location.locationMovedEmitter.subscribe((data) => {
-            const event = new UpdateEntityEvent(data.id, 'location', {'location': data.newLocation});
+            const event = new UpdateEntityEvent(data.id, 'location', {location: data.newLocation});
+            this.eventQueue.push(event);
+        });
+    }
+
+    private bindVisibilitySystem(): void {
+        this.systems.visibility.visionChangedEmitter.subscribe((data) => {
+            const event = new UpdateEntityEvent(data.id, 'visibility', {added: data.added, removed: data.removed, seen: data.seenAdded});
             this.eventQueue.push(event);
         });
     }

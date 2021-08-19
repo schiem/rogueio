@@ -38,7 +38,7 @@ export class Renderer {
         }
     }
 
-    drawSprite(sprite: Sprite, location: Point): void {
+    drawSprite(sprite: Sprite, location: Point, colorOverride?: string): void {
         const spriteNum = this.spriteSheet.spriteNames[sprite.name];
         if(!this.spriteSheet.ready || spriteNum > this.spriteSheet.numSprites) {
             throw new Error('Could not draw the sprite, either they have not been loaded or the sprite does not exist.')
@@ -48,11 +48,12 @@ export class Renderer {
             this.clearSquare(location, sprite.color);
             return;
         }
+        const color = colorOverride ?? sprite.color;
 
         // find the element to draw from
         let elementToDraw: HTMLCanvasElement ;
-        if (this.spriteSheet.tintedSheets[sprite.color] !== undefined) {
-            elementToDraw = this.spriteSheet.tintedSheets[sprite.color];
+        if (this.spriteSheet.tintedSheets[color] !== undefined) {
+            elementToDraw = this.spriteSheet.tintedSheets[color];
         } else {
             throw new Error('Invalid sprite color');
         }

@@ -9,7 +9,19 @@ export class Dungeon {
     rooms: Room[] = [];
     connections: [number, number][] = [];
 
-    constructor(public size: Point) {
+    constructor(public size: Point) {}
+
+    tileBlocksVision(point: Point): boolean {
+        const tile = this.tiles[point.x][point.y];
+        if (!tile) {
+            // no tile, probably outside the map
+            return true;
+        }
+        if (tile.definition === undefined) {
+            // nothing at this tile, can't block vision
+            return false;
+        }
+        return TileDefinitions[tile.definition].blocksVision;
     }
 
     /**
