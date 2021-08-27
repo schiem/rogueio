@@ -18,6 +18,12 @@ export class ServerVisbilitySystem extends VisiblitySystem {
         });
     }
 
+    addComponentForEntity(id: number, component: VisiblityComponent): void {
+        console.log('here');
+        super.addComponentForEntity(id, component);
+        this.recalculateVisibility(id);
+    }
+
     recalculateVisibility(entityId: number): void {
         const component: VisiblityComponent = this.getComponent(entityId);
         if (!component) {
@@ -48,6 +54,11 @@ export class ServerVisbilitySystem extends VisiblitySystem {
         } else {
             delete currentVision[locationComponent.location.x]?.[locationComponent.location.y];
         }
+
+        if (!sharedComponent.seen[locationComponent.location.x][locationComponent.location.y]) {
+            sharedComponent.seen[locationComponent.location.x][locationComponent.location.y] = true;
+            newSeen.push(locationComponent.location);
+        }
         newVision[locationComponent.location.x][locationComponent.location.y] = true;
 
         for(let i = 0; i < outerVision.length; i++) { 
@@ -62,11 +73,13 @@ export class ServerVisbilitySystem extends VisiblitySystem {
                 if (!newVision[bPoint.x]) {
                     newVision[bPoint.x] = {};
                 }
-                if (!currentVision[bPoint.x]?.[bPoint.y]) {
+
+                if (!currentVision[bPoint.x]?.[bPoint.y] && !newVision[bPoint.x]?.[bPoint.y]) {
                     toAdd.push(bPoint);
                 } else {
                     delete currentVision[bPoint.x]?.[bPoint.y];
                 }
+
                 newVision[bPoint.x][bPoint.y] = true;
                 if (!sharedComponent.seen[bPoint.x][bPoint.y]) {
                     sharedComponent.seen[bPoint.x][bPoint.y] = true;

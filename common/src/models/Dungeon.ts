@@ -29,6 +29,10 @@ export class Dungeon {
      */
     tileIsBlocked(point: Point, blockLayer: number): boolean {
         const tile = this.tiles[point.x][point.y];
+        if (!tile) {
+            return true;
+        }
+
         if (tile.definition === undefined) {
             return false;
         }
