@@ -26,7 +26,7 @@ export class ServerGame extends Game {
         this.newDungeon();
 
         // set up the visibility system, after the dungeon has been created
-        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.location, this.currentLevel);
+        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.currentLevel);
 
         // Add the network manager to handle events
         this.networkEventManager = new NetworkEventManager(this.systems, this.entityManager);

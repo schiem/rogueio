@@ -1,15 +1,16 @@
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
-import { VisiblityComponent, SharedVisibilityComponent } from "../../../common/src/components/VisibilityComponent";
+import { VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { Dungeon } from "../../../common/src/models/Dungeon";
+import { AllySystem } from "../../../common/src/systems/AllySystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
 import { BresenhamCircle, BresenhamRayCast } from "../utils/Bresenham";
 
 export class ServerVisbilitySystem extends VisiblitySystem {
-    constructor(entityManager: EntityManager, locationSystem: LocationSystem, private dungeon: Dungeon) {
-        super(entityManager, locationSystem, dungeon.size);
+    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, private dungeon: Dungeon) {
+        super(entityManager, allySystem, locationSystem, dungeon.size);
 
         locationSystem.locationAddedEmitter.subscribe((data) => {
             const d = new Date();
@@ -19,7 +20,6 @@ export class ServerVisbilitySystem extends VisiblitySystem {
     }
 
     addComponentForEntity(id: number, component: VisiblityComponent): void {
-        console.log('here');
         super.addComponentForEntity(id, component);
         this.recalculateVisibility(id);
     }
@@ -36,7 +36,11 @@ export class ServerVisbilitySystem extends VisiblitySystem {
             return;
         }
 
-        const sharedComponent: SharedVisibilityComponent = this.sharedComponents[component.sharedComponentId];
+        const sharedComponent = this.getSharedVisibilityComponent(entityId);
+
+        if (!sharedComponent) {
+            return;
+        }
 
         const outerVision = BresenhamCircle(locationComponent.location, component.sightRadius);
         const newVision: Record<number, Record<number, boolean>> = {};

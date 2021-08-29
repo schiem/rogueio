@@ -1,3 +1,4 @@
+import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
 import { VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
@@ -21,11 +22,14 @@ export const generatePlayerCharacter = (entityId: number, systems: GameSystems, 
         spawns: [1, 2],
         layer: LocationComponentLayers.character
     } as LocationComponent;
+
+    systems.ally.addComponentForEntity(entityId, {group: 'players'} as AllyComponent);
+
     systems.location.spawnComponentForEntity(entityId, locationComponent, dungeon);
 
     systems.movement.addComponentForEntity(entityId, { minMovementDelay: 30 } as MovementComponent);
 
     console.log(systems.visibility);
-    systems.visibility.addComponentForEntity(entityId, {sharedComponentId: 0, sightRadius: 5, visible: {}} as VisiblityComponent)
+    systems.visibility.addComponentForEntity(entityId, { sightRadius: 5, visible: {} } as VisiblityComponent)
     console.log(systems.visibility.entities);
 };

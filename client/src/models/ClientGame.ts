@@ -25,7 +25,7 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
-        this.systems.visibility = new VisiblitySystem(this.entityManager, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.visibility = new VisiblitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);
@@ -58,15 +58,18 @@ export class ClientGame extends Game {
         this.currentLevel = new Dungeon({x: 0, y: 0});
         this.currentLevel = Object.assign(this.currentLevel, event.data.game.currentLevel);
         this.timeInitialized = event.ts;
+
+        const systems = this.systems as any;
+        const incomingSystems = event.data.game.systems as any;
         
         // Get the current list of entities
         Object.assign(this.entityManager, event.data.game.entityManager);
 
         // deserialize all the systems
-        this.systems.location = Object.assign(this.systems.location, event.data.game.systems.location);
-        this.systems.location.postDeserialize();
-
-        this.systems.visibility = Object.assign(this.systems.visibility, event.data.game.systems.visibility);
+        Object.keys(incomingSystems).forEach((system) => {
+            Object.assign(systems[system], incomingSystems[system]);
+            systems[system].postDeserialize();
+        });
     }
 
     renderDungeonTileAtLocation(point: Point): void {
@@ -76,17 +79,13 @@ export class ClientGame extends Game {
 
         // if the tile was never seen, then it should never render
         const playerId = this.currentPlayerId;
-        const characterVisionComponent: VisiblityComponent = this.systems.visibility.getComponent(this.players[playerId].characterId);
-        if (!characterVisionComponent) {
-            return;
-        }
-        
-        if (!this.systems.visibility.tileWasSeen(characterVisionComponent.sharedComponentId, point)) {
+        const entityId = this.players[playerId].characterId;
+        if (!this.systems.visibility.tileWasSeen(entityId, point)) {
             return;
         }
 
         const tile = dungeon.tiles[point.x][point.y];
-        const isVisible = this.systems.visibility.sharedTileIsVisible(characterVisionComponent.sharedComponentId, point);
+        const isVisible = this.systems.visibility.sharedTileIsVisible(entityId, point);
         let colorOverride;
         if (!isVisible) {
             colorOverride = 'grey';

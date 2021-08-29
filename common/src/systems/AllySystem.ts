@@ -49,10 +49,20 @@ export class AllySystem extends ComponentSystem {
         super.removeComponentFromEntity(id);
     }
 
-    postDeserialize(): void {
-        throw new Error("Method not implemented.");
+    getAlliesForEntity(id: number): number[] | undefined {
+        const component: AllyComponent = this.getComponent(id); 
+        if (!component) {
+            return;
+        }
+        return this.groups[component.group];
     }
-    toJSON() {
-        throw new Error("Method not implemented.");
+
+    postDeserialize(): void {}
+
+    toJSON(): any {
+        return {
+            entities: this.entities, 
+            groups: this.groups
+        }
     }
 }
