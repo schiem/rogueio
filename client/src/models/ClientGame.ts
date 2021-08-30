@@ -30,20 +30,25 @@ export class ClientGame extends Game {
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);
 
-        this.systems.location.locationAddedEmitter.subscribe((data) => {
-            this.renderDungeonTileAtLocation(data.location);
-            this.renderer.renderViewPort();
-        });
-        this.systems.location.locationRemovedEmitter.subscribe((data) => {
-            this.renderDungeonTileAtLocation(data.location);
+        this.systems.location.removedComponentEmitter.subscribe((data) => {
+            this.renderDungeonTileAtLocation(data.component.location);
             this.renderer.renderViewPort();
         });
 
-        this.systems.location.locationMovedEmitter.subscribe((data) => {
-            if (data.id === this.players[this.currentPlayerId].characterId) {
-                this.recenterViewPort();
-            }
+        this.systems.location.addedComponentEmitter.subscribe((data) => {
+            this.renderDungeonTileAtLocation(data.component.location);
             this.renderer.renderViewPort();
+        });
+
+        this.systems.location.componentUpdatedEmitter.subscribe((data) => {
+            if (data.props.location) {
+                if (data.id === this.players[this.currentPlayerId].characterId) {
+                    this.recenterViewPort();
+                }
+            this.renderDungeonTileAtLocation(data.props.location);
+            this.renderDungeonTileAtLocation(data.oldProps.location);
+                this.renderer.renderViewPort();
+            }
         });
 
         this.systems.visibility.singleVisionPointChanged.subscribe((data) =>  {

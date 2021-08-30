@@ -3,8 +3,7 @@ import { Dungeon } from "../models/Dungeon";
 import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
 import { random } from "../utils/MathUtils";
-import { ComponentSystem } from "./ComponentSystem";
-import { EventEmitter } from "../events/EventEmitter";
+import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 
 /**
  * The system responsible for handling anything that can have a location.
@@ -12,11 +11,10 @@ import { EventEmitter } from "../events/EventEmitter";
  * represent it.
  */
 export class LocationSystem extends ComponentSystem {
+    replicationMode: ReplicationMode = 'visible';
+
     entities: Record<number, LocationComponent>;
     locationCache: number[][][];
-    locationAddedEmitter = new EventEmitter<{id: number, location: Point}>();
-    locationRemovedEmitter = new EventEmitter<{id: number, location: Point}>();
-    locationMovedEmitter = new EventEmitter<{id: number, oldLocation: Point, newLocation: Point}>();
 
     componentPropertyUpdaters = {
         location: (id: number, component: LocationComponent, newValue: Point) => {
@@ -136,7 +134,7 @@ export class LocationSystem extends ComponentSystem {
         this.removeComponentFromLocationCache(id);
         component.location = newLocation;
         this.addComponentToLocationCache(id, component)
-        this.locationMovedEmitter.emit({id, oldLocation, newLocation});
+        this.componentUpdatedEmitter.emit({id, props: { location: newLocation }, oldProps: {location: oldLocation}});
         return true;
 
     }
@@ -195,7 +193,6 @@ export class LocationSystem extends ComponentSystem {
         } else {
             this.locationCache[component.location.x][component.location.y].push(id);
         }
-        this.locationAddedEmitter.emit({id, location: component.location});
     }
 
     private removeComponentFromLocationCache(id: number) {
@@ -209,7 +206,6 @@ export class LocationSystem extends ComponentSystem {
         if (idx !== -1) {
             this.locationCache[component.location.x][component.location.y].splice(idx, 1);
         }
-        this.locationRemovedEmitter.emit({id, location: component.location});
     }
 
     private resetLocationCache(): void {

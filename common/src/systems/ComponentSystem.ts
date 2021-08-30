@@ -1,6 +1,8 @@
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
 
+export type ReplicationMode = 'self' | 'ally' | 'visible' | 'none';
+export type IdComponent = {id: number, component: any};
 /**
  * The base component system.
  * Handles adding and removing components.  Includes a subscriber so 
@@ -9,13 +11,15 @@ import { EventEmitter } from "../events/EventEmitter";
  */
 // TODO - add checks everywhere to make sure the entity exists
 export abstract class ComponentSystem {
+    abstract replicationMode: ReplicationMode;
     // A mapping of entities that this system manages to the component
     // that this sytem manages
     entities: Record<number, any> = {}
     componentPropertyUpdaters: Record<string, (id: number, component: any, newValue: any) => void>;
 
-    addedComponentEmitter = new EventEmitter<{id: number, component: any}>();
-    removedComponentEmitter = new EventEmitter<number>();
+    addedComponentEmitter = new EventEmitter<IdComponent>();
+    removedComponentEmitter = new EventEmitter<IdComponent>();
+    componentUpdatedEmitter = new EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>();
 
     constructor(entityManager: EntityManager) {
         entityManager.entityRemovedEmitter.subscribe((entityId) => {
@@ -66,8 +70,12 @@ export abstract class ComponentSystem {
      * Removes the given component from this entity. 
      */
     removeComponentFromEntity(id: number): void {
+        const component = this.getComponent(id);
+        if (!component) {
+            return;
+        }
         delete this.entities[id];
-        this.removedComponentEmitter.emit(id);
+        this.removedComponentEmitter.emit({id, component});
     }
 
     /**

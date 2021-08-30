@@ -1,6 +1,6 @@
 import { AllyComponent } from "../components/AllyComponent";
 import { EntityManager } from "../entities/EntityManager";
-import { ComponentSystem } from "./ComponentSystem";
+import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 
 /**
  * Contains all of the allies.
@@ -9,6 +9,8 @@ import { ComponentSystem } from "./ComponentSystem";
  * Each group of allies will have a list of entities belonging to it.
  */
 export class AllySystem extends ComponentSystem {
+    replicationMode: ReplicationMode = 'ally';
+
     entities: Record<string, AllyComponent>;
 
     // A mapping of groups to entities
