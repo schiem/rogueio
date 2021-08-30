@@ -39,17 +39,24 @@ export class NetworkEventManager {
         Object.keys(systems).forEach((systemName) => {
             const system: ComponentSystem = (systems as any)[systemName];
 
+            // Don't replicate this ever
+            if (system.replicationMode === 'none') {
+                return;
+            }
+
             // any time a component is added / removed, reflect it across the network
             system.addedComponentEmitter.subscribe((data) => {
                 this.eventQueue.push(new AddEntityComponentEvent(data.id, systemName, data.component));
             });
 
-            system.removedComponentEmitter.subscribe((id) => {
-                this.eventQueue.push(new RemoveEntityComponentEvent(id, systemName));
+            system.removedComponentEmitter.subscribe((data) => {
+                this.eventQueue.push(new RemoveEntityComponentEvent(data.id, systemName));
+            });
+
+            system.componentUpdatedEmitter.subscribe((data) => {
+                this.eventQueue.push(new UpdateEntityEvent(data.id, systemName, data.props));
             });
         });
-        this.bindLocationSystem();
-        this.bindVisibilitySystem();
     }
 
     /**
@@ -71,19 +78,5 @@ export class NetworkEventManager {
             });
             this.eventQueue = [];
         }
-    }
-
-    private bindLocationSystem(): void {
-        this.systems.location.locationMovedEmitter.subscribe((data) => {
-            const event = new UpdateEntityEvent(data.id, 'location', {location: data.newLocation});
-            this.eventQueue.push(event);
-        });
-    }
-
-    private bindVisibilitySystem(): void {
-        this.systems.visibility.visionChangedEmitter.subscribe((data) => {
-            const event = new UpdateEntityEvent(data.id, 'visibility', {added: data.added, removed: data.removed, seen: data.seenAdded});
-            this.eventQueue.push(event);
-        });
     }
 }

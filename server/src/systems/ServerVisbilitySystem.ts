@@ -12,10 +12,13 @@ export class ServerVisbilitySystem extends VisiblitySystem {
     constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, private dungeon: Dungeon) {
         super(entityManager, allySystem, locationSystem, dungeon.size);
 
-        locationSystem.locationAddedEmitter.subscribe((data) => {
+        locationSystem.componentUpdatedEmitter.subscribe((data) => {
             const d = new Date();
             this.recalculateVisibility(data.id);
             console.log(new Date().getTime() - d.getTime());
+        });
+        locationSystem.addedComponentEmitter.subscribe((data) => {
+            this.recalculateVisibility(data.id);
         });
     }
 
@@ -100,7 +103,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
         }
         component.visible = newVision;
 
-        this.visionChangedEmitter.emit({id: entityId, added: toAdd, removed: toDelete, seenAdded: newSeen});
+        this.componentUpdatedEmitter.emit({id: entityId, props: { added: toAdd, removed: toDelete, seen: newSeen}, oldProps: {}});
     }
 
     toJSON(): any {

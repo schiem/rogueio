@@ -4,10 +4,12 @@ import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
 import { Point } from "../types/Points";
 import { AllySystem } from "./AllySystem";
-import { ComponentSystem } from "./ComponentSystem";
+import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
 
 export class VisiblitySystem extends ComponentSystem {
+    replicationMode: ReplicationMode = 'ally';
+
     entities: Record<number, VisiblityComponent>;
     sharedComponents: Record<string, SharedVisibilityComponent> = {};
     visionChangedEmitter = new EventEmitter<{id: number, added: Point[], removed: Point[], seenAdded: Point[]}>();
@@ -45,7 +47,7 @@ export class VisiblitySystem extends ComponentSystem {
     constructor(entityManager: EntityManager, public allySystem: AllySystem, protected locationSystem: LocationSystem, dungeonSize: Point) {
         super(entityManager);
 
-        // For now, we only have the one shared visibility component
+        // Add a visibility component for every set of allies
         Object.keys(this.allySystem.groups).forEach((group) => {
             this.addSharedComponent(group, dungeonSize);
         })

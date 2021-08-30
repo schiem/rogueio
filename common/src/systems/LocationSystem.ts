@@ -4,7 +4,6 @@ import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
 import { random } from "../utils/MathUtils";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
-import { EventEmitter } from "../events/EventEmitter";
 
 /**
  * The system responsible for handling anything that can have a location.
@@ -194,7 +193,6 @@ export class LocationSystem extends ComponentSystem {
         } else {
             this.locationCache[component.location.x][component.location.y].push(id);
         }
-        this.locationAddedEmitter.emit({id, location: component.location});
     }
 
     private removeComponentFromLocationCache(id: number) {
@@ -208,7 +206,6 @@ export class LocationSystem extends ComponentSystem {
         if (idx !== -1) {
             this.locationCache[component.location.x][component.location.y].splice(idx, 1);
         }
-        this.locationRemovedEmitter.emit({id, location: component.location});
     }
 
     private resetLocationCache(): void {
