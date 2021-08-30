@@ -30,10 +30,11 @@ export class ClientGame extends Game {
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);
 
-        this.systems.location.locationAddedEmitter.subscribe((data) => {
-            this.renderDungeonTileAtLocation(data.location);
+        this.systems.location.componentUpdatedEmitter.subscribe((data) => {
+            this.renderDungeonTileAtLocation(data.props.location);
             this.renderer.renderViewPort();
         });
+
         this.systems.location.locationRemovedEmitter.subscribe((data) => {
             this.renderDungeonTileAtLocation(data.location);
             this.renderer.renderViewPort();

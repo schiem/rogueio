@@ -3,7 +3,7 @@ import { Dungeon } from "../models/Dungeon";
 import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
 import { random } from "../utils/MathUtils";
-import { ComponentSystem } from "./ComponentSystem";
+import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { EventEmitter } from "../events/EventEmitter";
 
 /**
@@ -12,11 +12,10 @@ import { EventEmitter } from "../events/EventEmitter";
  * represent it.
  */
 export class LocationSystem extends ComponentSystem {
+    replicationMode: ReplicationMode = 'visible';
+
     entities: Record<number, LocationComponent>;
     locationCache: number[][][];
-    locationAddedEmitter = new EventEmitter<{id: number, location: Point}>();
-    locationRemovedEmitter = new EventEmitter<{id: number, location: Point}>();
-    locationMovedEmitter = new EventEmitter<{id: number, oldLocation: Point, newLocation: Point}>();
 
     componentPropertyUpdaters = {
         location: (id: number, component: LocationComponent, newValue: Point) => {
@@ -136,7 +135,7 @@ export class LocationSystem extends ComponentSystem {
         this.removeComponentFromLocationCache(id);
         component.location = newLocation;
         this.addComponentToLocationCache(id, component)
-        this.locationMovedEmitter.emit({id, oldLocation, newLocation});
+        this.componentUpdatedEmitter.emit({id, props: { location: newLocation }, oldProps: {location: oldLocation}});
         return true;
 
     }
