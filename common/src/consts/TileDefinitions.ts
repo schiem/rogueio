@@ -6,6 +6,6 @@ export const BlockLayers = {
 }
 
 export const TileDefinitions: Record<string, TileDefinition> = {
-    wall: {blocks: [BlockLayers.character, BlockLayers.item], sprite: { name: 'wall', color: 'blue'}, blocksVision: true},
+    wall: {blocks: [BlockLayers.character, BlockLayers.item], sprite: { name: 'wall', color: 'default'}, blocksVision: true},
     floor: {blocks: [], sprite: { name: 'floor', color: 'default'}, blocksVision: false},
 };

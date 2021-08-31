@@ -13,9 +13,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
         super(entityManager, allySystem, locationSystem, dungeon.size);
 
         locationSystem.componentUpdatedEmitter.subscribe((data) => {
-            const d = new Date();
             this.recalculateVisibility(data.id);
-            console.log(new Date().getTime() - d.getTime());
         });
         locationSystem.addedComponentEmitter.subscribe((data) => {
             this.recalculateVisibility(data.id);

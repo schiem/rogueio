@@ -5,7 +5,9 @@ export const sprites: Record<string, number> = {
 }
 
 export const spriteColors: Record<string, string> = {
-    default: '#dddddd',
+    default: '#dddddd', // The default color for the floor
+    grey: '#8a8a8a', // The default 'out of vision color' - avoid it for other things
+    black: '#222222', // The background color - anything on it will be invisible
     red: '#ff356c', 
     green: '#3cb44b', 
     yellow: '#ffe119',
@@ -24,6 +26,4 @@ export const spriteColors: Record<string, string> = {
     olive: '#9c9c05',
     apricot: '#ffd8b1',
     navy: '#7e85d6',
-    grey: '#a9a9a9',
-    black: '#222222'
 }
