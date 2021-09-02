@@ -11,4 +11,8 @@ export enum ServerEventType {
 }
 export class ServerEvent extends NetworkEvent {
     type: ServerEventType;
+
+    serialize(): string | ArrayBuffer {
+        return JSON.stringify(this);
+    }
 }

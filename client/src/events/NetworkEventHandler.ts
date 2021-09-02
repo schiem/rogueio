@@ -25,7 +25,7 @@ export class NetworkEventHandler {
     }
 
     static sendEvent(event: NetworkEvent): void {
-        this.connection.send(JSON.stringify(event));
+        this.connection.send(event.serialize());
     }
 
     static handleEvent(game: ClientGame, serverEvent: ServerEvent): void {

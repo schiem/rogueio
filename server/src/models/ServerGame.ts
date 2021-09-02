@@ -5,13 +5,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { generatePlayerCharacter } from "../generators/EntityGenerators";
 import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
+import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
 
 export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
     networkEventManager: NetworkEventManager;
     private clients: Record<string, WebSocket> = {};
-    private tickSpeed = 100;
+    private tickSpeed = 10;
     private lastTick: number;
 
     constructor() {
@@ -35,16 +36,19 @@ export class ServerGame extends Game {
     }
 
     startTick(): void {
-        this.lastTick = new Date().getTime();
+        this.lastTick = performance.now();
         setInterval(() => {
-            const now = new Date().getTime();
+            const now = performance.now();
             if (now - this.lastTick > this.tickSpeed) {
+                process.stdout.cursorTo(0);
+                process.stdout.write((`Framerate: ${1000 / (now - this.lastTick)}`));
+
                 this.lastTick = now;
                 this.networkEventManager.flushEvents(
                     Object.keys(this.clients).map((client) => this.clients[client])
                 );
             }
-        }, 5);
+        }, 2);
     }
 
     newDungeon(): void {

@@ -10,6 +10,7 @@ import { RemoveEntityComponentEvent } from "../../../common/src/events/server/Re
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
+import { ServerEvent } from "../../../common/src/events/server/ServerEvent";
 
 /**
  * Handles both incoming and outgoing events.
@@ -74,9 +75,13 @@ export class NetworkEventManager {
     flushEvents(clients: WebSocket[]): void {
         if (this.eventQueue.length) {
             clients.forEach((ws) => {
-                ws.send(JSON.stringify(this.eventQueue));
+                ws.send(this.serializeEvents(this.eventQueue));
             });
             this.eventQueue = [];
         }
+    }
+
+    serializeEvents(events: ServerEvent[]): string | ArrayBuffer {
+        return '[' + events.map((event) => event.serialize()).join(',') + ']';
     }
 }
