@@ -12,7 +12,7 @@ export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
     networkEventManager: NetworkEventManager;
     private clients: Record<string, WebSocket> = {};
-    private tickSpeed = 10;
+    private tickSpeed = 50;
     private lastTick: number;
 
     constructor() {
@@ -77,12 +77,6 @@ export class ServerGame extends Game {
 
     toJSON(): any {
         return {
-            dungeonX: this.dungeonX,
-            dungeonY: this.dungeonY,
-            currentLevel: this.currentLevel,
-            systems: this.systems,
-            players: this.players,
-            entityManager: this.entityManager
         } as Game;
     }
 }

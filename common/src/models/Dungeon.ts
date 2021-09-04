@@ -11,6 +11,13 @@ export class Dungeon {
 
     constructor(public size: Point) {}
 
+    setTile(tile: Tile): void {
+        if (!this.tiles[tile.coords.x]) {
+            this.tiles[tile.coords.x] = new Array(this.size.y);
+        }
+        this.tiles[tile.coords.x][tile.coords.y] = tile;
+    }
+
     tileBlocksVision(point: Point): boolean {
         const tile = this.tiles[point.x][point.y];
         if (!tile) {

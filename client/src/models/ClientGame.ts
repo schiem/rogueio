@@ -52,23 +52,28 @@ export class ClientGame extends Game {
         });
 
         this.systems.visibility.singleVisionPointChanged.subscribe((data) =>  {
-            this.renderDungeonTileAtLocation(data);
+            if (data.tile) {
+                this.currentLevel.setTile(data.tile);
+            }
+            this.renderDungeonTileAtLocation(data.point);
             this.renderer.renderViewPort();
         });
     }
 
     postDeserialize(event: InitEvent) {
         this.currentPlayerId = event.data.playerId;
-        this.players = event.data.game.players;
+        this.players = event.data.gameData.players;
         this.currentLevel = new Dungeon({x: 0, y: 0});
-        this.currentLevel = Object.assign(this.currentLevel, event.data.game.currentLevel);
+        event.data.gameData.tiles?.forEach((tile) => {
+            this.currentLevel.setTile(tile);
+        });
         this.timeInitialized = event.ts;
 
         const systems = this.systems as any;
-        const incomingSystems = event.data.game.systems as any;
+        const incomingSystems = event.data.gameData.systems as any;
         
         // Get the current list of entities
-        Object.assign(this.entityManager, event.data.game.entityManager);
+        Object.assign(this.entityManager, event.data.gameData.entityManager);
 
         // deserialize all the systems
         Object.keys(incomingSystems).forEach((system) => {
@@ -127,6 +132,9 @@ export class ClientGame extends Game {
     renderDungeon(dungeon: Dungeon): void {
         this.currentLevel = dungeon;
         for(let x = 0; x < this.currentLevel.tiles.length; x++) {
+            if (!this.currentLevel.tiles[x]) {
+                continue;
+            }
             for(let y = 0; y < this.currentLevel.tiles[x].length; y++) {
                 this.renderDungeonTileAtLocation({x, y});
             }

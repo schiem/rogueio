@@ -3,6 +3,7 @@ import { SharedVisibilityComponent, VisiblityComponent } from "../components/Vis
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
 import { Point } from "../types/Points";
+import { Tile } from "../types/Tile";
 import { AllySystem } from "./AllySystem";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
@@ -13,7 +14,7 @@ export class VisiblitySystem extends ComponentSystem {
     entities: Record<number, VisiblityComponent>;
     sharedComponents: Record<string, SharedVisibilityComponent> = {};
     visionChangedEmitter = new EventEmitter<{id: number, added: Point[], removed: Point[], seenAdded: Point[]}>();
-    singleVisionPointChanged = new EventEmitter<Point>();
+    singleVisionPointChanged = new EventEmitter<{point: Point, tile?: Tile}>();
 
     componentPropertyUpdaters = {
         added: (id: number, component: VisiblityComponent, added: Point[]) => {
@@ -22,24 +23,25 @@ export class VisiblitySystem extends ComponentSystem {
                     component.visible[point.x] = {};
                 }
                 component.visible[point.x][point.y] = true;
-                this.singleVisionPointChanged.emit(point);
+                this.singleVisionPointChanged.emit({point});
             });
         },
         removed: (id: number, component: VisiblityComponent, removed: Point[]) => {
             removed.forEach((point) => {
                 delete component.visible[point.x]?.[point.y];
-                this.singleVisionPointChanged.emit(point);
+                this.singleVisionPointChanged.emit({point});
             });
         },
-        seen: (id: number, component: VisiblityComponent, seen: Point[]) => {
+        seen: (id: number, component: VisiblityComponent, seen: Tile[]) => {
             const sharedComponent = this.getSharedVisibilityComponent(id);
             if (!sharedComponent) {
                 return;
             }
 
-            seen.forEach((point) => {
-                sharedComponent.seen[point.x][point.y] = true;
-                this.singleVisionPointChanged.emit(point);
+            seen.forEach((tile) => {
+                sharedComponent.seen[tile.coords.x][tile.coords.y] = true;
+                // TODO - consider uncoupling this, right now it's very heavily coupled
+                this.singleVisionPointChanged.emit({point: tile.coords, tile});
             });
         },
     };

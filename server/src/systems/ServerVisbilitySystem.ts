@@ -6,6 +6,7 @@ import { AllySystem } from "../../../common/src/systems/AllySystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
+import { Tile } from "../../../common/src/types/Tile";
 import { BresenhamCircle, BresenhamRayCast } from "../utils/Bresenham";
 
 export class ServerVisbilitySystem extends VisiblitySystem {
@@ -23,6 +24,27 @@ export class ServerVisbilitySystem extends VisiblitySystem {
     addComponentForEntity(id: number, component: VisiblityComponent): void {
         super.addComponentForEntity(id, component);
         this.recalculateVisibility(id);
+    }
+
+    getSeenTilesForEntity(entityId: number): Tile[] | undefined {
+        const component = this.getSharedVisibilityComponent(entityId);
+        if (!component) {
+            return;
+        }
+        const seen: Tile[] = [];
+        for(let x = 0; x < component.seen.length; x++) {
+            for(let y = 0; y < component.seen.length; y++) {
+                if (!component.seen[x][y]) {
+                    continue;
+                }
+
+                const tile = this.dungeon.tiles[x]?.[y];
+                if (tile) {
+                    seen.push(tile);
+                }
+            }
+        }
+        return seen;
     }
 
     recalculateVisibility(entityId: number): void {
@@ -48,7 +70,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
         const currentVision = component.visible;
         const toDelete: Point[] = [];
         const toAdd: Point[] = [];
-        const newSeen: Point[] = [];
+        const newSeen: Tile[] = [];
 
         // Always add the location point - can always see self
         if (!newVision[locationComponent.location.x]) {
@@ -62,7 +84,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
 
         if (!sharedComponent.seen[locationComponent.location.x][locationComponent.location.y]) {
             sharedComponent.seen[locationComponent.location.x][locationComponent.location.y] = true;
-            newSeen.push(locationComponent.location);
+            newSeen.push(this.dungeon.tiles[locationComponent.location.x][locationComponent.location.y]);
         }
         newVision[locationComponent.location.x][locationComponent.location.y] = true;
 
@@ -88,7 +110,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
                 newVision[bPoint.x][bPoint.y] = true;
                 if (!sharedComponent.seen[bPoint.x][bPoint.y]) {
                     sharedComponent.seen[bPoint.x][bPoint.y] = true;
-                    newSeen.push(bPoint);
+                    newSeen.push(this.dungeon.tiles[bPoint.x][bPoint.y]);
                 }
                 return !this.dungeon.tileBlocksVision(bPoint);
             });
