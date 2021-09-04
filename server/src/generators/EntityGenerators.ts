@@ -15,7 +15,7 @@ export const generatePlayerCharacter = (entityId: number, systems: GameSystems, 
     const locationComponent = {
         sprite: {
             name: 'player',
-            color: 'brown'
+            color: 'beige'
         },
         collidesWith: [BlockLayers.character],
         collisionLayer: BlockLayers.character,

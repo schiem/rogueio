@@ -1,5 +1,6 @@
 export const sprites: Record<string, number> = {
     wall: 3,
+    rubble: 10,
     player: 32,
     floor: 118
 }

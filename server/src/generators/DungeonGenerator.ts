@@ -110,7 +110,7 @@ export class DungeonGenerator {
             for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                 for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                    if(Math.random() < factor) {
-                        dungeon.tiles[x][y].definition = 'wall';
+                        dungeon.tiles[x][y].definition = 'rubble';
                     } else if (room.age === 2) {
                         // rooms that are exactly '2' don't have any additional transforms
                         // the open spaces can be filled directly
@@ -147,7 +147,7 @@ export class DungeonGenerator {
                 neighborCount++;
             }
         }
-        dungeon.tiles[x][y].definition = neighborCount > 4 ? 'wall' : undefined;
+        dungeon.tiles[x][y].definition = neighborCount > 4 ? 'rubble' : undefined;
         return dungeon.tiles[x][y].definition;
     }
 
