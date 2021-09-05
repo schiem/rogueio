@@ -163,8 +163,8 @@ export class DungeonGenerator {
                 };
 
                 const location = {
-                    x: random(0, this.dungeonSize.x - size.x),
-                    y: random(0, this.dungeonSize.y - size.y)
+                    x: random(1, this.dungeonSize.x - size.x),
+                    y: random(1, this.dungeonSize.y - size.y)
                 };
                 const room = new Room(
                     new Rectangle(location, size)
