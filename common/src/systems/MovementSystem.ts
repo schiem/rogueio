@@ -7,9 +7,8 @@ import { clamp } from "../utils/MathUtils";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
 
-export class MovementSystem extends ComponentSystem {
+export class MovementSystem extends ComponentSystem<MovementComponent> {
     replicationMode: ReplicationMode = 'visible';
-    entities: Record<number, MovementComponent>;
 
     constructor(public locationSystem: LocationSystem, entityManager: EntityManager) {
         super(entityManager);

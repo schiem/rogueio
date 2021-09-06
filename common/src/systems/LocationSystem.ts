@@ -10,10 +10,8 @@ import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
  * In order to have a location in the world, it also must have a sprite to
  * represent it.
  */
-export class LocationSystem extends ComponentSystem {
+export class LocationSystem extends ComponentSystem<LocationComponent> {
     replicationMode: ReplicationMode = 'visible';
-
-    entities: Record<number, LocationComponent>;
     locationCache: number[][][];
 
     componentPropertyUpdaters = {

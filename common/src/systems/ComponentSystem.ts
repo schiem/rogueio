@@ -2,7 +2,7 @@ import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
 
 export type ReplicationMode = 'self' | 'ally' | 'visible' | 'none';
-export type IdComponent = {id: number, component: any};
+export type IdComponent<T> = {id: number, component: T};
 /**
  * The base component system.
  * Handles adding and removing components.  Includes a subscriber so 
@@ -10,15 +10,15 @@ export type IdComponent = {id: number, component: any};
  * from the system.
  */
 // TODO - add checks everywhere to make sure the entity exists
-export abstract class ComponentSystem {
+export abstract class ComponentSystem<T> {
     abstract replicationMode: ReplicationMode;
     // A mapping of entities that this system manages to the component
     // that this sytem manages
-    entities: Record<number, any> = {}
+    entities: Record<number, T> = {}
     componentPropertyUpdaters: Record<string, (id: number, component: any, newValue: any) => void>;
 
-    addedComponentEmitter = new EventEmitter<IdComponent>();
-    removedComponentEmitter = new EventEmitter<IdComponent>();
+    addedComponentEmitter = new EventEmitter<IdComponent<T>>();
+    removedComponentEmitter = new EventEmitter<IdComponent<T>>();
     componentUpdatedEmitter = new EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>();
 
     constructor(entityManager: EntityManager) {
@@ -61,7 +61,7 @@ export abstract class ComponentSystem {
      * It is expected that the component will already have been created outside
      * of the system (using one of the Generator functions). 
      */
-    addComponentForEntity(id: number, component: any): void {
+    addComponentForEntity(id: number, component: T): void {
         this.entities[id] = component;
         this.addedComponentEmitter.emit({id, component});
     }

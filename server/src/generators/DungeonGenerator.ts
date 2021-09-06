@@ -54,9 +54,8 @@ export class DungeonGenerator {
                 const openSpaces: Point[] = [];
                 for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                     for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
-                        // check if it's the final pass and the square is open
-                        const tileDef = dungeon.tiles[x][y].definition;
-                        if (tileDef === undefined) {
+                        // check if the square is open
+                        if (dungeon.tiles[x][y].definition === undefined) {
                             openSpaces.push({x, y});
                         }
                     }
@@ -106,15 +105,10 @@ export class DungeonGenerator {
             // gives a range of 0% - 50% chance of changing a tile
             const factor = (room.age - 1) / 6;
             const bottomRight = room.rect.bottomRight;
-            const openSpaces: Point[] = [];
             for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                 for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                    if(Math.random() < factor) {
                         dungeon.tiles[x][y].definition = 'rubble';
-                    } else if (room.age === 2) {
-                        // rooms that are exactly '2' don't have any additional transforms
-                        // the open spaces can be filled directly
-                        openSpaces.push({x, y});
                     }
                 }
             }
@@ -372,7 +366,7 @@ export class DungeonGenerator {
             perimPoint.y = flattenedPerimPoint < rect.size.x - 1 ? 0 : rect.size.y - 1;
             perimPoint.x = flattenedPerimPoint % rect.size.x;
         } else {
-            //either on the left or right - x will be either 0 or max, y will be module of the diff
+            //either on the left or right - x will be either 0 or max, y will be modulo of the diff
             perimPoint.x = diff < rect.size.y - 2 ? 0 : rect.size.x - 1;
 
             //subtract 2 because our y indices are 2 shorter than the x (see diagram), and add 1 to account for the index offset

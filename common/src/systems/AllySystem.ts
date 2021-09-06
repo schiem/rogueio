@@ -8,10 +8,8 @@ import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
  * Each enttiy will have a reference to the group that it belongs to.
  * Each group of allies will have a list of entities belonging to it.
  */
-export class AllySystem extends ComponentSystem {
+export class AllySystem extends ComponentSystem<AllyComponent> {
     replicationMode: ReplicationMode = 'ally';
-
-    entities: Record<string, AllyComponent>;
 
     // A mapping of groups to entities
     groups: Record<string, number[]>;
