@@ -44,14 +44,14 @@ export class NetworkEventHandler {
         [ServerEventType.message]: (game: ClientGame, event: any): void => {
         },
         [ServerEventType.update]: (game: ClientGame, event: UpdateEntityEvent): void => {
-            const system: ComponentSystem = (game.systems as any)[event.data.system];
+            const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
             if (!system) {
                 throw new Error('Invalid system');
             }
             system.updateComponent(event.data.id, event.data.properties);
         },
         [ServerEventType.addComponent]: (game: ClientGame, event: AddEntityComponentEvent): void => {
-            const system: ComponentSystem = (game.systems as any)[event.data.system];
+            const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
             if (!system) {
                 throw new Error('Invalid system');
             }

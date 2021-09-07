@@ -10,14 +10,16 @@ import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
 import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
-import { SharedVisibilityComponent, VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
+import { SharedVisibilityComponent, VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { spriteColors } from "../rendering/Sprites";
+import { UI } from "../UI/UI";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
     renderer: Renderer;
     inputEventHandler: InputEventHandler;
     timeInitialized: number;
+    ui: UI;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -25,6 +27,7 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
+        this.ui = new UI();
         this.systems.visibility = new VisiblitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);

@@ -1,7 +1,5 @@
 import { ServerEvent, ServerEventType } from "./ServerEvent";
-import { ServerGame } from "../../../../server/src/models/ServerGame";
-import { GameSystems } from "../../models/Game";
-import { ServerVisbilitySystem } from "../../../../server/src/systems/ServerVisbilitySystem";
+import { Game, GameSystems } from "../../models/Game";
 import { Tile } from "../../types/Tile";
 import { Player } from "../../models/Player";
 import { EntityManager } from "../../entities/EntityManager";
@@ -22,14 +20,14 @@ export class InitEvent extends ServerEvent {
     type = ServerEventType.init;
     data: InitData;
 
-    constructor(game: ServerGame, playerId: string) {
+    constructor(game: Game, playerId: string) {
         super();
         const characterId = game.players[playerId].characterId;
         this.data = {
             gameData: {
                 dungeonX: game.dungeonX,
                 dungeonY: game.dungeonY,
-                tiles: (game.systems.visibility as ServerVisbilitySystem).getSeenTilesForEntity(characterId),
+                tiles: (game.systems.visibility as any).getSeenTilesForEntity(characterId),
                 systems: game.systems,
                 players: game.players,
                 entityManager: game.entityManager

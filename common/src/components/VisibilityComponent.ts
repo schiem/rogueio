@@ -1,4 +1,4 @@
-export type VisiblityComponent = {
+export type VisibilityComponent = {
     visible: Record<number, Record<number, boolean>>,
     sightRadius: number
 }

@@ -1,7 +1,7 @@
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
-import { VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
+import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { BlockLayers } from "../../../common/src/consts/TileDefinitions";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { GameSystems } from "../../../common/src/models/Game";
@@ -29,5 +29,5 @@ export const generatePlayerCharacter = (entityId: number, systems: GameSystems, 
 
     systems.movement.addComponentForEntity(entityId, { minMovementDelay: 30 } as MovementComponent);
 
-    systems.visibility.addComponentForEntity(entityId, { sightRadius: 5, visible: {} } as VisiblityComponent)
+    systems.visibility.addComponentForEntity(entityId, { sightRadius: 5, visible: {} } as VisibilityComponent)
 };

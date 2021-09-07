@@ -1,5 +1,5 @@
 import { AllyComponent } from "../components/AllyComponent";
-import { SharedVisibilityComponent, VisiblityComponent } from "../components/VisibilityComponent";
+import { SharedVisibilityComponent, VisibilityComponent } from "../components/VisibilityComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
 import { Point } from "../types/Points";
@@ -8,16 +8,16 @@ import { AllySystem } from "./AllySystem";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
 
-export class VisiblitySystem extends ComponentSystem {
+export class VisiblitySystem extends ComponentSystem<VisibilityComponent> {
     replicationMode: ReplicationMode = 'ally';
 
-    entities: Record<number, VisiblityComponent>;
+    entities: Record<number, VisibilityComponent>;
     sharedComponents: Record<string, SharedVisibilityComponent> = {};
     visionChangedEmitter = new EventEmitter<{id: number, added: Point[], removed: Point[], seenAdded: Point[]}>();
     singleVisionPointChanged = new EventEmitter<{point: Point, tile?: Tile}>();
 
     componentPropertyUpdaters = {
-        added: (id: number, component: VisiblityComponent, added: Point[]) => {
+        added: (id: number, component: VisibilityComponent, added: Point[]) => {
             added.forEach((point) => {
                 if (!component.visible[point.x]) {
                     component.visible[point.x] = {};
@@ -26,13 +26,13 @@ export class VisiblitySystem extends ComponentSystem {
                 this.singleVisionPointChanged.emit({point});
             });
         },
-        removed: (id: number, component: VisiblityComponent, removed: Point[]) => {
+        removed: (id: number, component: VisibilityComponent, removed: Point[]) => {
             removed.forEach((point) => {
                 delete component.visible[point.x]?.[point.y];
                 this.singleVisionPointChanged.emit({point});
             });
         },
-        seen: (id: number, component: VisiblityComponent, seen: Tile[]) => {
+        seen: (id: number, component: VisibilityComponent, seen: Tile[]) => {
             const sharedComponent = this.getSharedVisibilityComponent(id);
             if (!sharedComponent) {
                 return;
@@ -56,7 +56,7 @@ export class VisiblitySystem extends ComponentSystem {
     }
 
     getSharedVisibilityComponent(entityId: number): SharedVisibilityComponent | undefined {
-        const component: VisiblityComponent = this.getComponent(entityId);
+        const component: VisibilityComponent = this.getComponent(entityId);
         if (!component) {
             return;
         }
@@ -70,7 +70,7 @@ export class VisiblitySystem extends ComponentSystem {
     }
 
     tileIsVisible(entityId: number, location: Point): boolean {
-        const component: VisiblityComponent = this.getComponent(entityId);
+        const component: VisibilityComponent = this.getComponent(entityId);
         if (!component) {
             return false;
         }

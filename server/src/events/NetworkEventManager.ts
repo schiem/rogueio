@@ -38,7 +38,7 @@ export class NetworkEventManager {
 
 
         Object.keys(systems).forEach((systemName) => {
-            const system: ComponentSystem = (systems as any)[systemName];
+            const system: ComponentSystem<any> = (systems as any)[systemName];
 
             // Don't replicate this ever
             if (system.replicationMode === 'none') {

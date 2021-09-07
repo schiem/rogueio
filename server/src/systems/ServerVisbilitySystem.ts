@@ -1,5 +1,5 @@
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
-import { VisiblityComponent } from "../../../common/src/components/VisibilityComponent";
+import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
@@ -21,7 +21,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
         });
     }
 
-    addComponentForEntity(id: number, component: VisiblityComponent): void {
+    addComponentForEntity(id: number, component: VisibilityComponent): void {
         super.addComponentForEntity(id, component);
         this.recalculateVisibility(id);
     }
@@ -48,7 +48,7 @@ export class ServerVisbilitySystem extends VisiblitySystem {
     }
 
     recalculateVisibility(entityId: number): void {
-        const component: VisiblityComponent = this.getComponent(entityId);
+        const component: VisibilityComponent = this.getComponent(entityId);
         if (!component) {
             return;
         }
