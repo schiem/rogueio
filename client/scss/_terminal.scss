@@ -1,0 +1,18 @@
+.terminal {
+    font-family: $font;
+    font-size: $font-base;
+    background: $black;
+    color: $white;
+    border: 1px solid $black;
+    min-width: 200px;
+
+    .terminal-title {
+        padding: 0 $spacing;
+        color: $black;
+        background: $white;
+    }
+
+    .terminal-content {
+        padding: $spacing;
+    }
+}

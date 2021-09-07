@@ -1,9 +1,23 @@
 <html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <link href="/dist/assets/css/style.css" rel="stylesheet">
+  </head>
   <body>
-    <canvas id="viewport"></canvas>
-    <div id="ui">
+    <div id="#game">
+      <div class="terminal">
+        <div class="terminal-title">RogueIO</div>
+        <div class="terminal-content">
+          <canvas id="viewport"></canvas>
+        </div>
+      </div>
+      <div id="ui">
         <div id="stats"></div>
+      </div>
     </div>
+
     <script src="/dist/index.js"></script>
   </body>
 </html>

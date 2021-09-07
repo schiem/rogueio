@@ -7,8 +7,8 @@ module.exports = {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
-      },
-    ],
+      }
+    ]
   },
   // Bundle '.ts' files as well as '.js' files.
   resolve: {

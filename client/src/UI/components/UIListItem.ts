@@ -7,6 +7,5 @@ export class UIListItem extends UIComponent<string> {
 
     render(): void {
         this.rootEl.textContent = this.data;
-        this.parentEl.appendChild(this.rootEl);
     }
 }

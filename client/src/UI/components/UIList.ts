@@ -11,6 +11,5 @@ export class UIList extends UIComponent<string[]> {
         this.data.forEach((str) => {
             this.children.push(new UIListItem(this.rootEl, str));
         });
-        this.parentEl.appendChild(this.rootEl);
     }
 }

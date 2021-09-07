@@ -1,8 +1,19 @@
 export abstract class UIComponent<Data> {
     protected children: UIComponent<any>[] = [];
 
-    constructor(protected rootEl: HTMLElement, protected parentEl: HTMLElement, protected data: Data) {
-        this.render();
+    constructor(
+        protected rootEl: HTMLElement, 
+        protected parentEl: HTMLElement, 
+        protected data: Data,
+        protected classes?: string[]) {
+        classes?.forEach((cssClass) => {
+            this.rootEl.classList.add(cssClass);
+        });
+
+        setTimeout(() => {
+            this.render();
+            this.parentEl.appendChild(this.rootEl);
+        })
     }
 
     abstract render(): void;
