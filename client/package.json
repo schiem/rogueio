@@ -5,7 +5,7 @@
   "main": "dist/index.html",
   "scripts": {
     "start": "npm run watch & webpack serve",
-    "style": "sass scss/style.scss dist/assets/css/style.css",
+    "style": "sass --watch scss/style.scss dist/assets/css/style.css",
     "build": "npm run style && webpack build --mode production",
     "watch": "webpack --watch --mode development"
   },

@@ -3,8 +3,11 @@
     font-size: $font-base;
     background: $black;
     color: $white;
-    border: 1px solid $black;
     min-width: 200px;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    overflow: hidden;
+    margin: 0 $spacing;
 
     .terminal-title {
         padding: 0 $spacing;

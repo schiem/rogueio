@@ -2,6 +2,7 @@ body {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  background: #b4b9dc;
 }
 
 ul {
@@ -10,8 +11,12 @@ ul {
   padding: 0;
 }
 
-#ui {
-  display: inline-block;
+#game {
+  display: flex;
+  flex-wrap: wrap;
+}
+#game #viewport {
+  max-width: 100%;
 }
 
 .terminal {
@@ -19,8 +24,11 @@ ul {
   font-size: 16px;
   background: #222;
   color: white;
-  border: 1px solid #222;
   min-width: 200px;
+  border-radius: 2px;
+  box-shadow: 3px 3px 5px #666;
+  overflow: hidden;
+  margin: 0 10px;
 }
 .terminal .terminal-title {
   padding: 0 10px;
