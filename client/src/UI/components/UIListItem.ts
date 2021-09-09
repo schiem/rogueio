@@ -1,11 +1,15 @@
 import { UIComponent } from "../UIComponent";
 
-export class UIListItem extends UIComponent<string> {
+export class UIListItem extends UIComponent<string | UIComponent<any>> {
     constructor(parentEl: HTMLElement, data: string) {
         super(document.createElement('li'), parentEl, data);
     }
 
     render(): void {
-        this.rootEl.textContent = this.data;
+        if (typeof this.data === 'string') {
+            this.rootEl.textContent = this.data;
+        } else {
+            this.children.push(this.data);
+        }
     }
 }
