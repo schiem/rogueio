@@ -1,6 +1,9 @@
 #game {
     display: flex;
     flex-wrap: wrap;
+    max-width: 1600px;
+    margin: auto;
+    padding: $spacing;
 
     #viewport {
         max-width: 100%;
