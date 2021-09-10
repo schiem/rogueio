@@ -30,4 +30,17 @@ export const generatePlayerCharacter = (entityId: number, systems: GameSystems, 
     systems.movement.addComponentForEntity(entityId, { minMovementDelay: 30 } as MovementComponent);
 
     systems.visibility.addComponentForEntity(entityId, { sightRadius: 5, visible: {} } as VisibilityComponent)
+
+    systems.stats.addComponentForEntity(entityId, {
+        current: {
+            str: 10,
+            con: 10,
+            dex: 10
+        },
+        max: {
+            str: 10,
+            con: 10,
+            dex: 10
+        }
+    });
 };

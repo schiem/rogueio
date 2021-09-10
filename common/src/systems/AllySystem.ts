@@ -57,8 +57,6 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
         return this.groups[component.group];
     }
 
-    postDeserialize(): void {}
-
     toJSON(): any {
         return {
             entities: this.entities, 

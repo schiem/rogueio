@@ -41,8 +41,6 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         }
     }
 
-    postDeserialize(): void {}
-
     toJSON(): any {
         return {
             entities: this.entities

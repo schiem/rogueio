@@ -27,7 +27,7 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
-        this.ui = new UI();
+        this.ui = new UI(this.systems, this.players[this.currentPlayerId]);
         this.systems.visibility = new VisiblitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
@@ -66,6 +66,7 @@ export class ClientGame extends Game {
     postDeserialize(event: InitEvent) {
         this.currentPlayerId = event.data.playerId;
         this.players = event.data.gameData.players;
+        this.ui.currentPlayer = this.players[this.currentPlayerId];
         this.currentLevel = new Dungeon({x: 0, y: 0});
         event.data.gameData.tiles?.forEach((tile) => {
             this.currentLevel.setTile(tile);
@@ -81,6 +82,7 @@ export class ClientGame extends Game {
         // deserialize all the systems
         Object.keys(incomingSystems).forEach((system) => {
             Object.assign(systems[system], incomingSystems[system]);
+            console.log(systems[system]);
             systems[system].postDeserialize();
         });
     }

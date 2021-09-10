@@ -114,6 +114,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
             const entityId = parseInt(entity);
             this.addComponentToLocationCache(entityId);
         });
+        super.postDeserialize();
     }
 
     toJSON(): any {

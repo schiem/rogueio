@@ -1,18 +1,49 @@
+import { GameSystems } from "../../../common/src/models/Game";
+import { Player } from "../../../common/src/models/Player";
 import { UIList } from "./components/UIList";
 import { UIStatBlock } from "./components/UIStatBlock";
 import { UITerminal } from "./components/UITerminal";
 
 export class UI {
     private rootEl: HTMLElement;
-    statBlock: UITerminal;
-    constructor() {
+    statBlocks: Record<string, UIStatBlock> = {
+        str: new UIStatBlock({
+            current: 0,
+            max: 0,
+            name: 'str'
+        }),
+        dex: new UIStatBlock({
+            current: 0,
+            max: 0,
+            name: 'dex'
+        }),
+        con: new UIStatBlock({
+            current: 0,
+            max: 0,
+            name: 'con'
+        }),
+    };
+    constructor(systems: GameSystems, public currentPlayer: Player) {
         this.rootEl = document.getElementById('ui') as HTMLElement;
-        this.statBlock = new UITerminal('Stats', this.rootEl.querySelector('#stats') as HTMLElement, [
-            new UIStatBlock({
-                current: 1,
-                max: 1,
-                name: 'oofums'
-            })
+        new UITerminal('Stats', this.rootEl.querySelector('#stats') as HTMLElement, [
+            this.statBlocks.str,
+            this.statBlocks.dex,
+            this.statBlocks.con,
         ]);
+
+        systems.stats.addedComponentEmitter.subscribe((data) => {
+            console.log(data);
+            console.log(this.currentPlayer);
+            if (data.id !== this.currentPlayer.characterId) {
+                return;
+            }
+
+            Object.keys(this.statBlocks).forEach((key) => {
+                this.statBlocks[key].data.max = (data.component.max as any)[key];
+                this.statBlocks[key].data.current = (data.component.current as any)[key];
+                this.statBlocks[key].clear();
+                this.statBlocks[key].render();
+            });
+        });
     }
 }

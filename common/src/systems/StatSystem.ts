@@ -3,9 +3,9 @@ import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 export class StatSystem extends ComponentSystem<StatComponent> {
     replicationMode: ReplicationMode = 'ally';
 
-    postDeserialize(): void {}
-
     toJSON() {
-        return this;
+        return {
+            entities: this.entities
+        }
     }
 }

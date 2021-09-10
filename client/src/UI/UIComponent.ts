@@ -4,7 +4,7 @@ export abstract class UIComponent<Data> {
     constructor(
         protected rootEl: HTMLElement, 
         protected parentEl: HTMLElement | null, 
-        protected data: Data,
+        public data: Data,
         protected classes?: string[]) {
         classes?.forEach((cssClass) => {
             this.rootEl.classList.add(cssClass);
@@ -41,6 +41,7 @@ export abstract class UIComponent<Data> {
 
     updateDataReference(data: Data): void {
         this.data = data;
+        this.clear();
         this.render();
     }
 }

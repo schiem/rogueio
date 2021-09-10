@@ -16,4 +16,5 @@ export class UIStatBlock extends UIComponent<StatBlock> {
         this.rootEl.appendChild(statNameEl);
         this.rootEl.appendChild(blockEl);
     }
+
 }

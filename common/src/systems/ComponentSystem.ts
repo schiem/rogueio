@@ -83,6 +83,12 @@ export abstract class ComponentSystem<T> {
      * Often, much of the redundant data will be removed before deserializing to make network
      * requests smaller. This function will reconstruct them.
      */
-    abstract postDeserialize(): void;
+    postDeserialize(): void {
+        Object.keys(this.entities).forEach((entityId) => {
+            const id = parseInt(entityId);
+            this.addedComponentEmitter.emit({id, component: this.entities[id]});
+        });
+    }
+
     abstract toJSON(): any;
 }

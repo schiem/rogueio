@@ -105,6 +105,5 @@ export class VisiblitySystem extends ComponentSystem<VisibilityComponent> {
         this.sharedComponents[group] = component;
     }
 
-    postDeserialize(): void {}
     toJSON(): any {}
 }
