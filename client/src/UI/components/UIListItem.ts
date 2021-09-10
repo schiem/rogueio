@@ -1,7 +1,7 @@
 import { UIComponent } from "../UIComponent";
 
 export class UIListItem extends UIComponent<string | UIComponent<any>> {
-    constructor(parentEl: HTMLElement, data: string) {
+    constructor(parentEl: HTMLElement, data: string | UIComponent<any>) {
         super(document.createElement('li'), parentEl, data);
     }
 
@@ -10,6 +10,7 @@ export class UIListItem extends UIComponent<string | UIComponent<any>> {
             this.rootEl.textContent = this.data;
         } else {
             this.children.push(this.data);
+            this.data.setParent(this.rootEl);
         }
     }
 }

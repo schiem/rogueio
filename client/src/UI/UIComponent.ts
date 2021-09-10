@@ -3,7 +3,7 @@ export abstract class UIComponent<Data> {
 
     constructor(
         protected rootEl: HTMLElement, 
-        protected parentEl: HTMLElement, 
+        protected parentEl: HTMLElement | null, 
         protected data: Data,
         protected classes?: string[]) {
         classes?.forEach((cssClass) => {
@@ -12,11 +12,22 @@ export abstract class UIComponent<Data> {
 
         setTimeout(() => {
             this.render();
-            this.parentEl.appendChild(this.rootEl);
+            if (this.parentEl) {
+                this.parentEl.appendChild(this.rootEl);
+            }
         })
     }
 
     abstract render(): void;
+
+    setParent(parentEl: HTMLElement): void {
+        if (this.parentEl) {
+            this.parentEl.removeChild(this.rootEl);
+        }
+
+        this.parentEl = parentEl;
+        this.parentEl.appendChild(this.rootEl);
+    }
 
     clear(): void {
         if (!this.rootEl) {

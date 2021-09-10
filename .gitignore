@@ -2,4 +2,5 @@
 **/dist/client
 **/dist/server
 **/dist/common
+**/dist/assets/css
 **/dist/**/*.js

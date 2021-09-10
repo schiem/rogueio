@@ -1,10 +1,10 @@
 import { UIComponent } from "../UIComponent";
 import { UIList } from "./UIList";
 
-export class UITerminal extends UIComponent<string[]> {
+export class UITerminal extends UIComponent<(string | UIComponent<any>)[]> {
     protected titleEl: HTMLElement;
     protected contentEl: HTMLElement;
-    constructor(protected title: string, parentEl: HTMLElement, data: string[]) {
+    constructor(protected title: string, parentEl: HTMLElement, data: (string | UIComponent<any>)[]) {
         super(document.createElement('div'), parentEl, data, ['terminal']);
         console.log(title);
     }

@@ -2,8 +2,8 @@ import { UIComponent } from "../UIComponent";
 
 type StatBlock = {name: string, max: number, current: number};
 export class UIStatBlock extends UIComponent<StatBlock> {
-    constructor(protected title: string, parentEl: HTMLElement, data: StatBlock) {
-        super(document.createElement('div'), parentEl, data, ['statblock']);
+    constructor(data: StatBlock) {
+        super(document.createElement('div'), null, data, ['statblock']);
     }
 
     render(): void {
@@ -11,7 +11,7 @@ export class UIStatBlock extends UIComponent<StatBlock> {
         statNameEl.textContent = this.data.name;
 
         const blockEl = document.createElement('span');
-        statNameEl.textContent = `${this.data.current}/${this.data.max}`;
+        blockEl.textContent = `${this.data.current}/${this.data.max}`;
 
         this.rootEl.appendChild(statNameEl);
         this.rootEl.appendChild(blockEl);

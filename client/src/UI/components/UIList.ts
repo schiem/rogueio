@@ -1,9 +1,9 @@
 import { UIComponent } from "../UIComponent";
 import { UIListItem } from "./UIListItem";
 
-export class UIList extends UIComponent<string[]> {
+export class UIList extends UIComponent<(string | UIComponent<any>)[]> {
     protected children: UIListItem[];
-    constructor(parentEl: HTMLElement, data: string[]) {
+    constructor(parentEl: HTMLElement, data: (string | UIComponent<any>)[]) {
         super(document.createElement('ul'), parentEl, data);
     }
 
