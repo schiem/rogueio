@@ -38,7 +38,7 @@ const loadLibrary = (lib: string): Promise<void> => {
     }
 
     const url = `/assets/lang/${currentLang}/${lib}.json`;
-    const promise = fetch(url).then(resp => resp.json()).then(json => {
+    const promise = fetch(url).then(resp => resp.json()).then((json: Record<string, string>) => {
         languageStrings[currentLang][lib] = json;
         delete promiseCache[lib];
     });
@@ -46,5 +46,45 @@ const loadLibrary = (lib: string): Promise<void> => {
     return promise;
 }
 
-export const localize = (message: string, placeholders?: string[]): Promise<string> {
+const lookupMessageInLibrary = (lib: string, key: string): string => {
+    return languageStrings[currentLang][lib][key];
+}
+
+const splitMessage = (message: string): string[] => {
+    return message.split('/');
+}
+
+export const localize = (message: string, replacements?: string[]): Promise<string> => {
+    const promises: Promise<void>[] = [];
+    if (replacements) {
+        replacements.unshift(message);
+    } else {
+        replacements = [message];
+    }
+
+    const splitReplacements: string[][] = [];
+    for(let i = -1; i < splitReplacements.length; i++) {
+        let str: string;
+        if (i === -1) {
+            str = message;
+        } else {
+            str = replacements[i];
+        }
+        const split = splitMessage(str);
+        splitReplacements.push(split);
+
+        if (shouldLoadLibrary(split[0])) {
+            promises.push(loadLibrary(split[0]));
+        }
+    }
+
+    let localizedMessage = lookupMessageInLibrary(splitReplacements[0][0], splitReplacements[0][1]);
+    return Promise.all(promises).then(() => {
+        for(let i = 1; i < splitReplacements.length; i++) {
+            const placeholder = `\\{${i}\\}`;
+            const localizedReplacement = lookupMessageInLibrary(splitReplacements[i][0], splitReplacements[i][1]);
+            localizedMessage = message.replace(new RegExp(placeholder), localizedReplacement);
+        }
+        return localizedMessage;
+    });
 }
