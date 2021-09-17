@@ -1,3 +1,4 @@
+import { localize } from "../../lang/Lang";
 import { UIComponent } from "../UIComponent";
 
 type StatBlock = {name: string, max: number, current: number};
@@ -8,7 +9,9 @@ export class UIStatBlock extends UIComponent<StatBlock> {
 
     render(): void {
         const statNameEl = document.createElement('span');
-        statNameEl.textContent = this.data.name;
+        localize(`common/stats/${this.data.name}`).then(localized => {
+            statNameEl.textContent = localized;
+        });
 
         const blockEl = document.createElement('span');
         blockEl.textContent = `${this.data.current}/${this.data.max}`;

@@ -82,7 +82,6 @@ export class ClientGame extends Game {
         // deserialize all the systems
         Object.keys(incomingSystems).forEach((system) => {
             Object.assign(systems[system], incomingSystems[system]);
-            console.log(systems[system]);
             systems[system].postDeserialize();
         });
     }

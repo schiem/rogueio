@@ -1,5 +1,6 @@
 import { GameSystems } from "../../../common/src/models/Game";
 import { Player } from "../../../common/src/models/Player";
+import { loadLibrary } from "../lang/Lang";
 import { UIList } from "./components/UIList";
 import { UIStatBlock } from "./components/UIStatBlock";
 import { UITerminal } from "./components/UITerminal";
@@ -32,8 +33,6 @@ export class UI {
         ]);
 
         systems.stats.addedComponentEmitter.subscribe((data) => {
-            console.log(data);
-            console.log(this.currentPlayer);
             if (data.id !== this.currentPlayer.characterId) {
                 return;
             }
@@ -45,5 +44,9 @@ export class UI {
                 this.statBlocks[key].render();
             });
         });
+    }
+
+    preloadLibraries() {
+        loadLibrary('common');
     }
 }
