@@ -44,9 +44,7 @@ export class ServerGame extends Game {
                 process.stdout.write((`Framerate: ${1000 / (now - this.lastTick)}`));
 
                 this.lastTick = now;
-                this.networkEventManager.flushEvents(
-                    Object.keys(this.clients).map((client) => this.clients[client])
-                );
+                this.networkEventManager.flushEvents(this.clients);
             }
         }, 2);
     }
@@ -65,12 +63,14 @@ export class ServerGame extends Game {
         this.players[playerId] = player;
 
         generatePlayerCharacter(player.characterId, this.systems, this.currentLevel);
+        this.networkEventManager.addPlayerEventQueue(playerId);
 
         return playerId;
     }
 
     playerDisconnected(playerId: string): void {
         this.entityManager.removeEntity(this.players[playerId].characterId);
+        this.networkEventManager.removePlayerEventQueue(playerId);
         delete this.players[playerId];
         delete this.clients[playerId];
     }
