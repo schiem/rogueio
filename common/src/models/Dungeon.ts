@@ -1,7 +1,8 @@
-import { Tile } from "../types/Tile";
+import { Tile, TileModifier } from "../types/Tile";
 import { Point } from "../types/Points";
 import { Room } from "./Room";
-import { TileDefinitions } from "../consts/TileDefinitions";
+import { ModDefinitions, TileDefinitions } from "../consts/TileDefinitions";
+import { TileDefinition } from "../types/TileDefinition";
 
 export class Dungeon {
     tiles: Tile[][] = [];
@@ -18,32 +19,54 @@ export class Dungeon {
         this.tiles[tile.coords.x][tile.coords.y] = tile;
     }
 
-    tileBlocksVision(point: Point): boolean {
-        const tile = this.tiles[point.x][point.y];
+    /**
+     * Get a tile definition, or undefined if the tile has no definition.
+     * Returns null if the tile does not exist.
+     */
+    getTileDefinition(point: Point): TileDefinition | undefined | null {
+        const tile = this.tiles[point.x]?.[point.y];
         if (!tile) {
+            return null;
+        }
+
+        if (tile.mods.length) {
+            const mod: TileModifier = Math.max.apply(tile.mods);
+            return ModDefinitions[mod];
+        }
+
+        const def = tile?.definition;
+        if (!def) {
+            return;
+        }
+        return TileDefinitions[def];
+    }
+
+    tileBlocksVision(point: Point): boolean {
+        const def = this.getTileDefinition(point);
+        if (def === null) {
             // no tile, probably outside the map
             return true;
         }
-        if (tile.definition === undefined) {
+        if (def === undefined) {
             // nothing at this tile, can't block vision
             return false;
         }
-        return TileDefinitions[tile.definition].blocksVision;
+        return def.blocksVision;
     }
 
     /**
      * Check whether a tile at a location blocks the given block layer.
      */
     tileIsBlocked(point: Point, blockLayer: number): boolean {
-        const tile = this.tiles[point.x][point.y];
-        if (!tile) {
+        const def = this.getTileDefinition(point);
+        if (def === null) {
+            // no tile, probably outside the map
             return true;
         }
 
-        if (tile.definition === undefined) {
+        if (def === undefined) {
             return false;
         }
-        const def = TileDefinitions[tile.definition];
         return def.blocks.indexOf(blockLayer) !== -1;
     }
 

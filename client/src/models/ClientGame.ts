@@ -5,7 +5,7 @@ import { Point } from "../../../common/src/types/Points";
 import { Renderer } from "../rendering/Renderer";
 import { ViewPort } from "../rendering/ViewPort";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
-import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
+import { ModDefinitions, TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
@@ -13,6 +13,7 @@ import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { SharedVisibilityComponent, VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { spriteColors } from "../rendering/Sprites";
 import { UI } from "../UI/UI";
+import { TileModifier } from "../../../common/src/types/Tile";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
@@ -98,7 +99,8 @@ export class ClientGame extends Game {
             return;
         }
 
-        const tile = dungeon.tiles[point.x][point.y];
+        const def = dungeon.getTileDefinition(point);
+
         const isVisible = this.systems.visibility.sharedTileIsVisible(entityId, point);
         let colorOverride;
         if (!isVisible) {
@@ -110,9 +112,10 @@ export class ClientGame extends Game {
             // draw an entity that's on the location
             // but only if the tile is visible - TODO: Draw already seen items
             sprite = highestComponent.component.sprite;
-        } else if (tile.definition) {
-            // draw the tile underneath
-            sprite = TileDefinitions[tile.definition].sprite;
+        } else if (def) {
+            sprite = def.sprite;
+        } else if (def === null) {
+            sprite = TileDefinitions['wall'].sprite;
         } else {
             // draw the default floor tile
             sprite = TileDefinitions['floor'].sprite;

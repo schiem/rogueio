@@ -7,7 +7,7 @@ import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
 import { Tile } from "../../../common/src/types/Tile";
-import { BresenhamCircle, BresenhamRayCast } from "../utils/Bresenham";
+import { GetVisibleTiles } from "../utils/ShadowCast";
 
 export class ServerVisbilitySystem extends VisiblitySystem {
     constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, private dungeon: Dungeon) {
@@ -65,57 +65,31 @@ export class ServerVisbilitySystem extends VisiblitySystem {
             return;
         }
 
-        const outerVision = BresenhamCircle(locationComponent.location, component.sightRadius);
-        const newVision: Record<number, Record<number, boolean>> = {};
         const currentVision = component.visible;
         const toDelete: Point[] = [];
         const toAdd: Point[] = [];
         const newSeen: Tile[] = [];
 
-        // Always add the location point - can always see self
-        if (!newVision[locationComponent.location.x]) {
-            newVision[locationComponent.location.x] = {};
-        }
-        if (!currentVision[locationComponent.location.x]?.[locationComponent.location.y]) {
-            toAdd.push(locationComponent.location);
-        } else {
-            delete currentVision[locationComponent.location.x]?.[locationComponent.location.y];
-        }
-
-        if (!sharedComponent.seen[locationComponent.location.x][locationComponent.location.y]) {
-            sharedComponent.seen[locationComponent.location.x][locationComponent.location.y] = true;
-            newSeen.push(this.dungeon.tiles[locationComponent.location.x][locationComponent.location.y]);
-        }
-        newVision[locationComponent.location.x][locationComponent.location.y] = true;
-
-        for(let i = 0; i < outerVision.length; i++) { 
-            const point = outerVision[i];
-            BresenhamRayCast({x: locationComponent.location.x, y: locationComponent.location.y}, point, (bPoint) => {
-                // skip the first point - already added it above, and it will get added for every point in the outer circle
-                // or skip it if we've already added it
-                if ((bPoint.x === locationComponent.location.x && bPoint.y === locationComponent.location.y)) {
-                    return true;
-                }
-
-                if (!newVision[bPoint.x]) {
-                    newVision[bPoint.x] = {};
-                }
-
-                if (!currentVision[bPoint.x]?.[bPoint.y] && !newVision[bPoint.x]?.[bPoint.y]) {
-                    toAdd.push(bPoint);
+        const newVision = GetVisibleTiles(
+            locationComponent.location, 
+            component.sightRadius, 
+            (point) => {
+                return !this.dungeon.tileBlocksVision(point);
+            },
+            (point) => {
+                if (!currentVision[point.x]?.[point.y]) {
+                    toAdd.push(point);
                 } else {
-                    delete currentVision[bPoint.x]?.[bPoint.y];
+                    delete currentVision[point.x]?.[point.y];
                 }
-
-                newVision[bPoint.x][bPoint.y] = true;
-                if (!sharedComponent.seen[bPoint.x][bPoint.y]) {
-                    sharedComponent.seen[bPoint.x][bPoint.y] = true;
-                    newSeen.push(this.dungeon.tiles[bPoint.x][bPoint.y]);
+                if (!sharedComponent.seen[point.x][point.y]) {
+                    sharedComponent.seen[point.x][point.y] = true;
+                    newSeen.push(this.dungeon.tiles[point.x][point.y]);
                 }
-                return !this.dungeon.tileBlocksVision(bPoint);
-            });
-        }
+            }
+        );
 
+        // Anything remaining in currentVision is no longer visible
         for (let x in currentVision) {
             for(let y in currentVision[x]) {
                 toDelete.push({ x: parseInt(x), y: parseInt(y)});

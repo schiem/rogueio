@@ -26,7 +26,7 @@ export class DungeonGenerator {
         for (let i = 0; i < dungeon.tiles.length; i++) {
             dungeon.tiles[i] = (new Array(this.dungeonSize.y));
             for (let j = 0; j < dungeon.tiles[i].length; j++) {
-                dungeon.tiles[i][j] = {coords: { x: i, y: j }, definition : 'wall'};
+                dungeon.tiles[i][j] = {coords: { x: i, y: j }, definition : 'wall', mods: []};
             }
         }
 
