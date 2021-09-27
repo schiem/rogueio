@@ -82,7 +82,10 @@ class ShadowCast {
     private markPointVisible(point: Point) {
         if (!this.visibleTiles[point.x]) {
             this.visibleTiles[point.x] = {};
+        } else if(this.visibleTiles[point.x][point.y]) {
+            return;
         }
+
         this.visibleTiles[point.x][point.y] = true;
         this.onVisibleFound(point);
     }

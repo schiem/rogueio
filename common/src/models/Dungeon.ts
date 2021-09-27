@@ -1,4 +1,4 @@
-import { Tile, TileModifier } from "../types/Tile";
+import { Tile } from "../types/Tile";
 import { Point } from "../types/Points";
 import { Room } from "./Room";
 import { ModDefinitions, TileDefinitions } from "../consts/TileDefinitions";
@@ -20,54 +20,56 @@ export class Dungeon {
     }
 
     /**
-     * Get a tile definition, or undefined if the tile has no definition.
-     * Returns null if the tile does not exist.
+     * Get all the defs for a tile, or undefined if the tile does not exist.
      */
-    getTileDefinition(point: Point): TileDefinition | undefined | null {
+    getAllTileDefinition(point: Point): TileDefinition[] | undefined {
+        const definitions: TileDefinition[] = [];
         const tile = this.tiles[point.x]?.[point.y];
         if (!tile) {
-            return null;
-        }
-
-        if (tile.mods.length) {
-            const mod: TileModifier = Math.max.apply(tile.mods);
-            return ModDefinitions[mod];
-        }
-
-        const def = tile?.definition;
-        if (!def) {
             return;
         }
-        return TileDefinitions[def];
+
+        if (tile.definition) {
+            definitions.push(TileDefinitions[tile.definition]);
+        }
+        tile.mods.forEach((mod) => {
+            definitions.push(ModDefinitions[mod]);
+        });
+        return definitions;
     }
 
     tileBlocksVision(point: Point): boolean {
-        const def = this.getTileDefinition(point);
-        if (def === null) {
+        const defs = this.getAllTileDefinition(point);
+        if (defs === undefined) {
             // no tile, probably outside the map
             return true;
         }
-        if (def === undefined) {
-            // nothing at this tile, can't block vision
-            return false;
-        }
-        return def.blocksVision;
+        return defs.find((def) => {
+            return def.blocksVision;
+        }) !== undefined;
     }
 
     /**
      * Check whether a tile at a location blocks the given block layer.
      */
-    tileIsBlocked(point: Point, blockLayer: number): boolean {
-        const def = this.getTileDefinition(point);
-        if (def === null) {
+    tileIsBlocked(point: Point, blockLayer?: number): boolean {
+        const defs = this.getAllTileDefinition(point);
+        if (defs === undefined) {
             // no tile, probably outside the map
             return true;
         }
 
-        if (def === undefined) {
-            return false;
+        if (blockLayer) {
+            // Check if the tile blocks a specific layer.
+            return defs.find((def) => {
+                return def.blocks.indexOf(blockLayer) !== -1;
+            }) !== undefined;
+        } else {
+            // Check if the tile blocks anything
+            return defs.find((def) => {
+                return def.blocks.length > 0;
+            }) !== undefined;
         }
-        return def.blocks.indexOf(blockLayer) !== -1;
     }
 
     hasOpenTileAround(point: Point): boolean {

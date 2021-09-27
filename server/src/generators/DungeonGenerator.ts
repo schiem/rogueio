@@ -34,6 +34,8 @@ export class DungeonGenerator {
 
         this.ageDungeon(dungeon);
 
+        this.addRoomFeatures(dungeon);
+
         this.connectRooms(dungeon);
 
         this.setSpawnPoints(dungeon);
@@ -42,21 +44,50 @@ export class DungeonGenerator {
 
     }
 
+    spawnWater(room: Room, dungeon: Dungeon): void {
+        const maxTries = 4;
+        let tries = 0;
+        let tileToAdd: Point | undefined = undefined;
+        while(tileToAdd === undefined &&  tries < maxTries) {
+            tries++;
+            const attemptTile = room.getRandomTile();
+            if(!dungeon.tileIsBlocked(attemptTile)) {
+                tileToAdd = attemptTile;
+            }
+        }
+
+        // Ran out of tries, couldn't add water
+        if (!tileToAdd) {
+            return;
+        }
+
+        const amountOfWater = random(4, 10);
+    }
+
+    addRoomFeatures(dungeon: Dungeon): void {
+        dungeon.rooms.forEach((room) => {
+            if (room.age > 2 && random(0, 2) === 1 ) {
+                this.spawnWater(room, dungeon);
+            }
+        });
+    }
+
     setSpawnPoints(dungeon: Dungeon): void {
         dungeon.rooms.forEach((room) => {
             const numSpawns = random(1, room.maxSpawnTiles + 1);
             if (room.age === 1) {
                 for(let i = 0; i < numSpawns; i++) {
-                    room.spawnTiles.push({x: random(room.rect.topLeft.x, room.rect.bottomRight.x), y: random(room.rect.topLeft.y, room.rect.bottomRight.y)});
+                    room.spawnTiles.push(room.getRandomTile());
                 }
             } else {
                 const bottomRight = room.rect.bottomRight;
                 const openSpaces: Point[] = [];
                 for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                     for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
+                        const point = {x, y};
                         // check if the square is open
-                        if (dungeon.tiles[x][y].definition === undefined) {
-                            openSpaces.push({x, y});
+                        if (!dungeon.tileIsBlocked(point)) {
+                            openSpaces.push(point);
                         }
                     }
                 }

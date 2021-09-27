@@ -1,3 +1,6 @@
+/**
+ * Get a random number between floor (inclusive) and ceil (exclusive)
+ */
 export const random = (floor: number, ceil: number): number => {
     return Math.floor(Math.random() * (ceil - floor) + floor);
 }

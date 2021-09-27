@@ -1,5 +1,6 @@
 import { Rectangle } from "./Rectangle";
 import { Point } from "../types/Points";
+import { random } from "../utils/MathUtils";
 
 export type Condition = 1 | 2 | 3 | 4;
 export class Room {
@@ -13,6 +14,10 @@ export class Room {
 
     constructor(public rect: Rectangle) {
         this.age = 1;
+    }
+
+    getRandomTile(): Point {
+        return {x: random(this.rect.topLeft.x, this.rect.bottomRight.x), y: random(this.rect.topLeft.y, this.rect.bottomRight.y)};
     }
 
     id(): string {
