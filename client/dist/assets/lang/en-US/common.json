@@ -3,5 +3,11 @@
         "str": "Strength",
         "dex": "Dexterity",
         "con": "Constitution"
+    },
+    "monsterBrief": {
+        "bufonid": {
+            "name": "Bufonid",
+            "description": "A small frog-like creature whose back is covered in thick, warty skin."
+        }
     }
 }

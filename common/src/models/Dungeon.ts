@@ -1,8 +1,9 @@
-import { Tile } from "../types/Tile";
+import { Tile, TileModifier } from "../types/Tile";
 import { Point } from "../types/Points";
 import { Room } from "./Room";
 import { ModDefinitions, TileDefinitions } from "../consts/TileDefinitions";
 import { TileDefinition } from "../types/TileDefinition";
+import { ArrayMax } from "../utils/ArrayUtils";
 
 export class Dungeon {
     tiles: Tile[][] = [];
@@ -17,6 +18,23 @@ export class Dungeon {
             this.tiles[tile.coords.x] = new Array(this.size.y);
         }
         this.tiles[tile.coords.x][tile.coords.y] = tile;
+    }
+
+    /**
+     * Get the highest tile definition of a tile.
+     * Returns a tiledefinition, undefined if the tile has no definition, or null if the tile doesn't exist.
+     */
+    getVisibleTileDefinition(point: Point): TileDefinition | undefined | null {
+        const tile = this.tiles[point.x]?.[point.y];
+        if (!tile) {
+            return null;
+        }
+
+        if (tile.mods.length) {
+            const mod = ArrayMax(tile.mods) as TileModifier;
+            return ModDefinitions[mod];
+        }
+        return tile.definition ? TileDefinitions[tile.definition] : undefined;
     }
 
     /**

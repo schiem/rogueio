@@ -89,7 +89,6 @@ export class ClientGame extends Game {
 
     renderDungeonTileAtLocation(point: Point): void {
         const dungeon = this.currentLevel;
-        // render characters on top
         let sprite: Sprite | undefined;
 
         // if the tile was never seen, then it should never render
@@ -99,7 +98,7 @@ export class ClientGame extends Game {
             return;
         }
 
-        const def = dungeon.getTileDefinition(point);
+        const def = dungeon.getVisibleTileDefinition(point);
 
         const isVisible = this.systems.visibility.sharedTileIsVisible(entityId, point);
         let colorOverride;

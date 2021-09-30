@@ -29,7 +29,7 @@ export class InputEvents {
 
     static resetActionToDefault(action: string): void {
         // unset any actions that were set
-        const currentActionKeys = Object.keys(this.inputEventMap).forEach(key => {
+        Object.keys(this.inputEventMap).forEach(key => {
             if (this.inputEventMap[key] === action) {
                 delete this.inputEventMap[key]
             }

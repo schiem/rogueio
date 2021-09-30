@@ -3,6 +3,7 @@ import { random } from "../../../common/src/utils/MathUtils";
 import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Dungeon } from "../../../common/src/models/Dungeon";
+import { TileModifier } from "../../../common/src/types/Tile";
 
 /**
  * Generates a dungeon, given a space to fill and the size of the rooms to fill it with.
@@ -61,7 +62,55 @@ export class DungeonGenerator {
             return;
         }
 
-        const amountOfWater = random(4, 10);
+        const amountOfWater = random(13, 24);
+        this.setWaterModifier(tileToAdd, amountOfWater, dungeon);
+        this.spreadWater(tileToAdd, amountOfWater, dungeon);
+    }
+
+    setWaterModifier(point: Point, amount: number, dungeon: Dungeon): void {
+        const tile = dungeon.tiles[point.x]?.[point.y];
+        if (!tile || amount === 0) {
+            return;
+        }
+
+        if (amount > 5) {
+            tile.mods.push(TileModifier.deepWater);
+        } else {
+            tile.mods.push(TileModifier.shallowWater);
+        }
+    }
+
+    spreadWater(point: Point, waterAmount: number, dungeon: Dungeon): void {
+        const surroundingTiles: Point[] = [];
+
+        [
+            {x: point.x - 1, y: point.y },
+            {x: point.x + 1, y: point.y },
+            {x: point.x, y: point.y - 1},
+            {x: point.x, y: point.y + 1 },
+        ].forEach((spreadPoint) => {
+            const tile = dungeon.tiles[spreadPoint.x]?.[spreadPoint.y];
+            // ensure that the tile exists, is not the current tile, is not blocked and does not contain water
+            if (
+                !tile || 
+                dungeon.tileIsBlocked(spreadPoint) || 
+                tile.mods.indexOf(TileModifier.deepWater) !== -1 ||
+                tile.mods.indexOf(TileModifier.shallowWater) !== -1) {
+                return;
+            }
+            surroundingTiles.push(spreadPoint);
+        });
+        const avgWater = surroundingTiles.length ? Math.round(waterAmount / surroundingTiles.length) : 0;
+        // Only spread to tiles that have at least two squares
+        if (avgWater > 1) {
+            surroundingTiles.forEach((tile) => {
+                this.setWaterModifier(tile, avgWater, dungeon);
+            });
+            // Do this twice so all the tiles have their water set before recursing into them
+            surroundingTiles.forEach((tile) => {
+                this.spreadWater(tile, avgWater, dungeon);
+            });
+        }
     }
 
     addRoomFeatures(dungeon: Dungeon): void {
@@ -353,6 +402,7 @@ export class DungeonGenerator {
                 }
             }
             dungeon.tiles[endPoint.x][endPoint.y].definition = undefined;
+            dungeon.tiles[endPoint.x][endPoint.y].mods = [];
         });
     }
 
