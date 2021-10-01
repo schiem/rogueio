@@ -73,7 +73,7 @@ export class DungeonGenerator {
             return;
         }
 
-        if (amount > 5) {
+        if (amount > 3) {
             tile.mods.push(TileModifier.deepWater);
         } else {
             tile.mods.push(TileModifier.shallowWater);
@@ -115,7 +115,7 @@ export class DungeonGenerator {
 
     addRoomFeatures(dungeon: Dungeon): void {
         dungeon.rooms.forEach((room) => {
-            if (room.age > 2 && random(0, 2) === 1 ) {
+            if (room.age > 1 && random(0, 3) === 1 ) {
                 this.spawnWater(room, dungeon);
             }
         });
