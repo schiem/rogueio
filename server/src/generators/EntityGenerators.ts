@@ -2,9 +2,9 @@ import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
 import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
-import { BlockLayers } from "../../../common/src/consts/TileDefinitions";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { GameSystems } from "../../../common/src/models/Game";
+import { BlockLayerName } from "../../../common/src/types/Tile";
 
 /**
  * Takes an entity ID and adds all the necessary components to it
@@ -17,8 +17,8 @@ export const generatePlayerCharacter = (entityId: number, systems: GameSystems, 
             name: 'player',
             color: 'beige'
         },
-        collidesWith: [BlockLayers.character],
-        collisionLayer: BlockLayers.character,
+        collidesWith: [BlockLayerName.character],
+        collisionLayer: BlockLayerName.character,
         spawns: [1, 2],
         layer: LocationComponentLayers.character
     } as LocationComponent;

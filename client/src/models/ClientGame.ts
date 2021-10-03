@@ -5,15 +5,13 @@ import { Point } from "../../../common/src/types/Points";
 import { Renderer } from "../rendering/Renderer";
 import { ViewPort } from "../rendering/ViewPort";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
-import { ModDefinitions, TileDefinitions } from "../../../common/src/consts/TileDefinitions";
+import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
 import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
-import { SharedVisibilityComponent, VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
-import { spriteColors } from "../rendering/Sprites";
 import { UI } from "../UI/UI";
-import { TileModifier } from "../../../common/src/types/Tile";
+import { TileName } from "../../../common/src/types/Tile";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
@@ -114,10 +112,10 @@ export class ClientGame extends Game {
         } else if (def) {
             sprite = def.sprite;
         } else if (def === null) {
-            sprite = TileDefinitions['wall'].sprite;
+            sprite = TileDefinitions[TileName.wall].sprite;
         } else {
             // draw the default floor tile
-            sprite = TileDefinitions['floor'].sprite;
+            sprite = TileDefinitions[TileName.floor].sprite;
         }
 
         this.renderer.drawSprite(sprite, point, colorOverride);

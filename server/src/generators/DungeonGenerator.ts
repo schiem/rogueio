@@ -3,7 +3,7 @@ import { random } from "../../../common/src/utils/MathUtils";
 import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Dungeon } from "../../../common/src/models/Dungeon";
-import { TileModifier } from "../../../common/src/types/Tile";
+import { TileModifier, TileName } from "../../../common/src/types/Tile";
 
 /**
  * Generates a dungeon, given a space to fill and the size of the rooms to fill it with.
@@ -27,7 +27,7 @@ export class DungeonGenerator {
         for (let i = 0; i < dungeon.tiles.length; i++) {
             dungeon.tiles[i] = (new Array(this.dungeonSize.y));
             for (let j = 0; j < dungeon.tiles[i].length; j++) {
-                dungeon.tiles[i][j] = {coords: { x: i, y: j }, definition : 'wall', mods: []};
+                dungeon.tiles[i][j] = {coords: { x: i, y: j }, definition : TileName.wall, mods: []};
             }
         }
 
@@ -188,7 +188,7 @@ export class DungeonGenerator {
             for(let x = room.rect.topLeft.x; x < bottomRight.x; x++) {
                 for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                    if(Math.random() < factor) {
-                        dungeon.tiles[x][y].definition = 'rubble';
+                        dungeon.tiles[x][y].definition = TileName.rubble;
                     }
                 }
             }
@@ -206,7 +206,7 @@ export class DungeonGenerator {
         });
     }
 
-    runCellularAutomata(x: number, y: number, dungeon: Dungeon): string | undefined {
+    runCellularAutomata(x: number, y: number, dungeon: Dungeon): TileName | undefined {
         let neighborCount = 0;
         for(let newX = x - 1; newX <= x + 1; newX++) {
             for(let newY = y - 1; newY <= y + 1; newY++) {
@@ -221,7 +221,7 @@ export class DungeonGenerator {
                 neighborCount++;
             }
         }
-        dungeon.tiles[x][y].definition = neighborCount > 4 ? 'rubble' : undefined;
+        dungeon.tiles[x][y].definition = neighborCount > 4 ? TileName.rubble : undefined;
         return dungeon.tiles[x][y].definition;
     }
 
