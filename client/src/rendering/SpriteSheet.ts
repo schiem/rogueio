@@ -1,9 +1,9 @@
 import { Point } from "../../../common/src/types/Points";
-import { SpriteColors, SpriteNames } from "../../../common/src/types/Sprite";
+import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite";
 
 export class SpriteSheet {
     defaultSheetElement: HTMLImageElement;
-    tintedSheets: Record<SpriteColors, HTMLCanvasElement>;
+    tintedSheets: Record<SpriteColor, HTMLCanvasElement>;
     numSprites: number = 0;
     ready = false;
     onReadyFunctions: (() => void)[] = [];
@@ -11,8 +11,8 @@ export class SpriteSheet {
     constructor(
         public spriteSize: Point,
         spriteSheetSrc: string,
-        public spriteNames: Record<SpriteNames, number>,
-        public spriteColors: Record<SpriteColors, string>
+        public spriteNames: Record<SpriteName, number>,
+        public spriteColors: Record<SpriteColor, string>
     ) {
         this.defaultSheetElement = new Image();
         this.defaultSheetElement.src = spriteSheetSrc;
@@ -20,10 +20,10 @@ export class SpriteSheet {
             this.ready = true;
             this.numSprites = (this.defaultSheetElement.width / this.spriteSize.x) * (this.defaultSheetElement.height / this.spriteSize.y);
 
-            this.tintedSheets = {} as Record<SpriteColors, HTMLCanvasElement>;
+            this.tintedSheets = {} as Record<SpriteColor, HTMLCanvasElement>;
             for(let colorName in spriteColors) {
-                const color = spriteColors[colorName as unknown as SpriteColors];
-                this.tintedSheets[colorName as unknown as SpriteColors] = this.tintImage(this.defaultSheetElement, color);
+                const color = spriteColors[colorName as unknown as SpriteColor];
+                this.tintedSheets[colorName as unknown as SpriteColor] = this.tintImage(this.defaultSheetElement, color);
             }
 
             this.onReadyFunctions.forEach(func => {

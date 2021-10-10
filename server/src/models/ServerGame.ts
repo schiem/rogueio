@@ -6,7 +6,8 @@ import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
-import { SpawnPlayerCharacter } from "../generators/SpawnGenerator";
+import { MobSpawnGenerator, MobSpawnGeneratorName, MobSpawnGenerators, SpawnPlayerCharacter } from "../generators/SpawnGenerator";
+import { random } from "../../../common/src/utils/MathUtils";
 
 export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
@@ -51,6 +52,29 @@ export class ServerGame extends Game {
 
     newDungeon(): void {
         this.currentLevel = this.dungeonGenerator.generate();
+        this.spawnMobs();
+        this.spawnItems();
+    }
+
+    spawnMobs(): void {
+        this.currentLevel.rooms.forEach((room) => {
+            const possibleSpawners: MobSpawnGenerator[] = [];
+            for(let spawnName in MobSpawnGenerators) {
+                const spawner = MobSpawnGenerators[spawnName as unknown as MobSpawnGeneratorName];
+                if (room.spawnerIsValid(spawner)) {
+                    possibleSpawners.push(spawner);
+                }
+            }
+            if (!possibleSpawners.length) {
+                return;
+            }
+            const spawner = possibleSpawners[random(0, possibleSpawners.length)];
+            spawner.doSpawn(this.currentLevel, room, this.entityManager, this.systems);
+        });
+    }
+
+    spawnItems(): void {
+
     }
 
     playerConnected(ws: WebSocket, playerId?: string): string {

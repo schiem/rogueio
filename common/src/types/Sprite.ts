@@ -1,4 +1,4 @@
-export enum SpriteNames {
+export enum SpriteName {
     wall,
     rubble,
     player,
@@ -7,7 +7,7 @@ export enum SpriteNames {
     bufonid,
     water,
 }
-export enum SpriteColors {
+export enum SpriteColor {
     default,
     grey,
     black,
@@ -31,6 +31,6 @@ export enum SpriteColors {
     navy,
 }
 export type Sprite = {
-    name: SpriteNames,
-    color: SpriteColors 
+    name: SpriteName,
+    color: SpriteColor 
 };

@@ -7,7 +7,7 @@ import { ViewPort } from "../rendering/ViewPort";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
-import { Sprite, SpriteColors } from "../../../common/src/types/Sprite";
+import { Sprite, SpriteColor } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { UI } from "../UI/UI";
@@ -101,7 +101,7 @@ export class ClientGame extends Game {
         const isVisible = this.systems.visibility.sharedTileIsVisible(entityId, point);
         let colorOverride;
         if (!isVisible) {
-            colorOverride = SpriteColors.grey;
+            colorOverride = SpriteColor.grey;
         }
 
         let highestComponent;

@@ -2,6 +2,7 @@ import { Rectangle } from "./Rectangle";
 import { Point } from "../types/Points";
 import { random } from "../utils/MathUtils";
 import { RoomFeatures } from "./RoomFeatures";
+import { MobSpawnGenerator } from "../../../server/src/generators/SpawnGenerator";
 
 export type Condition = 1 | 2 | 3 | 4;
 export class Room {
@@ -20,6 +21,20 @@ export class Room {
 
     getRandomTile(): Point {
         return {x: random(this.rect.topLeft.x, this.rect.bottomRight.x), y: random(this.rect.topLeft.y, this.rect.bottomRight.y)};
+    }
+
+    spawnerIsValid(spawner: MobSpawnGenerator): boolean {
+        if (this.age < spawner.ageRange.min || this.age > spawner.ageRange.max) {
+            return false;
+        }
+
+        const foundFeature = spawner.spawnInFeatures.find((feature) => {
+            return feature in this.features;
+        });
+        if (foundFeature === undefined) {
+            return false;
+        }
+        return true;
     }
 
     id(): string {

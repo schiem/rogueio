@@ -1,6 +1,6 @@
 import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Point } from "../../../common/src/types/Points";
-import { Sprite, SpriteColors } from "../../../common/src/types/Sprite";
+import { Sprite, SpriteColor } from "../../../common/src/types/Sprite";
 import { clamp } from "../../../common/src/utils/MathUtils";
 import { SpriteSheet } from "./SpriteSheet";
 import { ViewPort } from "./ViewPort";
@@ -38,7 +38,7 @@ export class Renderer {
         }
     }
 
-    drawSprite(sprite: Sprite, location: Point, colorOverride?: SpriteColors): void {
+    drawSprite(sprite: Sprite, location: Point, colorOverride?: SpriteColor): void {
         const spriteNum = this.spriteSheet.spriteNames[sprite.name];
         if(!this.spriteSheet.ready || spriteNum > this.spriteSheet.numSprites) {
             throw new Error('Could not draw the sprite, either they have not been loaded or the sprite does not exist.')
@@ -74,7 +74,7 @@ export class Renderer {
             this.spriteSheet.spriteSize.y);
     }
 
-    clearSquare(location: Point, color: SpriteColors = SpriteColors.black): void {
+    clearSquare(location: Point, color: SpriteColor = SpriteColor.black): void {
         this.ctx.fillStyle = this.spriteSheet.spriteColors[color];
         this.ctx.fillRect(location.x * this.spriteSheet.spriteSize.x, location.y * this.spriteSheet.spriteSize.y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
     }

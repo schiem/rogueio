@@ -5,7 +5,7 @@ import { StatComponent } from "../../../common/src/components/StatComponent";
 import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { GameSystems } from "../../../common/src/models/Game";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
-import { SpriteColors, SpriteNames } from "../../../common/src/types/Sprite";
+import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite";
 import { BlockLayerName } from "../../../common/src/types/Tile";
 
 export type ComponentBlock = {
@@ -27,8 +27,8 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
         return {
             location: {
                 sprite: {
-                    name: SpriteNames.player,
-                    color: SpriteColors.beige
+                    name: SpriteName.player,
+                    color: SpriteColor.beige
                 },
                 collidesWith: [BlockLayerName.character],
                 collisionLayer: BlockLayerName.character,
@@ -56,8 +56,8 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
         return {
             location: {
                 sprite: {
-                    name: SpriteNames.bufonid,
-                    color: SpriteColors.green
+                    name: SpriteName.bufonid,
+                    color: SpriteColor.green
                 },
                 collidesWith: [BlockLayerName.character],
                 collisionLayer: BlockLayerName.character,
@@ -66,7 +66,6 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
             },
             ally: {group: 'enemies'},
             movement: { minMovementDelay: 30 },
-            visibility: { sightRadius: 6, visible: {} },
             stats: {
                 current: {
                     str: 4,
@@ -85,8 +84,8 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
         return {
             location: {
                 sprite: {
-                    name: SpriteNames.bufonid,
-                    color: SpriteColors.red
+                    name: SpriteName.bufonid,
+                    color: SpriteColor.red
                 },
                 collidesWith: [BlockLayerName.character],
                 collisionLayer: BlockLayerName.character,
@@ -114,8 +113,8 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
         return {
             location: {
                 sprite: {
-                    name: SpriteNames.spawn,
-                    color: SpriteColors.cyan
+                    name: SpriteName.spawn,
+                    color: SpriteColor.cyan
                 },
                 collidesWith: [BlockLayerName.character],
                 collisionLayer: BlockLayerName.character,
