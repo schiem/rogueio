@@ -2,7 +2,6 @@ import { LocationComponent } from "../components/LocationComponent";
 import { Dungeon } from "../models/Dungeon";
 import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
-import { random } from "../utils/MathUtils";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 
 /**
@@ -42,19 +41,6 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     removeComponentFromEntity(id: number): void {
         this.removeComponentFromLocationCache(id);
         super.removeComponentFromEntity(id);
-    }
-
-    /**
-     * As @see {@link addComponentForEntity}, but overwrites the location with a new one.
-     */
-    spawnComponentForEntity(id: number, component: LocationComponent, dungeon: Dungeon): void {
-        const location = this.getSpawnLocation(component, dungeon);
-        if (location === undefined) {
-            // TODO - send a message and a disconnect
-            return;
-        }
-        component.location = location;
-        this.addComponentForEntity(id, component);
     }
 
     /**
@@ -151,29 +137,6 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
                 return component.collidesWith.indexOf(comp.collisionLayer) !== -1;
             }
         ) !== undefined;
-    }
-
-    private getSpawnLocation(component: LocationComponent, dungeon: Dungeon): Point | undefined {
-        const roomsAvailable = dungeon.rooms.filter((room) => {
-            return room.spawnTiles.length > 0 && component.spawns.indexOf(room.age) !== -1;
-        });
-        if (roomsAvailable.length === 0) {
-            return;
-        }
-
-        const maxTries = 4;
-        let tries = 0;
-        while(tries < maxTries && roomsAvailable.length > 0) {
-            tries++;
-            const idx = random(0, roomsAvailable.length);
-            const room = roomsAvailable[idx];
-            const tiles = room.spawnTiles.filter((tile) => !dungeon.tileIsBlocked(tile, component.collisionLayer));
-            if (tiles.length) {
-                return tiles[random(0, tiles.length)];
-            }
-        }
-
-        return;
     }
 
     /**

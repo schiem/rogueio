@@ -8,7 +8,7 @@ import { AllySystem } from "./AllySystem";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
 
-export class VisiblitySystem extends ComponentSystem<VisibilityComponent> {
+export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
     replicationMode: ReplicationMode = 'ally';
 
     entities: Record<number, VisibilityComponent>;

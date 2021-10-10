@@ -4,12 +4,12 @@ import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
-import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
+import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
 import { Tile } from "../../../common/src/types/Tile";
 import { GetVisibleTiles } from "../utils/ShadowCast";
 
-export class ServerVisbilitySystem extends VisiblitySystem {
+export class ServerVisbilitySystem extends VisibilitySystem {
     constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, private dungeon: Dungeon) {
         super(entityManager, allySystem, locationSystem, dungeon.size);
 

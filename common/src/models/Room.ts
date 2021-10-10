@@ -1,6 +1,7 @@
 import { Rectangle } from "./Rectangle";
 import { Point } from "../types/Points";
 import { random } from "../utils/MathUtils";
+import { RoomFeatures } from "./RoomFeatures";
 
 export type Condition = 1 | 2 | 3 | 4;
 export class Room {
@@ -11,6 +12,7 @@ export class Room {
     maxSpawnTiles = 6;
 
     age: Condition;
+    features: RoomFeatures = {};
 
     constructor(public rect: Rectangle) {
         this.age = 1;

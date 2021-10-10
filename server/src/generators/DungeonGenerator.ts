@@ -4,6 +4,7 @@ import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { TileModifier, TileName } from "../../../common/src/types/Tile";
+import { RoomFeatureNames } from "../../../common/src/models/RoomFeatures";
 
 /**
  * Generates a dungeon, given a space to fill and the size of the rooms to fill it with.
@@ -63,6 +64,9 @@ export class DungeonGenerator {
         }
 
         const amountOfWater = random(13, 24);
+        room.features[RoomFeatureNames.water] = {
+            originTile: tileToAdd
+        }
         this.setWaterModifier(tileToAdd, amountOfWater, dungeon);
         this.spreadWater(tileToAdd, amountOfWater, dungeon);
     }

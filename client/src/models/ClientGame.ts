@@ -7,9 +7,9 @@ import { ViewPort } from "../rendering/ViewPort";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
-import { Sprite } from "../../../common/src/types/Sprite";
+import { Sprite, SpriteColors } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
-import { VisiblitySystem } from "../../../common/src/systems/VisibilitySystem";
+import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { UI } from "../UI/UI";
 import { TileName } from "../../../common/src/types/Tile";
 
@@ -27,7 +27,7 @@ export class ClientGame extends Game {
     ) {
         super();
         this.ui = new UI(this.systems, this.players[this.currentPlayerId]);
-        this.systems.visibility = new VisiblitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.visibility = new VisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);
@@ -101,7 +101,7 @@ export class ClientGame extends Game {
         const isVisible = this.systems.visibility.sharedTileIsVisible(entityId, point);
         let colorOverride;
         if (!isVisible) {
-            colorOverride = 'grey';
+            colorOverride = SpriteColors.grey;
         }
 
         let highestComponent;

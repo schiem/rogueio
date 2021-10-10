@@ -2,11 +2,11 @@ import { Player } from "../../../common/src/models/Player";
 import { DungeonGenerator } from "../generators/DungeonGenerator";
 import { Game } from "../../../common/src/models/Game";
 import { v4 as uuidv4 } from 'uuid';
-import { generatePlayerCharacter } from "../generators/EntityGenerators";
 import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
+import { SpawnPlayerCharacter } from "../generators/SpawnGenerator";
 
 export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
@@ -62,7 +62,7 @@ export class ServerGame extends Game {
         player.characterId = this.entityManager.addNextEntity();
         this.players[playerId] = player;
 
-        generatePlayerCharacter(player.characterId, this.systems, this.currentLevel);
+        SpawnPlayerCharacter(player.characterId, this.systems, this.currentLevel);
         this.networkEventManager.addPlayerEventQueue(playerId);
 
         return playerId;

@@ -1,16 +1,17 @@
 import { ViewPort } from "./rendering/ViewPort";
 import { SpriteSheet } from "./rendering/SpriteSheet";
-import { spriteColors as SpriteColors, sprites as Sprites } from "./rendering/Sprites";
+import { spriteColors, sprites } from "./rendering/Sprites";
 import { ClientGame } from "./models/ClientGame";
 import { NetworkEventHandler } from "./events/NetworkEventHandler";
 import { NetworkEvent } from "../../common/src/events/NetworkEvent";
+import { SpriteColors } from "../../common/src/types/Sprite";
 
 const viewportCanvas: HTMLCanvasElement = document.getElementById('viewport') as HTMLCanvasElement;
 const spriteWidth = 14;
 const spriteHeight = 25;
 const virtualCanvas = document.createElement('canvas');
-const spriteSheet = new SpriteSheet({ x: spriteWidth, y: spriteHeight }, '/dist/assets/img/fira_code_regular_14.png', Sprites, SpriteColors);
-const viewport = new ViewPort({x: 64, y: 32}, viewportCanvas, spriteSheet, SpriteColors['black']);
+const spriteSheet = new SpriteSheet({ x: spriteWidth, y: spriteHeight }, '/dist/assets/img/fira_code_regular_14.png', sprites, spriteColors);
+const viewport = new ViewPort({x: 64, y: 32}, viewportCanvas, spriteSheet, spriteColors[SpriteColors.black]);
 
 const game = new ClientGame(virtualCanvas, spriteSheet, viewport);
 virtualCanvas.width = spriteWidth * game.dungeonX;
