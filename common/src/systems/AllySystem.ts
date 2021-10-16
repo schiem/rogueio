@@ -33,7 +33,7 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
     }
 
     removeComponentFromEntity(id: number): void {
-        const component: AllyComponent = this.getComponent(id); 
+        const component = this.getComponent(id); 
         if (!component) {
             return;
         }
@@ -50,7 +50,7 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
     }
 
     getAlliesForEntity(id: number): number[] | undefined {
-        const component: AllyComponent = this.getComponent(id); 
+        const component = this.getComponent(id); 
         if (!component) {
             return;
         }

@@ -32,7 +32,7 @@ export abstract class ComponentSystem<T> {
     /**
      * Gets the component for a given entity, or undefined if it's not set.
      */
-    getComponent(id: number): any | undefined {
+    getComponent(id: number): T | undefined {
         return this.entities[id];
     }
 
@@ -40,18 +40,22 @@ export abstract class ComponentSystem<T> {
      * Updates the properties on a given component. 
      */
     updateComponent(id: number, properties: Record<string, any>): void {
-        const component = this.getComponent(id);
+        const component: any = this.getComponent(id);
         if (!component) {
             return;
         }
 
         for (let key in properties) {
-            if (this.componentPropertyUpdaters[key] !== undefined) {
+            if (this.componentPropertyUpdaters?.[key] !== undefined) {
                 // If there's a "special" handling case, then allow the specific system to handle it
+                // Each special case is responsible for firing the propertyUpdated handler on it's own
                 this.componentPropertyUpdaters[key](id, component, properties[key]);
             } else {
                 // Just update the property without fanfare
-                component[key] = properties[key];
+                const oldProp = this.updateNestedProperty(component, key, properties[key]);
+
+                // Emit the single value
+                this.componentUpdatedEmitter.emit({id, props: { [key]: properties[key] }, oldProps: {[key]: oldProp }});
             }
         }
     }
@@ -88,6 +92,26 @@ export abstract class ComponentSystem<T> {
             const id = parseInt(entityId);
             this.addedComponentEmitter.emit({id, component: this.entities[id]});
         });
+    }
+
+    private updateNestedProperty(component: T, property: string, value: any): any {
+        const properties = property.split('.');
+        let currentObj: any = component;
+        let oldProp: any;
+        for(let i = 0; i < properties.length; i++) {
+            const prop = properties[i];
+            if (!currentObj[prop]) {
+                throw new Error('Could not update non existant property');
+            }
+
+            if (i === properties.length - 1) {
+                oldProp = currentObj[prop];
+                currentObj[prop] = value;
+            } else {
+                currentObj = currentObj[prop];
+            }
+        }
+        return oldProp;
     }
 
     abstract toJSON(): any;

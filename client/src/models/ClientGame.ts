@@ -10,7 +10,7 @@ import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite, SpriteColor } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
-import { UI } from "../UI/UI";
+import { setupUI } from "../UI/UI";
 import { TileName } from "../../../common/src/types/Tile";
 
 export class ClientGame extends Game {
@@ -18,7 +18,6 @@ export class ClientGame extends Game {
     renderer: Renderer;
     inputEventHandler: InputEventHandler;
     timeInitialized: number;
-    ui: UI;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -26,7 +25,6 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
-        this.ui = new UI(this.systems, this.players[this.currentPlayerId]);
         this.systems.visibility = new VisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
@@ -65,7 +63,6 @@ export class ClientGame extends Game {
     postDeserialize(event: InitEvent) {
         this.currentPlayerId = event.data.playerId;
         this.players = event.data.gameData.players;
-        this.ui.currentPlayer = this.players[this.currentPlayerId];
         this.currentLevel = new Dungeon({x: 0, y: 0});
         event.data.gameData.tiles?.forEach((tile) => {
             this.currentLevel.setTile(tile);
@@ -83,6 +80,9 @@ export class ClientGame extends Game {
             Object.assign(systems[system], incomingSystems[system]);
             systems[system].postDeserialize();
         });
+
+        // Initialize the UI
+        setupUI(this.systems, this.players[this.currentPlayerId]);
     }
 
     renderDungeonTileAtLocation(point: Point): void {
@@ -127,7 +127,7 @@ export class ClientGame extends Game {
      */
     recenterViewPort(): void {
         const characterId = this.players[this.currentPlayerId].characterId;
-        const characterLocation: LocationComponent = this.systems.location.getComponent(characterId);
+        const characterLocation = this.systems.location.getComponent(characterId);
         if (characterLocation) {
             this.renderer.centerViewPortOn(characterLocation.location);
         }

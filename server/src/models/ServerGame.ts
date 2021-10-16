@@ -89,6 +89,12 @@ export class ServerGame extends Game {
         SpawnPlayerCharacter(player.characterId, this.systems, this.currentLevel);
         this.networkEventManager.addPlayerEventQueue(playerId);
 
+        let str = 10;
+        setInterval(() => {
+            str++;
+            this.systems.stats.updateComponent(player.characterId, {'max.str': str})
+        }, 2000);
+
         return playerId;
     }
 

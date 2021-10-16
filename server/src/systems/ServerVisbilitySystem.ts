@@ -1,4 +1,3 @@
-import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { Dungeon } from "../../../common/src/models/Dungeon";
@@ -48,13 +47,13 @@ export class ServerVisbilitySystem extends VisibilitySystem {
     }
 
     recalculateVisibility(entityId: number): void {
-        const component: VisibilityComponent = this.getComponent(entityId);
+        const component = this.getComponent(entityId);
         if (!component) {
             return;
         }
         
         // requires a location component to recalculate the visiblity
-        const locationComponent: LocationComponent = this.locationSystem.getComponent(entityId);
+        const locationComponent = this.locationSystem.getComponent(entityId);
         if (!locationComponent) {
             return;
         }

@@ -48,7 +48,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
      * Returns whether the entity was successfully moved.
      */
     moveAndCollideEntity(id: number, location: Point, dungeon: Dungeon): boolean {
-        const component: LocationComponent = this.getComponent(id);
+        const component = this.getComponent(id);
         if (component === undefined) {
             return false;
         }
@@ -58,7 +58,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
             return false;
         }
 
-        this.moveEntity(id, location);
+        this.updateComponent(id, {location: location});
         return true;
     }
 
@@ -79,8 +79,8 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         let highest: number | undefined = undefined;
         let bestComponent: {id: number, component: LocationComponent} | undefined;
         entities.forEach((entity) => {
-            const component: LocationComponent = this.getComponent(entity);
-            if (highest === undefined || component.layer > highest) {
+            const component = this.getComponent(entity);
+            if (component && (highest === undefined || component.layer > highest)) {
                 highest = component.layer;
                 bestComponent = {id: entity, component};
             }
@@ -110,7 +110,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     }
 
     private moveEntity(id: number, newLocation: Point) {
-        const component: LocationComponent = this.getComponent(id);
+        const component = this.getComponent(id);
         if (component === undefined) {
             return false;
         }
@@ -121,7 +121,6 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         this.addComponentToLocationCache(id, component)
         this.componentUpdatedEmitter.emit({id, props: { location: newLocation }, oldProps: {location: oldLocation}});
         return true;
-
     }
 
     private isCollision(component: LocationComponent, location: Point): boolean {

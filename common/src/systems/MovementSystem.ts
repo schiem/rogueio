@@ -1,4 +1,3 @@
-import { LocationComponent } from "../components/LocationComponent";
 import { MovementComponent } from "../components/MovementComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { Dungeon } from "../models/Dungeon";
@@ -15,12 +14,12 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
     }
 
     attemptMove(id: number, direction: Point, dungeon: Dungeon): void {
-        const component: MovementComponent = this.getComponent(id);
+        const component = this.getComponent(id);
         if (component === undefined) {
             return;
         }
 
-        const locationComponent: LocationComponent = this.locationSystem.getComponent(id);
+        const locationComponent = this.locationSystem.getComponent(id);
         if (locationComponent === undefined) {
             this.removeComponentFromEntity(id);
             return;

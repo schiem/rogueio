@@ -15,10 +15,13 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "strictPropertyInitialization": false,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
   },
   "include": [
     "src/**/*",
+    "external/**/*",
     "../common/src/**/*"
   ],
   "exclude": [

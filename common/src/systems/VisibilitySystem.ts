@@ -1,4 +1,3 @@
-import { AllyComponent } from "../components/AllyComponent";
 import { SharedVisibilityComponent, VisibilityComponent } from "../components/VisibilityComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
@@ -56,12 +55,12 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
     }
 
     getSharedVisibilityComponent(entityId: number): SharedVisibilityComponent | undefined {
-        const component: VisibilityComponent = this.getComponent(entityId);
+        const component = this.getComponent(entityId);
         if (!component) {
             return;
         }
 
-        const allyComponent: AllyComponent = this.allySystem.getComponent(entityId);
+        const allyComponent = this.allySystem.getComponent(entityId);
         if (!allyComponent) {
             return;
         }
@@ -70,7 +69,7 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
     }
 
     tileIsVisible(entityId: number, location: Point): boolean {
-        const component: VisibilityComponent = this.getComponent(entityId);
+        const component = this.getComponent(entityId);
         if (!component) {
             return false;
         }

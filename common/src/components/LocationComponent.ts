@@ -1,5 +1,6 @@
 import { Point } from "../types/Points";
 import { Sprite } from "../types/Sprite";
+import { BlockLayerName } from "../types/Tile";
 
 export const LocationComponentLayers = {
     item: 1,
@@ -8,8 +9,8 @@ export const LocationComponentLayers = {
 
 export type LocationComponent = {
     sprite: Sprite;
-    collidesWith: number[];
-    collisionLayer: number;
+    collidesWith: BlockLayerName[];
+    collisionLayer: BlockLayerName;
     location: Point;
     layer: number;
 };

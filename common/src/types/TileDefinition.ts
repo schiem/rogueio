@@ -1,7 +1,8 @@
 import { Sprite } from "./Sprite";
+import { BlockLayerName } from "./Tile";
 
 export type TileDefinition = {
-    blocks: number[];
+    blocks: BlockLayerName[];
     blocksVision: boolean;
     sprite: Sprite 
 }
