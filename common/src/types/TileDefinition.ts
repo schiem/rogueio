@@ -1,8 +1,8 @@
 import { Sprite } from "./Sprite";
-import { BlockLayerName } from "./Tile";
+import { MovementType } from "./Tile";
 
 export type TileDefinition = {
-    blocks: BlockLayerName[];
+    movement: MovementType[];
     blocksVision: boolean;
     sprite: Sprite 
 }

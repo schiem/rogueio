@@ -1,14 +1,14 @@
 import { SpriteName, SpriteColor } from "../types/Sprite";
-import { BlockLayerName, TileModifier, TileName } from "../types/Tile";
+import { MovementType, TileModifier, TileName } from "../types/Tile";
 import { TileDefinition } from "../types/TileDefinition";
 
 export const ModDefinitions: Record<TileModifier, TileDefinition> = {
-    [TileModifier.shallowWater]: { blocks: [], sprite: { name: SpriteName.water, color: SpriteColor.cyan }, blocksVision: false },
-    [TileModifier.deepWater]: { blocks: [BlockLayerName.character], sprite: { name: SpriteName.water, color: SpriteColor.blue }, blocksVision: false }
+    [TileModifier.shallowWater]: { movement: [MovementType.land, MovementType.water], sprite: { name: SpriteName.water, color: SpriteColor.cyan }, blocksVision: false },
+    [TileModifier.deepWater]: { movement: [MovementType.water], sprite: { name: SpriteName.water, color: SpriteColor.blue }, blocksVision: false }
 };
 
 export const TileDefinitions: Record<TileName, TileDefinition> = {
-    [TileName.wall]: { blocks: [BlockLayerName.character, BlockLayerName.item], sprite: { name: SpriteName.wall, color: SpriteColor.default }, blocksVision: true },
-    [TileName.rubble]: { blocks: [BlockLayerName.character, BlockLayerName.item], sprite: { name: SpriteName.rubble, color: SpriteColor.brown }, blocksVision: true },
-    [TileName.floor]: { blocks: [], sprite: { name: SpriteName.floor, color: SpriteColor.default }, blocksVision: false },
+    [TileName.wall]: { movement: [], sprite: { name: SpriteName.wall, color: SpriteColor.default }, blocksVision: true },
+    [TileName.rubble]: { movement: [], sprite: { name: SpriteName.rubble, color: SpriteColor.brown }, blocksVision: true },
+    [TileName.floor]: { movement: [MovementType.land], sprite: { name: SpriteName.floor, color: SpriteColor.default }, blocksVision: false },
 };

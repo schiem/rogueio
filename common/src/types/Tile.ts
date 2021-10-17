@@ -1,8 +1,8 @@
 import { Point } from "./Points";
 
-export enum BlockLayerName {
-    character = 1,
-    item
+export enum MovementType {
+    land = 1,
+    water
 }
 
 export enum TileName {

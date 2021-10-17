@@ -90,7 +90,7 @@ export const SpawnPlayerCharacter = (entityId: number, systems: GameSystems, dun
             tries++;
             const idx = random(0, roomsAvailable.length);
             const room = roomsAvailable[idx];
-            const tiles = room.spawnTiles.filter((tile) => !dungeon.tileIsBlocked(tile, locationComponent.collisionLayer));
+            const tiles = room.spawnTiles.filter((tile) => !dungeon.tileIsBlocked(tile, locationComponent.movesThrough));
             if (tiles.length) {
                 location = tiles[random(0, tiles.length)];
             }

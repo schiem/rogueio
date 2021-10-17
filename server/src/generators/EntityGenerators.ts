@@ -6,7 +6,7 @@ import { VisibilityComponent } from "../../../common/src/components/VisibilityCo
 import { GameSystems } from "../../../common/src/models/Game";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite";
-import { BlockLayerName } from "../../../common/src/types/Tile";
+import { MovementType } from "../../../common/src/types/Tile";
 
 export type ComponentBlock = {
     location?: LocationComponent;
@@ -30,8 +30,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     name: SpriteName.player,
                     color: SpriteColor.beige
                 },
-                collidesWith: [BlockLayerName.character],
-                collisionLayer: BlockLayerName.character,
+                movesThrough: [MovementType.land],
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
@@ -59,8 +58,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     name: SpriteName.bufonid,
                     color: SpriteColor.green
                 },
-                collidesWith: [BlockLayerName.character],
-                collisionLayer: BlockLayerName.character,
+                movesThrough: [MovementType.land, MovementType.water],
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
@@ -87,8 +85,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     name: SpriteName.bufonid,
                     color: SpriteColor.red
                 },
-                collidesWith: [BlockLayerName.character],
-                collisionLayer: BlockLayerName.character,
+                movesThrough: [MovementType.land, MovementType.water],
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
@@ -116,8 +113,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     name: SpriteName.spawn,
                     color: SpriteColor.cyan
                 },
-                collidesWith: [BlockLayerName.character],
-                collisionLayer: BlockLayerName.character,
+                movesThrough: [MovementType.water],
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },

@@ -90,7 +90,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     }
 
     canMoveTo(component: LocationComponent, location: Point, dungeon: Dungeon): boolean {
-        return !dungeon.tileIsBlocked(location, component.collisionLayer) && !this.isCollision(component, location);
+        return !dungeon.tileIsBlocked(location, component.movesThrough) && !this.isCollision(component, location);
     }
 
     postDeserialize(): void {
@@ -126,14 +126,11 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     private isCollision(component: LocationComponent, location: Point): boolean {
         const components = this.locationCache[location.x][location.y];
         // check if any of the components at this location collide with the current component
+        // TODO - add collision layers
         return components?.find(
             (compId: number) => { 
                 const comp: LocationComponent | undefined = this.getComponent(compId);
-                if (!comp) {
-                    return;
-                }
-
-                return component.collidesWith.indexOf(comp.collisionLayer) !== -1;
+                return !!comp;
             }
         ) !== undefined;
     }

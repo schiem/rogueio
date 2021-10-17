@@ -1,4 +1,4 @@
-import { Tile, TileModifier } from "../types/Tile";
+import { MovementType, Tile, TileModifier, TileName } from "../types/Tile";
 import { Point } from "../types/Points";
 import { Room } from "./Room";
 import { ModDefinitions, TileDefinitions } from "../consts/TileDefinitions";
@@ -24,17 +24,17 @@ export class Dungeon {
      * Get the highest tile definition of a tile.
      * Returns a tiledefinition, undefined if the tile has no definition, or null if the tile doesn't exist.
      */
-    getVisibleTileDefinition(point: Point): TileDefinition | undefined | null {
+    getVisibleTileDefinition(point: Point): TileDefinition | undefined {
         const tile = this.tiles[point.x]?.[point.y];
         if (!tile) {
-            return null;
+            return;
         }
 
         if (tile.mods.length) {
             const mod = ArrayMax(tile.mods) as TileModifier;
             return ModDefinitions[mod];
         }
-        return tile.definition ? TileDefinitions[tile.definition] : undefined;
+        return tile.definition ? TileDefinitions[tile.definition] : TileDefinitions[TileName.floor];
     }
 
     /**
@@ -49,6 +49,8 @@ export class Dungeon {
 
         if (tile.definition) {
             definitions.push(TileDefinitions[tile.definition]);
+        } else {
+            definitions.push(TileDefinitions[TileName.floor]);
         }
         tile.mods.forEach((mod) => {
             definitions.push(ModDefinitions[mod]);
@@ -70,24 +72,18 @@ export class Dungeon {
     /**
      * Check whether a tile at a location blocks the given block layer.
      */
-    tileIsBlocked(point: Point, blockLayer?: number): boolean {
-        const defs = this.getAllTileDefinition(point);
-        if (defs === undefined) {
+    tileIsBlocked(point: Point, moveType: MovementType[]): boolean {
+        const def = this.getVisibleTileDefinition(point);
+        if (def === undefined) {
             // no tile, probably outside the map
             return true;
         }
 
-        if (blockLayer) {
-            // Check if the tile blocks a specific layer.
-            return defs.find((def) => {
-                return def.blocks.indexOf(blockLayer) !== -1;
-            }) !== undefined;
-        } else {
-            // Check if the tile blocks anything
-            return defs.find((def) => {
-                return def.blocks.length > 0;
-            }) !== undefined;
-        }
+        // check to make sure that at least one of the components
+        // movement types is in the tile
+        return moveType.find((type) => {
+            return def.movement.indexOf(type) !== -1;
+        }) === undefined;
     }
 
     hasOpenTileAround(point: Point): boolean {

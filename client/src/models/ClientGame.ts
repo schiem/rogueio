@@ -111,11 +111,9 @@ export class ClientGame extends Game {
             sprite = highestComponent.component.sprite;
         } else if (def) {
             sprite = def.sprite;
-        } else if (def === null) {
-            sprite = TileDefinitions[TileName.wall].sprite;
         } else {
-            // draw the default floor tile
-            sprite = TileDefinitions[TileName.floor].sprite;
+            // draw the default wall tile
+            sprite = TileDefinitions[TileName.wall].sprite;
         }
 
         this.renderer.drawSprite(sprite, point, colorOverride);

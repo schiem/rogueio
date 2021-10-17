@@ -3,7 +3,7 @@ import { random } from "../../../common/src/utils/MathUtils";
 import { Condition, Room } from "../../../common/src/models/Room";
 import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Dungeon } from "../../../common/src/models/Dungeon";
-import { TileModifier, TileName } from "../../../common/src/types/Tile";
+import { MovementType, TileModifier, TileName } from "../../../common/src/types/Tile";
 import { RoomFeatureNames } from "../../../common/src/models/RoomFeatures";
 
 /**
@@ -53,7 +53,7 @@ export class DungeonGenerator {
         while(tileToAdd === undefined &&  tries < maxTries) {
             tries++;
             const attemptTile = room.getRandomTile();
-            if(!dungeon.tileIsBlocked(attemptTile)) {
+            if(!dungeon.tileIsBlocked(attemptTile, [MovementType.land])) {
                 tileToAdd = attemptTile;
             }
         }
@@ -95,11 +95,7 @@ export class DungeonGenerator {
         ].forEach((spreadPoint) => {
             const tile = dungeon.tiles[spreadPoint.x]?.[spreadPoint.y];
             // ensure that the tile exists, is not the current tile, is not blocked and does not contain water
-            if (
-                !tile || 
-                dungeon.tileIsBlocked(spreadPoint) || 
-                tile.mods.indexOf(TileModifier.deepWater) !== -1 ||
-                tile.mods.indexOf(TileModifier.shallowWater) !== -1) {
+            if (!tile || dungeon.tileIsBlocked(spreadPoint, [MovementType.land])) { 
                 return;
             }
             surroundingTiles.push(spreadPoint);
@@ -139,7 +135,7 @@ export class DungeonGenerator {
                     for(let y = room.rect.topLeft.y; y < bottomRight.y; y++) {
                         const point = {x, y};
                         // check if the square is open
-                        if (!dungeon.tileIsBlocked(point)) {
+                        if (!dungeon.tileIsBlocked(point, [MovementType.land])) {
                             openSpaces.push(point);
                         }
                     }
