@@ -17,7 +17,7 @@ export type ComponentBlock = {
 }
 
 export enum EntityType {
-    player,
+    player = 1,
     bufonidWarrior,
     bufonidQueen,
     bufonidSpawn

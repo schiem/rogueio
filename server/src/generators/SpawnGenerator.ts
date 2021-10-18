@@ -35,37 +35,49 @@ export const MobSpawnGenerators: Record<MobSpawnGeneratorName, MobSpawnGenerator
             if (!startPoint) {
                 return;
             }
-            const numBufonidSpawn = 1; //random(0, 3);
-            //const numQueens = random(0, 1);
-            //const numWarriors = random(1, 4);
+            const spawns: Partial<Record<EntityType, number>> = {
+                [EntityType.bufonidWarrior]: random(1, 5),
+                [EntityType.bufonidSpawn]: random(0, 4),
+                [EntityType.bufonidQueen]: random(0, 2),
+            };
 
-            let nextSpawnPoint = startPoint;
-            for(let i = 0; i < numBufonidSpawn; i++) {
-                const components = baseEntities[EntityType.bufonidSpawn]();
-                const locationComponent = components.location as LocationComponent;
-                locationComponent.location = nextSpawnPoint;
-                const id = entityManager.addNextEntity();
-                SpawnEntity(id, components, systems);
+            let nextPoint: Point | undefined;
+
+            for(const spawn in spawns) {
+                const entitySpawn = spawn as unknown as EntityType;
+                const numSpawns = spawns[entitySpawn] || 0;
+                for(let i = 0; i < numSpawns; i++) {
+                    const components = baseEntities[entitySpawn]();
+                    const locationComponent = components.location as LocationComponent;
+                    if (nextPoint === undefined) {
+                        nextPoint = startPoint;
+                    } else {
+                        const surroundingTiles: Point[] = [];
+                        [
+                            {x: nextPoint.x - 1, y: nextPoint.y },
+                            {x: nextPoint.x + 1, y: nextPoint.y },
+                            {x: nextPoint.x, y: nextPoint.y - 1},
+                            {x: nextPoint.x, y: nextPoint.y + 1 },
+                        ].forEach((spreadPoint) => {
+                            const tile = dungeon.tiles[spreadPoint.x]?.[spreadPoint.y];
+                            // ensure that the tile exists, is not the current tile, is not blocked and does not contain water
+                            if (!tile || dungeon.tileIsBlocked(spreadPoint, locationComponent.movesThrough)) { 
+                                return;
+                            }
+                            surroundingTiles.push(spreadPoint);
+                        });
+                        if (!surroundingTiles.length) {
+                            // No valid tiles to spawn around this point, stop trying for this mob
+                            break;
+                        }
+                        nextPoint = surroundingTiles[random(0, surroundingTiles.length - 1)];
+                    }
+                    console.log(entitySpawn);
+                    locationComponent.location = nextPoint;
+                    const id = entityManager.addNextEntity();
+                    SpawnEntity(id, components, systems);
+                }
             }
-
-            /*
-            for(let i = 0; i < numWarriors; i++) {
-                const components = baseEntities[EntityType.bufonidWarrior]();
-                const locationComponent = components.location as LocationComponent;
-                locationComponent.location = startPoint;
-                const id = entityManager.addNextEntity();
-                SpawnEntity(id, components, systems);
-            }
-
-            for(let i = 0; i < numQueens; i++) {
-                const components = baseEntities[EntityType.bufonidQueen]();
-                const locationComponent = components.location as LocationComponent;
-                locationComponent.location = startPoint;
-                const id = entityManager.addNextEntity();
-                SpawnEntity(id, components, systems);
-            }
-            */
-
         }
     }
 }

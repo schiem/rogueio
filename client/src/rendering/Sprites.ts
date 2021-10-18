@@ -6,7 +6,7 @@ export const Sprites: Record<SpriteName, number> = {
     [SpriteName.player]: 32,
     [SpriteName.floor]: 118,
     [SpriteName.spawn]: 240,
-    [SpriteName.bufonid]: 64,
+    [SpriteName.bufonid]: 66,
     [SpriteName.water]: 243
 }
 
