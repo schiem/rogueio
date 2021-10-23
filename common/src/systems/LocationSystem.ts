@@ -127,12 +127,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         const components = this.locationCache[location.x][location.y];
         // check if any of the components at this location collide with the current component
         // TODO - add collision layers
-        return components?.find(
-            (compId: number) => { 
-                const comp: LocationComponent | undefined = this.getComponent(compId);
-                return !!comp;
-            }
-        ) !== undefined;
+        return components?.length > 0;
     }
 
     /**

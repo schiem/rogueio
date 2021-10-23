@@ -9,8 +9,9 @@ import { Tile } from "../../../common/src/types/Tile";
 import { GetVisibleTiles } from "../utils/ShadowCast";
 
 export class ServerVisbilitySystem extends VisibilitySystem {
-    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, private dungeon: Dungeon) {
-        super(entityManager, allySystem, locationSystem, dungeon.size);
+    private dungeon: Dungeon;
+    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, dungeonSize: Point) {
+        super(entityManager, allySystem, locationSystem, dungeonSize);
 
         locationSystem.componentUpdatedEmitter.subscribe((data) => {
             this.recalculateVisibility(data.id);
@@ -18,6 +19,10 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         locationSystem.addedComponentEmitter.subscribe((data) => {
             this.recalculateVisibility(data.id);
         });
+    }
+
+    setDungeon(dungeon: Dungeon): void {
+        this.dungeon = dungeon;
     }
 
     addComponentForEntity(id: number, component: VisibilityComponent): void {

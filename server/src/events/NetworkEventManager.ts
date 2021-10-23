@@ -11,6 +11,7 @@ import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
 import { ServerEvent } from "../../../common/src/events/server/ServerEvent";
+import { encode } from "messagepack";
 
 /**
  * Handles both incoming and outgoing events.
@@ -28,12 +29,12 @@ export class NetworkEventManager {
         entityManager: EntityManager
     ) {
         entityManager.entityAddedEmitter.subscribe((entity) => {
-            this.queueEvent(new AddEntityEvent(entity), {} as ComponentSystem<any>);
+            this.queueEvent(new AddEntityEvent(entity), entity, {} as ComponentSystem<any>);
         });
 
         // TODO - removing an entity removes all it's components - shouldn't fire events for those
         entityManager.entityRemovedEmitter.subscribe((entity) => {
-            this.queueEvent(new RemoveEntityEvent(entity), {} as ComponentSystem<any>)
+            this.queueEvent(new RemoveEntityEvent(entity), entity, {} as ComponentSystem<any>)
         });
 
 
@@ -47,15 +48,15 @@ export class NetworkEventManager {
 
             // any time a component is added / removed, reflect it across the network
             system.addedComponentEmitter.subscribe((data) => {
-                this.queueEvent(new AddEntityComponentEvent(data.id, systemName, data.component), system);
+                this.queueEvent(new AddEntityComponentEvent(data.id, systemName, data.component), data.id, system);
             });
 
             system.removedComponentEmitter.subscribe((data) => {
-                this.queueEvent(new RemoveEntityComponentEvent(data.id, systemName), system);
+                this.queueEvent(new RemoveEntityComponentEvent(data.id, systemName), data.id, system);
             });
 
             system.componentUpdatedEmitter.subscribe((data) => {
-                this.queueEvent(new UpdateEntityEvent(data.id, systemName, data.props), system);
+                this.queueEvent(new UpdateEntityEvent(data.id, systemName, data.props), data.id, system);
             });
         });
     }
@@ -68,7 +69,7 @@ export class NetworkEventManager {
         delete this.eventQueue[playerId];
     }
 
-    queueEvent(event: NetworkEvent, fromSystem: ComponentSystem<any>): void {
+    queueEvent(event: NetworkEvent, triggeringId: number, fromSystem?: ComponentSystem<any>): void {
         for(let playerId in this.eventQueue) {
             const queue = this.eventQueue[playerId];
             queue.push(event);
@@ -97,6 +98,6 @@ export class NetworkEventManager {
     }
 
     serializeEvents(events: ServerEvent[]): string | ArrayBuffer {
-        return '[' + events.map((event) => event.serialize()).join(',') + ']';
+        return encode(events);
     }
 }

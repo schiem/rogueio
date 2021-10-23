@@ -7,13 +7,15 @@ import { GameSystems } from "../../../common/src/models/Game";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite";
 import { MovementType } from "../../../common/src/types/Tile";
+import { AIComponent, AIType } from "../components/AIComponent";
 
 export type ComponentBlock = {
-    location?: LocationComponent;
-    movement?: MovementComponent;
-    visibility?: VisibilityComponent;
-    ally?: AllyComponent;
-    stats?: StatComponent;
+    location: LocationComponent;
+    movement: MovementComponent;
+    visibility: VisibilityComponent;
+    ally: AllyComponent;
+    stats: StatComponent;
+    ai: AIComponent;
 }
 
 export enum EntityType {
@@ -22,7 +24,7 @@ export enum EntityType {
     bufonidQueen,
     bufonidSpawn
 }
-export const baseEntities: Record<EntityType, () => ComponentBlock> = {
+export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     [EntityType.player]: () => {
         return {
             location: {
@@ -30,12 +32,12 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     name: SpriteName.player,
                     color: SpriteColor.beige
                 },
-                movesThrough: [MovementType.land],
+                movesThrough: [MovementType.land, MovementType.water],
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
             ally: {group: 'players'},
-            movement: { minMovementDelay: 30 },
+            movement: { minMovementDelay: 100 },
             visibility: { sightRadius: 6, visible: {} },
             stats: {
                 current: {
@@ -48,7 +50,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     con: 10,
                     dex: 10
                 },
-            } as StatComponent
+            }
         };
     },
     [EntityType.bufonidWarrior]: () => {
@@ -63,7 +65,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                 location: { x: 0, y: 0}
             },
             ally: {group: 'enemies'},
-            movement: { minMovementDelay: 30 },
+            movement: { minMovementDelay: 200 },
             stats: {
                 current: {
                     str: 4,
@@ -75,7 +77,10 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     con: 4,
                     dex: 4 
                 },
-            } as StatComponent
+            },
+            ai: {
+                type: AIType.defensive
+            }
         };
     },
     [EntityType.bufonidQueen]: () => {
@@ -90,7 +95,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                 location: { x: 0, y: 0}
             },
             ally: {group: 'enemies'},
-            movement: { minMovementDelay: 30 },
+            movement: { minMovementDelay: 200 },
             stats: {
                 current: {
                     str: 8,
@@ -102,8 +107,10 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     con: 8,
                     dex: 8 
                 },
-            } as StatComponent
-
+            },
+            ai: {
+                type: AIType.defensive
+            }
         };
     },
     [EntityType.bufonidSpawn]: () => {
@@ -118,7 +125,7 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                 location: { x: 0, y: 0}
             },
             ally: {group: 'enemies'},
-            movement: { minMovementDelay: 30 },
+            movement: { minMovementDelay: 200 },
             stats: {
                 current: {
                     str: 0,
@@ -130,8 +137,10 @@ export const baseEntities: Record<EntityType, () => ComponentBlock> = {
                     con: 0,
                     dex: 0
                 },
-            } as StatComponent
-
+            },
+            ai: {
+                type: AIType.passive
+            }
         };
     },
 };

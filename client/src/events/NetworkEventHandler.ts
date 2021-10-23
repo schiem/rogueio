@@ -7,6 +7,7 @@ import { UpdateEntityEvent } from "../../../common/src/events/server/UpdateEntit
 import { AddEntityComponentEvent } from "../../../common/src/events/server/AddEntityComponentEvent";
 import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
+import { encode } from "messagepack";
 
 /**
  * The client network event handler is completely unrelated to the server event handler.
@@ -25,7 +26,7 @@ export class NetworkEventHandler {
     }
 
     static sendEvent(event: NetworkEvent): void {
-        this.connection.send(event.serialize());
+        this.connection.send(encode(event));
     }
 
     static handleEvent(game: ClientGame, serverEvent: ServerEvent): void {

@@ -94,6 +94,10 @@ export abstract class ComponentSystem<T> {
         });
     }
 
+    asSerializable(): unknown {
+        return JSON.parse(JSON.stringify(this));
+    }
+
     private updateNestedProperty(component: T, property: string, value: any): any {
         const properties = property.split('.');
         let currentObj: any = component;

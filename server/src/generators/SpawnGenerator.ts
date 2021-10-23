@@ -72,7 +72,6 @@ export const MobSpawnGenerators: Record<MobSpawnGeneratorName, MobSpawnGenerator
                         }
                         nextPoint = surroundingTiles[random(0, surroundingTiles.length - 1)];
                     }
-                    console.log(entitySpawn);
                     locationComponent.location = nextPoint;
                     const id = entityManager.addNextEntity();
                     SpawnEntity(id, components, systems);

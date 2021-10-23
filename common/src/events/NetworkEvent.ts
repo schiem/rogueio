@@ -5,6 +5,4 @@ export abstract class NetworkEvent {
     constructor() {
         this.ts = new Date().getTime();
     }
-
-    abstract serialize(): string | ArrayBuffer;
 }

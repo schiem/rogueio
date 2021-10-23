@@ -13,16 +13,16 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         super(entityManager);
     }
 
-    attemptMove(id: number, direction: Point, dungeon: Dungeon): void {
+    attemptMove(id: number, direction: Point, dungeon: Dungeon): boolean {
         const component = this.getComponent(id);
         if (component === undefined) {
-            return;
+            return false;
         }
 
         const locationComponent = this.locationSystem.getComponent(id);
         if (locationComponent === undefined) {
             this.removeComponentFromEntity(id);
-            return;
+            return false;
         }
 
         direction.x = clamp(direction.x, -1, 1);
@@ -30,14 +30,15 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         const newLocation = { x: locationComponent.location.x + direction.x, y: locationComponent.location.y + direction.y };
         const now = new Date().getTime();
         const enoughTimeElapsed = component.lastMoveTime === undefined || now - component.lastMoveTime > component.minMovementDelay;
-        if (!enoughTimeElapsed || !this.locationSystem.canMoveTo(locationComponent, newLocation, dungeon)) {
-            return;
+        if (!enoughTimeElapsed) {
+            return false;
         }
 
         const didMove = this.locationSystem.moveAndCollideEntity(id, newLocation, dungeon);
         if (didMove) {
             component.lastMoveTime = now;
         }
+        return didMove;
     }
 
     toJSON(): any {

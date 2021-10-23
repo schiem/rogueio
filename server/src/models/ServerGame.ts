@@ -1,6 +1,6 @@
 import { Player } from "../../../common/src/models/Player";
 import { DungeonGenerator } from "../generators/DungeonGenerator";
-import { Game } from "../../../common/src/models/Game";
+import { Game, GameSystems } from "../../../common/src/models/Game";
 import { v4 as uuidv4 } from 'uuid';
 import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
@@ -8,27 +8,40 @@ import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
 import { MobSpawnGenerator, MobSpawnGeneratorName, MobSpawnGenerators, SpawnPlayerCharacter } from "../generators/SpawnGenerator";
 import { random } from "../../../common/src/utils/MathUtils";
+import { AISystem } from "../systems/AISystem";
 
+export type ServerGameSystems = GameSystems & {
+    ai: AISystem;
+    visibility: ServerVisbilitySystem
+}
 export class ServerGame extends Game {
+    systems: ServerGameSystems;
     dungeonGenerator: DungeonGenerator;
     networkEventManager: NetworkEventManager;
     private clients: Record<string, WebSocket> = {};
-    private tickSpeed = 50;
+    private tickSpeed = 200;
     private lastTick: number;
 
     constructor() {
         super();
+        console.log(this.systems.ally);
 
         const maxRoomSize = {x: 30, y: 16};
         const minRoomSize = {x: 8, y: 4};
         const minRoomSpacing = 6;
         const maxRoomSpacing = 14;
-        this.dungeonGenerator = new DungeonGenerator({x: this.dungeonX, y: this.dungeonY}, minRoomSize, maxRoomSize, minRoomSpacing, maxRoomSpacing, 500);
+        const dungeonSize = {x: this.dungeonX, y: this.dungeonY };
+        this.dungeonGenerator = new DungeonGenerator(dungeonSize, minRoomSize, maxRoomSize, minRoomSpacing, maxRoomSpacing, 500);
 
-        this.newDungeon();
 
         // set up the visibility system, after the dungeon has been created
-        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.currentLevel);
+        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, dungeonSize);
+
+        // set up the AI system
+        this.systems.ai = new AISystem(this.entityManager);
+
+        this.newDungeon();
+        this.systems.visibility.setDungeon(this.currentLevel);
 
         // Add the network manager to handle events
         this.networkEventManager = new NetworkEventManager(this.systems, this.entityManager);
@@ -40,11 +53,13 @@ export class ServerGame extends Game {
         this.lastTick = performance.now();
         setInterval(() => {
             const now = performance.now();
-            if (now - this.lastTick > this.tickSpeed) {
+            const delta = now - this.lastTick;
+            if (delta > this.tickSpeed) {
                 process.stdout.cursorTo(0);
                 process.stdout.write((`Framerate: ${1000 / (now - this.lastTick)}`));
 
                 this.lastTick = now;
+                this.systems.ai.runAI(delta, this.systems, this.currentLevel);
                 this.networkEventManager.flushEvents(this.clients);
             }
         }, 2);
@@ -88,12 +103,6 @@ export class ServerGame extends Game {
 
         SpawnPlayerCharacter(player.characterId, this.systems, this.currentLevel);
         this.networkEventManager.addPlayerEventQueue(playerId);
-
-        let str = 10;
-        setInterval(() => {
-            str++;
-            this.systems.stats.updateComponent(player.characterId, {'max.str': str})
-        }, 2000);
 
         return playerId;
     }

@@ -1,17 +1,16 @@
 import { ServerEvent, ServerEventType } from "./ServerEvent";
-import { Game, GameSystems } from "../../models/Game";
+import { Game } from "../../models/Game";
 import { Tile } from "../../types/Tile";
 import { Player } from "../../models/Player";
-import { EntityManager } from "../../entities/EntityManager";
 
 type InitData = {
     gameData: { 
         dungeonX: number, 
         dungeonY: number, 
         tiles?: Tile[], 
-        systems: GameSystems, 
+        systems: Record<string, any>, 
         players: Record<string, Player>, 
-        entityManager: EntityManager 
+        entityManager: any 
     },
     playerId: string;
 };
@@ -23,14 +22,19 @@ export class InitEvent extends ServerEvent {
     constructor(game: Game, playerId: string) {
         super();
         const characterId = game.players[playerId].characterId;
+        const systems: Record<string, any> = {};
+        for(const system in game.systems) {
+            systems[system] = (game.systems as any)[system].asSerializable();
+        }
+
         this.data = {
             gameData: {
                 dungeonX: game.dungeonX,
                 dungeonY: game.dungeonY,
                 tiles: (game.systems.visibility as any).getSeenTilesForEntity(characterId),
-                systems: game.systems,
+                systems: systems,
                 players: game.players,
-                entityManager: game.entityManager
+                entityManager: game.entityManager.asSerializable()
             },
             playerId,
         };

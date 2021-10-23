@@ -37,6 +37,10 @@ export class EntityManager {
         return this.entities[entityId] !== undefined;
     }
 
+    asSerializable(): unknown {
+        return JSON.parse(JSON.stringify(this));
+    }
+
     toJSON() {
         return {
             entities: this.entities

@@ -5,6 +5,7 @@ import { ClientGame } from "./models/ClientGame";
 import { NetworkEventHandler } from "./events/NetworkEventHandler";
 import { NetworkEvent } from "../../common/src/events/NetworkEvent";
 import { SpriteColor } from "../../common/src/types/Sprite";
+import { decode } from "messagepack";
 
 const viewportCanvas: HTMLCanvasElement = document.getElementById('viewport') as HTMLCanvasElement;
 const spriteWidth = 14;
@@ -21,9 +22,10 @@ spriteSheet.onReady(() => {
     const ws = new WebSocket('ws://localhost:8888');
     NetworkEventHandler.setConnecton(ws);
 
-    ws.onmessage = (eventJson) => {
-        const event = JSON.parse(eventJson.data);
-        event.forEach((evData: NetworkEvent) => {
+    ws.onmessage = async (event) => {
+        const arrayBuffer = await new Response(event.data).arrayBuffer()
+        const events: NetworkEvent[] = decode(arrayBuffer);
+        events.forEach((evData: NetworkEvent) => {
             // ignore any events that were before the game was initialized
             // if a client connects in the middle of a tick cycle, it's possible
             // that there are events queued that will be included in the initEvent

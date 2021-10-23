@@ -76,7 +76,11 @@ export class ClientGame extends Game {
         Object.assign(this.entityManager, event.data.gameData.entityManager);
 
         // deserialize all the systems
+        debugger;
         Object.keys(incomingSystems).forEach((system) => {
+            if (!incomingSystems[system]) {
+                return;
+            }
             Object.assign(systems[system], incomingSystems[system]);
             systems[system].postDeserialize();
         });
