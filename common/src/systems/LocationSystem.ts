@@ -93,22 +93,6 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         return !dungeon.tileIsBlocked(location, component.movesThrough) && !this.isCollision(component, location);
     }
 
-    postDeserialize(): void {
-        this.resetLocationCache();
-        Object.keys(this.entities).forEach((entity) => {
-            // All keys in javascript are a string - who knows why
-            const entityId = parseInt(entity);
-            this.addComponentToLocationCache(entityId);
-        });
-        super.postDeserialize();
-    }
-
-    toJSON(): any {
-        return {
-            entities: this.entities
-        };
-    }
-
     private moveEntity(id: number, newLocation: Point) {
         const component = this.getComponent(id);
         if (component === undefined) {

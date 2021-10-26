@@ -2,15 +2,16 @@ import { ServerEvent, ServerEventType } from "./ServerEvent";
 import { Game } from "../../models/Game";
 import { Tile } from "../../types/Tile";
 import { Player } from "../../models/Player";
+import { ComponentSystem } from "../../systems/ComponentSystem";
 
 type InitData = {
     gameData: { 
         dungeonX: number, 
         dungeonY: number, 
         tiles?: Tile[], 
-        systems: Record<string, any>, 
         players: Record<string, Player>, 
-        entityManager: any 
+        entities: Record<number, Record<string, any>>
+        additionalSystemData: Record<string, any>;
     },
     playerId: string;
 };
@@ -22,9 +23,26 @@ export class InitEvent extends ServerEvent {
     constructor(game: Game, playerId: string) {
         super();
         const characterId = game.players[playerId].characterId;
-        const systems: Record<string, any> = {};
-        for(const system in game.systems) {
-            systems[system] = (game.systems as any)[system].asSerializable();
+        const entities: Record<number, Record<string, any>> = {};
+        game.entityManager.forEachEntity((id) => {
+            const systems: Record<string, any> = {};
+            for(const systemName in game.systems) {
+                const system = (game.systems as Record<string, ComponentSystem<unknown>>)[systemName];
+                if (system.entityIsAwareOfComponent(characterId, id, game.systems)) {
+                    systems[systemName] = system.getComponent(id);
+                }
+            }
+
+            entities[id] = systems;
+        });
+
+        const additionalSystemData: Record<string, any> = {};
+        for(const systemName in game.systems) {
+            const system = (game.systems as Record<string, ComponentSystem<unknown>>)[systemName];
+            const additionalData = system.additionalDataForEntity(characterId);
+            if (additionalData) {
+                additionalSystemData[systemName] = additionalData;
+            }
         }
 
         this.data = {
@@ -32,9 +50,9 @@ export class InitEvent extends ServerEvent {
                 dungeonX: game.dungeonX,
                 dungeonY: game.dungeonY,
                 tiles: (game.systems.visibility as any).getSeenTilesForEntity(characterId),
-                systems: systems,
                 players: game.players,
-                entityManager: game.entityManager.asSerializable()
+                entities: entities,
+                additionalSystemData
             },
             playerId,
         };

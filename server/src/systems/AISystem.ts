@@ -19,7 +19,4 @@ export class AISystem extends ComponentSystem<AIComponent> {
             aiFunction(entityId, component, systems, dungeon);
         }
     }
-    toJSON(): any {
-        return null;
-    }
 }

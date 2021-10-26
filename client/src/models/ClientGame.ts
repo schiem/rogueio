@@ -12,6 +12,7 @@ import { InputEventHandler } from "../events/InputEventHandler";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { setupUI } from "../UI/UI";
 import { TileName } from "../../../common/src/types/Tile";
+import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
@@ -45,8 +46,9 @@ export class ClientGame extends Game {
                 if (data.id === this.players[this.currentPlayerId].characterId) {
                     this.recenterViewPort();
                 }
-            this.renderDungeonTileAtLocation(data.props.location);
-            this.renderDungeonTileAtLocation(data.oldProps.location);
+
+                this.renderDungeonTileAtLocation(data.props.location);
+                this.renderDungeonTileAtLocation(data.oldProps.location);
                 this.renderer.renderViewPort();
             }
         });
@@ -69,24 +71,34 @@ export class ClientGame extends Game {
         });
         this.timeInitialized = event.ts;
 
-        const systems = this.systems as any;
-        const incomingSystems = event.data.gameData.systems as any;
-        
-        // Get the current list of entities
-        Object.assign(this.entityManager, event.data.gameData.entityManager);
+        const systems = this.systems as Record<string, ComponentSystem<unknown>>;
 
-        // deserialize all the systems
-        debugger;
-        Object.keys(incomingSystems).forEach((system) => {
-            if (!incomingSystems[system]) {
-                return;
-            }
-            Object.assign(systems[system], incomingSystems[system]);
-            systems[system].postDeserialize();
-        });
+        // Add additional data to the systems first
+        for(const systemName in event.data.gameData.additionalSystemData) {
+            Object.assign(systems[systemName], event.data.gameData.additionalSystemData[systemName]);
+        }
+
+        // Get the set of entities + components
+        const entities = event.data.gameData.entities;
+        for(const key in entities) {
+            const entityId = parseInt(key);
+            this.entityManager.addEntity(entityId);
+            // Add all the components.
+            this.addComponentsForEntity(entityId, entities[entityId]);
+        }
 
         // Initialize the UI
         setupUI(this.systems, this.players[this.currentPlayerId]);
+    }
+
+    addComponentsForEntity(entityId: number, components: Record<string, any>): void {
+        const systems = this.systems as Record<string, ComponentSystem<unknown>>;
+        for(const systemName in components) {
+            const component = components[systemName];
+            
+            // Add it directly, do not fire events
+            systems[systemName].addComponentForEntity(entityId, component);
+        }
     }
 
     renderDungeonTileAtLocation(point: Point): void {

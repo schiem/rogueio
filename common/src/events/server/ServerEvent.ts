@@ -7,7 +7,8 @@ export enum ServerEventType {
     addComponent,
     removeComponent,
     addEntity,
-    removeEntity
+    removeEntity,
+    removeVisibleComponents
 }
 export class ServerEvent extends NetworkEvent {
     type: ServerEventType;

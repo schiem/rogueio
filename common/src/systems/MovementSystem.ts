@@ -40,11 +40,4 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         }
         return didMove;
     }
-
-    toJSON(): any {
-        return {
-            entities: this.entities
-        };
-    }
-
 }

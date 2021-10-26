@@ -19,12 +19,11 @@ export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
     networkEventManager: NetworkEventManager;
     private clients: Record<string, WebSocket> = {};
-    private tickSpeed = 200;
+    private tickSpeed = 66.6666;
     private lastTick: number;
 
     constructor() {
         super();
-        console.log(this.systems.ally);
 
         const maxRoomSize = {x: 30, y: 16};
         const minRoomSize = {x: 8, y: 4};
@@ -44,7 +43,7 @@ export class ServerGame extends Game {
         this.systems.visibility.setDungeon(this.currentLevel);
 
         // Add the network manager to handle events
-        this.networkEventManager = new NetworkEventManager(this.systems, this.entityManager);
+        this.networkEventManager = new NetworkEventManager(this.players, this.systems, this.entityManager);
 
         this.startTick();
     }
@@ -96,13 +95,14 @@ export class ServerGame extends Game {
         if (playerId === undefined) {
             playerId = uuidv4();
         }
-        this.clients[playerId] = ws;
         const player = new Player(playerId);
-        player.characterId = this.entityManager.addNextEntity();
+        this.clients[playerId] = ws;
         this.players[playerId] = player;
-
-        SpawnPlayerCharacter(player.characterId, this.systems, this.currentLevel);
         this.networkEventManager.addPlayerEventQueue(playerId);
+
+
+        player.characterId = this.entityManager.addNextEntity();
+        SpawnPlayerCharacter(player.characterId, this.systems, this.currentLevel);
 
         return playerId;
     }
@@ -112,10 +112,5 @@ export class ServerGame extends Game {
         this.networkEventManager.removePlayerEventQueue(playerId);
         delete this.players[playerId];
         delete this.clients[playerId];
-    }
-
-    toJSON(): any {
-        return {
-        } as Game;
     }
 }

@@ -1,5 +1,6 @@
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
+import { GameSystems } from "../models/Game";
 
 export type ReplicationMode = 'self' | 'ally' | 'visible' | 'none';
 export type IdComponent<T> = {id: number, component: T};
@@ -82,20 +83,41 @@ export abstract class ComponentSystem<T> {
         this.removedComponentEmitter.emit({id, component});
     }
 
-    /**
-     * Handles the work required to create this object after serializing it (e.g. to send across the network).
-     * Often, much of the redundant data will be removed before deserializing to make network
-     * requests smaller. This function will reconstruct them.
-     */
-    postDeserialize(): void {
-        Object.keys(this.entities).forEach((entityId) => {
-            const id = parseInt(entityId);
-            this.addedComponentEmitter.emit({id, component: this.entities[id]});
-        });
+    entityIsAwareOfComponent(entityToSendTo: number, entityId: number, systems: GameSystems): boolean {
+        const component = this.getComponent(entityId);
+        if (!component) {
+            return false;
+        }
+
+        switch (this.replicationMode) {
+            case 'none':
+                return false;
+            case 'ally':
+                const allySystem = systems.ally;
+                return allySystem.entitiesAreAllies(entityToSendTo, entityId);
+            case 'self':
+                return entityId === entityToSendTo;
+            case 'visible':
+                const visibilitySystem = systems.visibility;
+                const locationSystem = systems.location;
+
+                const locationComponent = locationSystem.getComponent(entityId);
+                if (!locationComponent) {
+                    return false;
+                }
+                return visibilitySystem.sharedTileIsVisible(entityToSendTo, locationComponent.location);
+
+            default: 
+                return false;
+        }
     }
 
-    asSerializable(): unknown {
-        return JSON.parse(JSON.stringify(this));
+    /**
+     * Fetches any additional data in the system associated with this component (e.g. data shared between multiple components) 
+     * Returns undefined if no data is needed
+     */
+    additionalDataForEntity(entityId: number): any {
+        return;
     }
 
     private updateNestedProperty(component: T, property: string, value: any): any {
@@ -117,6 +139,4 @@ export abstract class ComponentSystem<T> {
         }
         return oldProp;
     }
-
-    abstract toJSON(): any;
 }

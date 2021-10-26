@@ -54,13 +54,19 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
         if (!component) {
             return;
         }
-        return this.groups[component.group];
+        return this.getAlliesForGroup(component.group);
     }
 
-    toJSON(): any {
-        return {
-            entities: this.entities, 
-            groups: this.groups
+    getAlliesForGroup(group: string): number[] {
+        return this.groups[group];
+    }
+
+    entitiesAreAllies(id: number, other: number): boolean {
+        const component = this.getComponent(id);
+        const otherComp = this.getComponent(other);
+        if (!component || !otherComp) {
+            return false;
         }
+        return component.group === otherComp.group;
     }
 }

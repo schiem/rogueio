@@ -83,11 +83,16 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
     }
 
     sharedTileIsVisible(entityId: number, location: Point): boolean {
-        const allies = this.allySystem.getAlliesForEntity(entityId);
-        if (!allies) {
+        const allyComponent = this.allySystem.getComponent(entityId);
+        if (!allyComponent) {
             return this.tileIsVisible(entityId, location);
         }
-        return allies.find((entityId) => {
+        return this.groupTileIsVisible(allyComponent.group, location);
+    }
+
+    groupTileIsVisible(group: string, location: Point): boolean {
+        const allies = this.allySystem.getAlliesForGroup(group);
+        return allies?.find((entityId) => {
             return this.tileIsVisible(entityId, location);
         }) !== undefined;
     }
@@ -99,10 +104,25 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
 
         for (let i = 0; i < component.seen.length; i++) {
             component.seen[i] = new Array(size.y);
+            for(let j = 0; j < component.seen[i].length; j++) {
+                component.seen[i][j] = false;
+            }
         }
 
         this.sharedComponents[group] = component;
     }
 
-    toJSON(): any {}
+    additionalDataForEntity(entityId: number): any {
+        const sharedComponent = this.getSharedVisibilityComponent(entityId);
+        const allyComponent = this.allySystem.getComponent(entityId);
+        if (!sharedComponent || !allyComponent) {
+            return;
+        }
+
+        return {
+            sharedComponents: {
+                [allyComponent.group]: sharedComponent
+            }
+        };
+    }
 }

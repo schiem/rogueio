@@ -4,10 +4,11 @@ import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { NetworkEvent } from "../../../common/src/events/NetworkEvent";
 import { UpdateEntityEvent } from "../../../common/src/events/server/UpdateEntityEvent";
-import { AddEntityComponentEvent } from "../../../common/src/events/server/AddEntityComponentEvent";
+import { AddEntityComponentsEvent } from "../../../common/src/events/server/AddEntityComponentEvent";
 import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
 import { encode } from "messagepack";
+import { RemoveVisibleComponentsEvent } from "../../../common/src/events/server/RemoveVisibleComponentsEvent";
 
 /**
  * The client network event handler is completely unrelated to the server event handler.
@@ -51,18 +52,29 @@ export class NetworkEventHandler {
             }
             system.updateComponent(event.data.id, event.data.properties);
         },
-        [ServerEventType.addComponent]: (game: ClientGame, event: AddEntityComponentEvent): void => {
-            const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
-            if (!system) {
-                throw new Error('Invalid system');
+        [ServerEventType.addComponent]: (game: ClientGame, event: AddEntityComponentsEvent): void => {
+            for(let systemName in event.data.components) {
+                const system: ComponentSystem<any> = (game.systems as any)[systemName];
+                if (!system) {
+                    throw new Error('Invalid system');
+                }
+                system.addComponentForEntity(event.data.id, event.data.components[systemName]);
             }
-            system.addComponentForEntity(event.data.id, event.data.component);
         },
         [ServerEventType.addEntity]: (game: ClientGame, event: AddEntityEvent): void => {
             game.entityManager.addEntity(event.data.id);
         },
         [ServerEventType.removeEntity]: (game: ClientGame, event: RemoveEntityEvent): void => {
             game.entityManager.removeEntity(event.data.id);
+        },
+        [ServerEventType.removeVisibleComponents]: (game: ClientGame, event: RemoveVisibleComponentsEvent): void => {
+            const systems = game.systems as Record<string, ComponentSystem<unknown>>;
+            for(let systemName in game.systems) {
+                const system = systems[systemName];
+                if (system.replicationMode === 'visible') {
+                    system.removeComponentFromEntity(event.data.id);
+                }
+            }
         }
     }
 }

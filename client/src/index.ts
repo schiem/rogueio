@@ -6,6 +6,7 @@ import { NetworkEventHandler } from "./events/NetworkEventHandler";
 import { NetworkEvent } from "../../common/src/events/NetworkEvent";
 import { SpriteColor } from "../../common/src/types/Sprite";
 import { decode } from "messagepack";
+import { ServerEventType } from "../../common/src/events/server/ServerEvent";
 
 const viewportCanvas: HTMLCanvasElement = document.getElementById('viewport') as HTMLCanvasElement;
 const spriteWidth = 14;
@@ -29,7 +30,7 @@ spriteSheet.onReady(() => {
             // ignore any events that were before the game was initialized
             // if a client connects in the middle of a tick cycle, it's possible
             // that there are events queued that will be included in the initEvent
-            if (game.timeInitialized === undefined || game.timeInitialized < evData.ts) {
+            if ((game.timeInitialized === undefined && evData.type === ServerEventType.init) || game.timeInitialized < evData.ts) {
                 NetworkEventHandler.handleEvent(game, evData);
             }
         });
