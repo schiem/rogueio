@@ -15,7 +15,8 @@ type StatProps = {
 
 export class UIStatBlock extends Component<StatProps, StatState> {
     componentChangedEmitter: EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>;
-    subscription: number;
+    subscription?: number;
+
     constructor({ stats, componentChangedEmitter }: StatProps) {
         super();
         this.state = {
@@ -48,7 +49,10 @@ export class UIStatBlock extends Component<StatProps, StatState> {
     }
 
     componentWillUnmount(): void {
-        this.componentChangedEmitter.unsubscribe(this.subscription);
+        if (this.subscription) {
+            this.componentChangedEmitter.unsubscribe(this.subscription);
+            this.subscription = undefined;
+        }
     }
 
     render() {
@@ -58,7 +62,7 @@ export class UIStatBlock extends Component<StatProps, StatState> {
             <div class="terminal-content">
               <ul>
                   {Object.keys(this.state.statNameList).map(key => 
-                    <li class="statblock"><span>{this.state.statNameList[key]}</span><span>{(this.state.stats.current as any)[key] + ' / ' + (this.state.stats.max as any)[key]}</span></li>
+                    <li class="columned"><span>{this.state.statNameList[key]}</span><span>{(this.state.stats.current as any)[key] + ' / ' + (this.state.stats.max as any)[key]}</span></li>
                   )}
               </ul>
             </div>

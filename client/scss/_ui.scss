@@ -1,8 +1,18 @@
 #ui {
     flex: 1;
 
-    .statblock {
+    & > div {
+        display: flex;
+    }
+
+    .columned {
         display: flex;
         justify-content: space-between;
+    }
+
+    .separated-row:not(:first-child) {
+        margin-top: $spacing-xs;
+        padding-top: $spacing-xs;
+        border-top: $border;
     }
 }

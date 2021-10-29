@@ -4,6 +4,7 @@ import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { GameSystems } from "../../../common/src/models/Game";
 import { Player } from "../../../common/src/models/Player";
 import { loadLibrary } from "../lang/Lang";
+import { UIMessages } from "./components/UIMessages";
 import { UIStatBlock } from "./components/UIStatBlock";
 
 type UIProps = {
@@ -30,7 +31,10 @@ export class UI extends Component<UIProps> {
     }
 
     render() {
-        return <UIStatBlock stats={this.playerStatComponent} componentChangedEmitter={this.statUpdatedEmitter} />
+        return <div>
+            <UIStatBlock stats={this.playerStatComponent} componentChangedEmitter={this.statUpdatedEmitter} />
+            <UIMessages />
+        </div>
     }
 }
 

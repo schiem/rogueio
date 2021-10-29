@@ -53,11 +53,13 @@ export class ClientGame extends Game {
             }
         });
 
-        this.systems.visibility.singleVisionPointChanged.subscribe((data) =>  {
-            if (data.tile) {
-                this.currentLevel.setTile(data.tile);
-            }
-            this.renderDungeonTileAtLocation(data.point);
+        this.systems.visibility.visionPointsChanged.subscribe((data) =>  {
+            data.forEach((pointData) => {
+                if (pointData.tile) {
+                    this.currentLevel.setTile(pointData.tile);
+                }
+                this.renderDungeonTileAtLocation(pointData.point);
+            });
             this.renderer.renderViewPort();
         });
     }

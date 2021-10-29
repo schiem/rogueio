@@ -10,7 +10,7 @@ const wss = new WebSocket.Server({ port: 8888});
 wss.on('connection', (ws) => {
     const playerId = game.playerConnected(ws);
     // send the initial event
-    game.networkEventManager.queueEvent(new InitEvent(game, playerId), game.players[playerId].characterId);
+    game.networkEventManager.queueEventForPlayer(playerId, new InitEvent(game, playerId));
 
     ws.onmessage = (event) => {
         const eventData: ClientEvent = decode(event.data as Buffer);

@@ -27,6 +27,7 @@ export enum EntityType {
 export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     [EntityType.player]: () => {
         return {
+            ally: {group: 'players'},
             location: {
                 sprite: {
                     name: SpriteName.player,
@@ -36,7 +37,6 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            ally: {group: 'players'},
             movement: { minMovementDelay: 100 },
             visibility: { sightRadius: 6, visible: {} },
             stats: {
@@ -55,6 +55,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
     [EntityType.bufonidWarrior]: () => {
         return {
+            ally: {group: 'enemies'},
             location: {
                 sprite: {
                     name: SpriteName.bufonid,
@@ -64,7 +65,6 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            ally: {group: 'enemies'},
             movement: { minMovementDelay: 200 },
             stats: {
                 current: {
@@ -85,6 +85,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
     [EntityType.bufonidQueen]: () => {
         return {
+            ally: {group: 'enemies'},
             location: {
                 sprite: {
                     name: SpriteName.bufonid,
@@ -94,7 +95,6 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            ally: {group: 'enemies'},
             movement: { minMovementDelay: 200 },
             stats: {
                 current: {
@@ -115,6 +115,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
     [EntityType.bufonidSpawn]: () => {
         return {
+            ally: {group: 'enemies'},
             location: {
                 sprite: {
                     name: SpriteName.spawn,
@@ -124,7 +125,6 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            ally: {group: 'enemies'},
             movement: { minMovementDelay: 200 },
             stats: {
                 current: {

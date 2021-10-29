@@ -1,7 +1,7 @@
 import { NetworkEvent } from "../NetworkEvent";
 
 export enum ServerEventType {
-    init,
+    init = 1,
     update,
     message,
     addComponent,

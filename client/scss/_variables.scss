@@ -1,9 +1,13 @@
+@use 'sass:math';
+
 $black: #222;
 $gray: #666;
+$dark-gray: #444;
 $white: white;
 $primary-color: #b4b9dc;
 
 $spacing: 10px;
+$spacing-xs: math.div($spacing, 2);
 $spacing-sm: $spacing * 2; 
 $spacing-md: $spacing * 3;
 $spacing-xl: $spacing * 6;
@@ -13,3 +17,4 @@ $font: 'Fira Code', monospace;
 
 $box-shadow: 3px 3px 5px $gray;
 $border-radius: 2px;
+$border: 1px solid #333;

@@ -3,11 +3,11 @@
     font-size: $font-base;
     background: $black;
     color: $white;
-    min-width: 200px;
+    min-width: 300px;
     border-radius: $border-radius;
     box-shadow: $box-shadow;
     overflow: hidden;
-    margin: 0 $spacing;
+    margin: $spacing 0 $spacing $spacing;
 
     .terminal-title {
         padding: 0 $spacing;
@@ -17,5 +17,46 @@
 
     .terminal-content {
         padding: $spacing;
+
+        .scrollable-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .scroll-bottom {
+            & > * {
+                overflow-anchor: none;
+            }
+
+            .pin-to-bottom {
+                overflow-anchor: auto;
+                height: 1px;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    }
+
+
+    & * {
+        /* Works on Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: $primary-color $dark-gray;
+
+        /* Works on Chrome, Edge, and Safari */
+        &::-webkit-scrollbar {
+            width: 12px;
+            border-radius: 20px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: $dark-gray;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: $primary-color;
+            border-radius: 20px;
+            border: 3px solid $dark-gray;
+        }
     }
 }

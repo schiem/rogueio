@@ -89,15 +89,20 @@ export abstract class ComponentSystem<T> {
             return false;
         }
 
+        const allySystem = systems.ally;
         switch (this.replicationMode) {
             case 'none':
                 return false;
             case 'ally':
-                const allySystem = systems.ally;
                 return allySystem.entitiesAreAllies(entityToSendTo, entityId);
             case 'self':
                 return entityId === entityToSendTo;
             case 'visible':
+                // For now, all allies are visible, always.
+                if (allySystem.entitiesAreAllies(entityToSendTo, entityId)) {
+                    return true;
+                }
+
                 const visibilitySystem = systems.visibility;
                 const locationSystem = systems.location;
 

@@ -12,8 +12,7 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
 
     entities: Record<number, VisibilityComponent>;
     sharedComponents: Record<string, SharedVisibilityComponent> = {};
-    visionChangedEmitter = new EventEmitter<{id: number, added: Point[], removed: Point[], seenAdded: Point[]}>();
-    singleVisionPointChanged = new EventEmitter<{point: Point, tile?: Tile}>();
+    visionPointsChanged = new EventEmitter<{point: Point, tile?: Tile}[]>();
 
     componentPropertyUpdaters = {
         added: (id: number, component: VisibilityComponent, added: Point[]) => {
@@ -22,13 +21,13 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
                     component.visible[point.x] = {};
                 }
                 component.visible[point.x][point.y] = true;
-                this.singleVisionPointChanged.emit({point});
+                this.visionPointsChanged.emit([{point}]);
             });
         },
         removed: (id: number, component: VisibilityComponent, removed: Point[]) => {
             removed.forEach((point) => {
                 delete component.visible[point.x]?.[point.y];
-                this.singleVisionPointChanged.emit({point});
+                this.visionPointsChanged.emit([{point}]);
             });
         },
         seen: (id: number, component: VisibilityComponent, seen: Tile[]) => {
@@ -37,11 +36,13 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
                 return;
             }
 
+            const changed:{point: Point, tile?: Tile}[]  = [];
             seen.forEach((tile) => {
                 sharedComponent.seen[tile.coords.x][tile.coords.y] = true;
                 // TODO - consider uncoupling this, right now it's very heavily coupled
-                this.singleVisionPointChanged.emit({point: tile.coords, tile});
+                changed.push({point: tile.coords, tile});
             });
+            this.visionPointsChanged.emit(changed);
         },
     };
     
@@ -52,6 +53,28 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
         Object.keys(this.allySystem.groups).forEach((group) => {
             this.addSharedComponent(group, dungeonSize);
         })
+    }
+
+    removeComponentFromEntity(id: number): void {
+        const component = this.getComponent(id);
+        if (!component) {
+            return;
+        }
+        // TODO - this really only needs to be done on the client - should we subclass it?
+        const points: {point: Point, tile?: Tile}[] = [];
+        for(const x in component.visible) {
+            for(const y in component.visible[x]) {
+                points.push({
+                    point: {
+                        x: parseInt(x),
+                        y: parseInt(y)
+                    }
+                });
+            }
+        }
+
+        this.visionPointsChanged.emit(points);
+        super.removeComponentFromEntity(id);
     }
 
     getSharedVisibilityComponent(entityId: number): SharedVisibilityComponent | undefined {
