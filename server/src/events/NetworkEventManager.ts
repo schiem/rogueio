@@ -105,10 +105,10 @@ export class NetworkEventManager {
         delete this.eventQueue[playerId];
     }
 
-    queueEvent(event: NetworkEvent, triggeringId: number, fromSystem?: ComponentSystem<unknown>): void {
+    queueEvent(event: NetworkEvent, triggeringId?: number, fromSystem?: ComponentSystem<unknown>): void {
         for(let playerId in this.eventQueue) {
             const entityId = this.players[playerId].characterId;
-            if (!fromSystem || fromSystem.entityIsAwareOfComponent(entityId, triggeringId, this.systems)) {
+            if (!fromSystem || !triggeringId || fromSystem.entityIsAwareOfComponent(entityId, triggeringId, this.systems)) {
                 this.queueEventForPlayer(playerId, event);
             }
         }

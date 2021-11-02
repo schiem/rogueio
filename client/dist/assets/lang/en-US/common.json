@@ -4,6 +4,9 @@
         "dex": "Dexterity",
         "con": "Constitution"
     },
+    "system": {
+        "gameStart": "You enter a dungeon dimly lit dungeon. Water drips in the distance and creatures scurry in the dark.  Nearly out of earshot, there is a faint chattering."
+    },
     "monsterBrief": {
         "bufonid": {
             "name": "Bufonid",

@@ -13,12 +13,15 @@ import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { setupUI } from "../UI/UI";
 import { TileName } from "../../../common/src/types/Tile";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
+import { EventEmitter } from "../../../common/src/events/EventEmitter";
+import { MessageData } from "../../../common/src/events/server/MessageEvent";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
     renderer: Renderer;
     inputEventHandler: InputEventHandler;
     timeInitialized: number;
+    messageEmitter = new EventEmitter<MessageData>();
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -90,7 +93,7 @@ export class ClientGame extends Game {
         }
 
         // Initialize the UI
-        setupUI(this.systems, this.players[this.currentPlayerId]);
+        setupUI(this, this.players[this.currentPlayerId]);
     }
 
     addComponentsForEntity(entityId: number, components: Record<string, any>): void {

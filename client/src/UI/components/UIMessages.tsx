@@ -1,26 +1,35 @@
 import { Attributes, Component, ComponentChild, ComponentChildren, Ref } from "preact";
+import { resolveProjectReferencePath } from "typescript";
+import { EventEmitter } from "../../../../common/src/events/EventEmitter";
+import { MessageData } from "../../../../common/src/events/server/MessageEvent";
+import { localize } from "../../lang/Lang";
 
 type MessageState = {
     messages: string[]
 }
 
-export class UIMessages extends Component<{}, MessageState> {
-    maxMessages = 50;
+type MessageProps = {
+    messageEmitter: EventEmitter<MessageData>
+}
 
-    constructor() {
-        super();
+export class UIMessages extends Component<MessageProps, MessageState> {
+    maxMessages = 50;
+    messageSubscription: number;
+
+    constructor(props: MessageProps) {
+        super(props);
         this.state = {
             messages: []
         };
+
     }
 
     componentDidMount(): void {
-        setInterval(() => {
-            // The idea of copying the entire array to push into it 
-            // is absolutely asinine and the reason people make fun of
-            // javascript
-            this.addMessage("This is a new message");
-        }, 1000);
+        this.messageSubscription = this.props.messageEmitter.subscribe((data) => {
+            localize(data.message, data.replacements).then((msg) => {
+                this.addMessage(msg);
+            })
+        });
     }
 
     addMessage(message: string): void {

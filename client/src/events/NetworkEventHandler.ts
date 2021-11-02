@@ -43,8 +43,10 @@ export class NetworkEventHandler {
         [ServerEventType.init]: (game: ClientGame, event: InitEvent): void => {
             game.postDeserialize(event);
             game.renderDungeon(game.currentLevel);
+            game.messageEmitter.emit({message: "common/system/gameStart"});
         },
-        [ServerEventType.message]: (game: ClientGame, event: any): void => {
+        [ServerEventType.message]: (game: ClientGame, event: MessageEvent): void => {
+            game.messageEmitter.emit(event.data);
         },
         [ServerEventType.update]: (game: ClientGame, event: UpdateEntityEvent): void => {
             const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
