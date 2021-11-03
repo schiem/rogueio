@@ -5,7 +5,28 @@ import { ClientEvent } from '../../common/src/events/client/ClientEvent';
 import { decode } from "messagepack";
 
 const game = new ServerGame();
-const wss = new WebSocket.Server({ port: 8888});
+const wss = new WebSocket.Server({ port: 8888,   
+    /** Consider enabling this in production
+    perMessageDeflate: {
+        zlibDeflateOptions: {
+            // See zlib defaults.
+            chunkSize: 1024,
+            memLevel: 7,
+            level: 3
+        },
+        zlibInflateOptions: {
+            chunkSize: 10 * 1024
+        },
+        // Other options settable:
+        clientNoContextTakeover: false, // Defaults to negotiated value.
+        serverNoContextTakeover: false, // Defaults to negotiated value.
+        serverMaxWindowBits: 10, // Defaults to negotiated value.
+        // Below options specified as default values.
+        concurrencyLimit: 10, // Limits zlib concurrency for perf.
+        //threshold: 1024 // Size (in bytes) below which messages should not be compressed if context takeover is disabled.
+    }
+    */
+});
 
 wss.on('connection', (ws) => {
     const playerId = game.playerConnected(ws);
