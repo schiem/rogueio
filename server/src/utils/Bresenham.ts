@@ -30,7 +30,7 @@ export const BresenhamCircle = (location: Point, radius: number): Point[] => {
 };
 
 // Raycast a point out
-export const BresenhamRayCast = (start: Point, end: Point, fn?: (point: Point) => boolean): void => {
+export const BresenhamRayCast = (start: Point, end: Point, fn: (point: Point) => boolean): boolean => {
     const steep = (Math.abs(end.y - start.y) > Math.abs(end.x - start.x));
 
     if(steep) {
@@ -68,7 +68,7 @@ export const BresenhamRayCast = (start: Point, end: Point, fn?: (point: Point) =
         }
 
         if (fn && !fn(current_point)) {
-            return;
+            return true;
         }
 
         error = error - deltay;
@@ -77,4 +77,5 @@ export const BresenhamRayCast = (start: Point, end: Point, fn?: (point: Point) =
             error = error + deltax;
         }
     }
+    return false;
 }

@@ -1,3 +1,4 @@
+import { ActionComponent, ActionTarget, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
@@ -16,6 +17,7 @@ export type ComponentBlock = {
     ally: AllyComponent;
     stats: StatComponent;
     ai: AIComponent;
+    action: ActionComponent
 }
 
 export enum EntityType {
@@ -50,6 +52,21 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                     con: 10,
                     dex: 10
                 },
+            },
+            action: {
+                actions: [{
+                    range: 1,
+                    targetType: {
+                        target: ActionTarget.entity,
+                    },
+                    effects: [
+                        {
+                            type: EffectType.attack,
+                            target: EffectTarget.enemy,
+                            damage: {min: 0, max: 4}
+                        }
+                    ]
+                }]
             }
         };
     },

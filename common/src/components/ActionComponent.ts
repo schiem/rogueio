@@ -1,48 +1,51 @@
+// Action Target Data
 export enum ActionTarget {
     self,
     entity,
-    area
-}
-
-export enum EffectTarget {
-    enemy,
-    ally,
-    self
-}
-
-export enum TargetShape {
     circle,
-    square
+    line
 }
-
 type SelfAction = {
     target: ActionTarget.self;
 };
+
 type EntityAction = {
     target: ActionTarget.entity;
-}
-type AreaAction = {
-    target: ActionTarget.area
-    shape: TargetShape,
-    targetRadius: number
+};
+
+type CircleAction = {
+    target: ActionTarget.circle
+    radius: number
+};
+
+type LineAction = {
+    target: ActionTarget.line
+    length: number;
 };
 
 
 export enum EffectType {
     attack,
 }
+export enum EffectTarget {
+    enemy,
+    ally,
+    self
+}
 export interface Effect {
+    type: EffectType,
+    target: EffectTarget
 }
 export interface AttackEffect extends Effect {
     type: EffectType.attack;
     damage: { min: number, max: number };
-    range: number;
 };
 
 
 export type Action = {
     effects: Effect[];
-    targetType: SelfAction | AreaAction | EntityAction
+    range: number;
+    targetType: SelfAction | CircleAction | EntityAction | LineAction
 };
 
 export type ActionComponent = {
