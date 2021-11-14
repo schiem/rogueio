@@ -1,8 +1,9 @@
 import { ServerEvent, ServerEventType } from "./ServerEvent";
-import { Game } from "../../models/Game";
 import { Tile } from "../../types/Tile";
 import { Player } from "../../models/Player";
 import { ComponentSystem } from "../../systems/ComponentSystem";
+import { Game } from "../../models/Game";
+import { EntityManager } from "../../entities/EntityManager";
 
 type InitData = {
     gameData: { 
@@ -20,7 +21,7 @@ export class InitEvent extends ServerEvent {
     type = ServerEventType.init;
     data: InitData;
 
-    constructor(game: Game, playerId: string) {
+    constructor(game: Game, entityManager: EntityManager, playerId: string) {
         super();
         const characterId = game.players[playerId].characterId;
         const entities: Record<number, Record<string, any>> = {};
@@ -28,7 +29,7 @@ export class InitEvent extends ServerEvent {
             const systems: Record<string, any> = {};
             for(const systemName in game.systems) {
                 const system = (game.systems as Record<string, ComponentSystem<unknown>>)[systemName];
-                if (system.entityIsAwareOfComponent(characterId, id, game.systems)) {
+                if (entityManager.entityIsAwareOfComponent(characterId, id, game.systems, system.replicationMode)) {
                     systems[systemName] = system.getComponent(id);
                 }
             }

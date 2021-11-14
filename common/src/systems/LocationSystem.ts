@@ -44,7 +44,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     }
 
     /**
-     * Moves an entity to a new location. Only checks collisions if @param {collide} is true.
+     * Attempts to move an entity to a new location.
      * Returns whether the entity was successfully moved.
      */
     moveAndCollideEntity(id: number, location: Point, dungeon: Dungeon): boolean {
@@ -58,7 +58,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
             return false;
         }
 
-        this.updateComponent(id, {location: location});
+        this.moveEntity(id, location);
         return true;
     }
 

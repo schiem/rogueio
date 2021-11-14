@@ -39,3 +39,4 @@ spriteSheet.onReady(() => {
 
 // For debugging
 (window as any).game = game;
+(window as any).networkHandler = NetworkEventHandler;

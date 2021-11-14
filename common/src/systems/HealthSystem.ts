@@ -9,9 +9,13 @@ export class HealthSystem extends ComponentSystem<HealthComponent> {
         super(entityManager)
 
         this.componentUpdatedEmitter.subscribe((data) => {
-            if (data.props.health) {
-                // Oh dear, the player has died
-                if (data.props.health <= 0) {
+            if (data.props.current !== undefined) {
+                const component = this.getComponent(data.id);
+                if (!component) {
+                    return;
+                }
+                // Oh dear, the entity has died
+                if (component.current <= 0) {
                     this.removeComponentFromEntity(data.id);
                 }
             } 

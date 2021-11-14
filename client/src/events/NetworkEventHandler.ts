@@ -9,6 +9,7 @@ import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
 import { encode } from "messagepack";
 import { RemoveVisibleComponentsEvent } from "../../../common/src/events/server/RemoveVisibleComponentsEvent";
+import { RemoveEntityComponentEvent } from "../../../common/src/events/server/RemoveEntityComponentEvent";
 
 /**
  * The client network event handler is completely unrelated to the server event handler.
@@ -62,6 +63,13 @@ export class NetworkEventHandler {
                 }
                 system.addComponentForEntity(event.data.id, event.data.components[systemName]);
             }
+        },
+        [ServerEventType.removeComponent]: (game: ClientGame, event: RemoveEntityComponentEvent): void => {
+            const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
+            if (!system) {
+                throw new Error('Invalid system');
+            }
+            system.removeComponentFromEntity(event.data.id);
         },
         [ServerEventType.addEntity]: (game: ClientGame, event: AddEntityEvent): void => {
             game.entityManager.addEntity(event.data.id);

@@ -1,7 +1,5 @@
-import { NetworkEvent } from "../../../common/src/events/NetworkEvent";
 import * as WebSocket from 'ws';
 import { ClientEvent, ClientEventType } from "../../../common/src/events/client/ClientEvent";
-import { Game } from "../../../common/src/models/Game";
 import { MoveEvent } from "../../../common/src/events/client/MoveEvent";
 import { UpdateEntityEvent } from "../../../common/src/events/server/UpdateEntityEvent";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
@@ -10,29 +8,35 @@ import { RemoveEntityComponentEvent } from "../../../common/src/events/server/Re
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
-import { ServerEvent } from "../../../common/src/events/server/ServerEvent";
+import { ServerEvent, ServerEventType } from "../../../common/src/events/server/ServerEvent";
 import { encode } from "messagepack";
 import { Player } from "../../../common/src/models/Player";
-import { ServerGameSystems } from "../models/ServerGame";
+import { ServerGame, ServerGameSystems } from "../models/ServerGame";
 import { RemoveVisibleComponentsEvent } from "../../../common/src/events/server/RemoveVisibleComponentsEvent";
+import { ActionEvent } from "../../../common/src/events/client/ActionEvent";
+import { NetworkEvent } from '../../../common/src/events/NetworkEvent';
 
 /**
  * Handles both incoming and outgoing events.
  */
 export class NetworkEventManager {
     eventQueue: Record<string, NetworkEvent[]> = {};
-    private eventHandlers: Record<ClientEventType, (playerId: string, game: Game, event: MoveEvent) => void> = {
-        [ClientEventType.move]: (playerId: string, game: Game, event: MoveEvent) => {
+    private eventHandlers: Record<ClientEventType, (playerId: string, game: ServerGame, event: ClientEvent) => void> = {
+        [ClientEventType.move]: (playerId: string, game: ServerGame, event: MoveEvent) => {
             const characterId = game.players[playerId].characterId;
             this.systems.movement.attemptMove(characterId, event.data.direction, game.currentLevel);
         },
-        [ClientEventType.action]: (playerId: string, game: Game, event: MoveEvent) => {
+        [ClientEventType.action]: (playerId: string, game: ServerGame, event: ActionEvent) => {
+            const characterId = game.players[playerId].characterId;
+            // Do action handles all validation, so they can attmept to do an invalid action as much
+            // as they would like
+            game.systems.action.doAction(characterId, event.data.id, event.data.target);
         }
     }
     constructor(
         private players: Record<string, Player>,
         private systems: ServerGameSystems,
-        entityManager: EntityManager
+        private entityManager: EntityManager
     ) {
         entityManager.entityAddedEmitter.subscribe((entity) => {
             this.queueEvent(new AddEntityEvent(entity), entity);
@@ -110,7 +114,7 @@ export class NetworkEventManager {
     queueEvent(event: NetworkEvent, triggeringId?: number, fromSystem?: ComponentSystem<unknown>): void {
         for(let playerId in this.eventQueue) {
             const entityId = this.players[playerId].characterId;
-            if (!fromSystem || !triggeringId || fromSystem.entityIsAwareOfComponent(entityId, triggeringId, this.systems)) {
+            if (!fromSystem || triggeringId === undefined || this.entityManager.entityIsAwareOfComponent(entityId, triggeringId, this.systems, fromSystem.replicationMode)) {
                 this.queueEventForPlayer(playerId, event);
             }
         }
@@ -127,7 +131,7 @@ export class NetworkEventManager {
      * cause side effects to the game state which will need
      * to be reflected across the network.
      */
-    handleEvent(playerId: string, game: Game, event: ClientEvent): void {
+    handleEvent(playerId: string, game: ServerGame, event: ClientEvent): void {
         if (this.eventHandlers[event.type] !== undefined) {
             this.eventHandlers[event.type](playerId, game, event);
         }
@@ -145,5 +149,4 @@ export class NetworkEventManager {
     serializeEvents(events: ServerEvent[]): string | ArrayBuffer {
         return encode(events);
     }
-
 }

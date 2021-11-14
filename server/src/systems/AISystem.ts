@@ -8,7 +8,7 @@ export class AISystem extends ComponentSystem<AIComponent> {
 
     runAI(delta: number, systems: ServerGameSystems, dungeon: Dungeon): void {
         for(let key in this.entities) {
-            const entityId =  key as unknown as number;
+            const entityId =  parseInt(key);
             const component = this.getComponent(entityId);
             if (!component) {
                 continue;

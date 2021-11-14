@@ -109,7 +109,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         const allies = allyComponent ? this.allySystem.getAlliesForGroup(allyComponent.group) : [entityId];
 
         const newVision = GetVisibleTiles(
-            locationComponent.location, 
+            {...locationComponent.location}, 
             component.sightRadius, 
             (point) => {
                 return !this.dungeon.tileBlocksVision(point);

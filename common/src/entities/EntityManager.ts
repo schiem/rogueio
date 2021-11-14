@@ -1,4 +1,6 @@
 import { EventEmitter } from "../events/EventEmitter";
+import { GameSystems } from "../models/Game";
+import { ReplicationMode } from "../systems/ComponentSystem";
 
 /**
  * The base of the ECS.  Responsible for creating new 'entities' (which 
@@ -42,4 +44,34 @@ export class EntityManager {
             fn(parseInt(key));
         }
     }
+
+    entityIsAwareOfComponent(entityToSendTo: number, entityId: number, systems: GameSystems, replicationMode: ReplicationMode): boolean {
+        const allySystem = systems.ally;
+        switch (replicationMode) {
+            case 'none':
+                return false;
+            case 'ally':
+                return allySystem.entitiesAreAllies(entityToSendTo, entityId);
+            case 'self':
+                return entityId === entityToSendTo;
+            case 'visible':
+                // For now, all allies are visible, always.
+                if (allySystem.entitiesAreAllies(entityToSendTo, entityId)) {
+                    return true;
+                }
+
+                const visibilitySystem = systems.visibility;
+                const locationSystem = systems.location;
+
+                const locationComponent = locationSystem.getComponent(entityId);
+                if (!locationComponent) {
+                    return false;
+                }
+                return visibilitySystem.sharedTileIsVisible(entityToSendTo, locationComponent.location);
+
+            default: 
+                return false;
+        }
+    }
+
 }

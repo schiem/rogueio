@@ -33,7 +33,6 @@ export class UI extends Component<UIProps> {
         const healthComponent = game.systems.health.getComponent(charId);
         if (healthComponent) {
             this.playerHealthComponent = healthComponent;
-            console.log(this.playerHealthComponent);
         }
         this.emitters = [game.systems.stats.componentUpdatedEmitter, game.systems.health.componentUpdatedEmitter];
         this.messageEventEmitter = game.messageEmitter;

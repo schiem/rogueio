@@ -1,6 +1,5 @@
 import { EntityManager } from "../entities/EntityManager";
 import { EventEmitter } from "../events/EventEmitter";
-import { GameSystems } from "../models/Game";
 
 export type ReplicationMode = 'self' | 'ally' | 'visible' | 'none';
 export type IdComponent<T> = {id: number, component: T};
@@ -15,7 +14,7 @@ export abstract class ComponentSystem<T> {
     abstract replicationMode: ReplicationMode;
     // A mapping of entities that this system manages to the component
     // that this sytem manages
-    entities: Record<number, T> = {}
+    protected entities: Record<number, T> = {}
     componentPropertyUpdaters: Record<string, (id: number, component: any, newValue: any) => void>;
 
     addedComponentEmitter = new EventEmitter<IdComponent<T>>();
@@ -82,41 +81,6 @@ export abstract class ComponentSystem<T> {
         delete this.entities[id];
         this.removedComponentEmitter.emit({id, component});
     }
-
-    entityIsAwareOfComponent(entityToSendTo: number, entityId: number, systems: GameSystems): boolean {
-        const component = this.getComponent(entityId);
-        if (!component) {
-            return false;
-        }
-
-        const allySystem = systems.ally;
-        switch (this.replicationMode) {
-            case 'none':
-                return false;
-            case 'ally':
-                return allySystem.entitiesAreAllies(entityToSendTo, entityId);
-            case 'self':
-                return entityId === entityToSendTo;
-            case 'visible':
-                // For now, all allies are visible, always.
-                if (allySystem.entitiesAreAllies(entityToSendTo, entityId)) {
-                    return true;
-                }
-
-                const visibilitySystem = systems.visibility;
-                const locationSystem = systems.location;
-
-                const locationComponent = locationSystem.getComponent(entityId);
-                if (!locationComponent) {
-                    return false;
-                }
-                return visibilitySystem.sharedTileIsVisible(entityToSendTo, locationComponent.location);
-
-            default: 
-                return false;
-        }
-    }
-
     /**
      * Fetches any additional data in the system associated with this component (e.g. data shared between multiple components) 
      * Returns undefined if no data is needed
@@ -131,8 +95,8 @@ export abstract class ComponentSystem<T> {
         let oldProp: any;
         for(let i = 0; i < properties.length; i++) {
             const prop = properties[i];
-            if (!currentObj[prop]) {
-                throw new Error('Could not update non existant property');
+            if (currentObj[prop] === undefined) {
+                throw new Error(`Could not update non existent property ${property}`);
             }
 
             if (i === properties.length - 1) {
