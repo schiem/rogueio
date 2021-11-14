@@ -1,4 +1,4 @@
-import { Point } from "../types/Points";
+import { Point } from "../../../common/src/types/Points";
 export enum RoomFeatureNames {
     water
 }

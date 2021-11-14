@@ -1,7 +1,7 @@
-import { Rectangle } from "./Rectangle";
-import { Point } from "../types/Points";
-import { random } from "../utils/MathUtils";
+import { Rectangle } from "../../../common/src/models/Rectangle";
 import { RoomFeatures } from "./RoomFeatures";
+import { Point } from "../../../common/src/types/Points";
+import { random } from "../../../common/src/utils/MathUtils";
 import { MobSpawnGenerator } from "../../../server/src/generators/SpawnGenerator";
 
 export type Condition = 1 | 2 | 3 | 4;

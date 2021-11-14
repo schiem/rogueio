@@ -1,12 +1,12 @@
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
-import { Dungeon } from "../../../common/src/models/Dungeon";
 import { GameSystems } from "../../../common/src/models/Game";
-import { Condition, Room } from "../../../common/src/models/Room";
-import { RoomFeatureNames } from "../../../common/src/models/RoomFeatures";
+import { RoomFeatureNames } from "../models/RoomFeatures";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
 import { baseEntities, EntityType, SpawnEntity } from "./EntityGenerators";
+import { Condition, Room } from "../models/Room";
+import { ServerDungeon } from "../models/ServerDungeon";
 
 export enum MobSpawnGeneratorName {
     bufonid
@@ -20,7 +20,7 @@ export type MobSpawnGenerator = {
 
     spawnInFeatures: RoomFeatureNames[];
 
-    doSpawn: (dungeon: Dungeon, room: Room, entityManager: EntityManager, systems: GameSystems) => void;
+    doSpawn: (dungeon: ServerDungeon, room: Room, entityManager: EntityManager, systems: GameSystems) => void;
 };
 
 export const MobSpawnGenerators: Record<MobSpawnGeneratorName, MobSpawnGenerator> = {
@@ -81,7 +81,7 @@ export const MobSpawnGenerators: Record<MobSpawnGeneratorName, MobSpawnGenerator
     }
 }
 
-export const SpawnPlayerCharacter = (entityId: number, systems: GameSystems, dungeon: Dungeon): void => {
+export const SpawnPlayerCharacter = (entityId: number, systems: GameSystems, dungeon: ServerDungeon): void => {
     const components = baseEntities[EntityType.player]();
     let location: Point | undefined = undefined;
     const locationComponent = components.location as LocationComponent;

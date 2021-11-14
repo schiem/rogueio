@@ -1,4 +1,3 @@
-import { Point } from "../../types/Points";
 import { ClientEvent, ClientEventType } from "./ClientEvent";
 
 export type ActionData = {

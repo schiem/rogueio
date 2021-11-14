@@ -21,10 +21,12 @@ import { RemoveVisibleComponentsEvent } from "../../../common/src/events/server/
  */
 export class NetworkEventManager {
     eventQueue: Record<string, NetworkEvent[]> = {};
-    private eventHandlers = {
+    private eventHandlers: Record<ClientEventType, (playerId: string, game: Game, event: MoveEvent) => void> = {
         [ClientEventType.move]: (playerId: string, game: Game, event: MoveEvent) => {
             const characterId = game.players[playerId].characterId;
             this.systems.movement.attemptMove(characterId, event.data.direction, game.currentLevel);
+        },
+        [ClientEventType.action]: (playerId: string, game: Game, event: MoveEvent) => {
         }
     }
     constructor(

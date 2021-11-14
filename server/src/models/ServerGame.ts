@@ -11,6 +11,7 @@ import { random } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
 import { MessageData, MessageEvent } from "../../../common/src/events/server/MessageEvent";
 import { ServerActionSystem } from "../systems/ServerActionSystem";
+import { ServerDungeon } from "./ServerDungeon";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
@@ -20,6 +21,7 @@ export type ServerGameSystems = GameSystems & {
 export class ServerGame extends Game {
     systems: ServerGameSystems;
     dungeonGenerator: DungeonGenerator;
+    currentLevel: ServerDungeon;
     networkEventManager: NetworkEventManager;
     private clients: Record<string, WebSocket> = {};
     private fps = 15;

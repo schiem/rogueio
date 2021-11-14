@@ -1,6 +1,5 @@
 import { MovementType, Tile, TileModifier, TileName } from "../types/Tile";
 import { Point } from "../types/Points";
-import { Room } from "./Room";
 import { ModDefinitions, TileDefinitions } from "../consts/TileDefinitions";
 import { TileDefinition } from "../types/TileDefinition";
 import { ArrayMax } from "../utils/ArrayUtils";
@@ -8,7 +7,6 @@ import { ArrayMax } from "../utils/ArrayUtils";
 export class Dungeon {
     tiles: Tile[][] = [];
 
-    rooms: Room[] = [];
     connections: [number, number][] = [];
 
     constructor(public size: Point) {}
