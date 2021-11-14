@@ -32,7 +32,6 @@ export class NetworkEventHandler {
 
     static handleEvent(game: ClientGame, serverEvent: ServerEvent): void {
         const handler = (this.eventHandlers as any)[serverEvent.type];
-        console.log(serverEvent);
         if (handler !== undefined) {
             handler(game, serverEvent as any);
         }

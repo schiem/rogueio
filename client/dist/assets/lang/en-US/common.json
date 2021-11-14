@@ -2,7 +2,8 @@
     "stats": {
         "str": "Strength",
         "dex": "Dexterity",
-        "con": "Constitution"
+        "con": "Constitution",
+        "hp": "Health"
     },
     "system": {
         "gameStart": "You enter a dungeon dimly lit dungeon. Water drips in the distance and creatures scurry in the dark.  Nearly out of earshot, there is a faint chattering."

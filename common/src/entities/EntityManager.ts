@@ -39,7 +39,7 @@ export class EntityManager {
 
     forEachEntity(fn: (id: number) => void): void {
         for(let key in this.entities) {
-            fn(key as unknown as number);
+            fn(parseInt(key));
         }
     }
 }

@@ -5,6 +5,7 @@ import { Point } from "../types/Points";
 import { Tile } from "../types/Tile";
 import { AllySystem } from "./AllySystem";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
+import { HealthSystem } from "./HealthSystem";
 import { LocationSystem } from "./LocationSystem";
 
 export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
@@ -46,13 +47,19 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
         },
     };
     
-    constructor(entityManager: EntityManager, public allySystem: AllySystem, protected locationSystem: LocationSystem, dungeonSize: Point) {
+    constructor(entityManager: EntityManager, public allySystem: AllySystem, protected locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point) {
         super(entityManager);
 
         // Add a visibility component for every set of allies
         Object.keys(this.allySystem.groups).forEach((group) => {
             this.addSharedComponent(group, dungeonSize);
         })
+
+        healthSystem.removedComponentEmitter.subscribe((data) => {
+            if (entityManager.hasEntity(data.id)) {
+                this.removeComponentFromEntity(data.id);
+            }
+        });
     }
 
     removeComponentFromEntity(id: number): void {

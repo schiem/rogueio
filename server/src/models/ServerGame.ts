@@ -10,22 +10,26 @@ import { MobSpawnGenerator, MobSpawnGeneratorName, MobSpawnGenerators, SpawnPlay
 import { random } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
 import { MessageData, MessageEvent } from "../../../common/src/events/server/MessageEvent";
+import { ServerActionSystem } from "../systems/ServerActionSystem";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
-    visibility: ServerVisbilitySystem
+    visibility: ServerVisbilitySystem;
+    action: ServerActionSystem;
 }
 export class ServerGame extends Game {
     systems: ServerGameSystems;
     dungeonGenerator: DungeonGenerator;
     networkEventManager: NetworkEventManager;
     private clients: Record<string, WebSocket> = {};
-    private tickSpeed = 66.6666;
+    private fps = 15;
+    private tickSpeed: number
     private lastTick: number;
 
     constructor() {
         super();
 
+        this.tickSpeed = 1000 / this.fps;
         const maxRoomSize = {x: 30, y: 16};
         const minRoomSize = {x: 8, y: 4};
         const minRoomSpacing = 6;
@@ -35,12 +39,13 @@ export class ServerGame extends Game {
 
 
         // set up the visibility system, after the dungeon has been created
-        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, dungeonSize);
+        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, dungeonSize);
 
         // set up the AI system
         this.systems.ai = new AISystem(this.entityManager);
 
         this.newDungeon();
+        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health, this.currentLevel);
         this.systems.visibility.setDungeon(this.currentLevel);
 
         // Add the network manager to handle events

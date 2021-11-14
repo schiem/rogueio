@@ -4,7 +4,6 @@ import { SpriteSheet } from "../rendering/SpriteSheet";
 import { Point } from "../../../common/src/types/Points";
 import { Renderer } from "../rendering/Renderer";
 import { ViewPort } from "../rendering/ViewPort";
-import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite, SpriteColor } from "../../../common/src/types/Sprite";
@@ -15,6 +14,7 @@ import { TileName } from "../../../common/src/types/Tile";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { MessageData } from "../../../common/src/events/server/MessageEvent";
+import { ActionSystem } from "../../../common/src/systems/ActionSystem";
 
 export class ClientGame extends Game {
     currentPlayerId: string;
@@ -29,7 +29,8 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
-        this.systems.visibility = new VisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.visibility = new VisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.action = new ActionSystem(this.entityManager);
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);

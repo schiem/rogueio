@@ -1,4 +1,5 @@
 import { Component, render } from "preact";
+import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { StatComponent } from "../../../common/src/components/StatComponent";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { MessageData } from "../../../common/src/events/server/MessageEvent";
@@ -16,17 +17,25 @@ type UIProps = {
 
 export class UI extends Component<UIProps> {
     playerStatComponent: StatComponent;
-    statUpdatedEmitter: EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>;
+    playerHealthComponent: HealthComponent;
+    emitters: EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>[];
     messageEventEmitter: EventEmitter<MessageData>;
 
     constructor({ game, currentPlayer }: UIProps) {
         super();
         this.preloadLibraries();
-        const component = game.systems.stats.getComponent(currentPlayer.characterId);
-        if (component) {
-            this.playerStatComponent = component;
+        const charId = currentPlayer.characterId;
+        const statComponent = game.systems.stats.getComponent(charId);
+        if (statComponent) {
+            this.playerStatComponent = statComponent;
         }
-        this.statUpdatedEmitter = game.systems.stats.componentUpdatedEmitter;
+
+        const healthComponent = game.systems.health.getComponent(charId);
+        if (healthComponent) {
+            this.playerHealthComponent = healthComponent;
+            console.log(this.playerHealthComponent);
+        }
+        this.emitters = [game.systems.stats.componentUpdatedEmitter, game.systems.health.componentUpdatedEmitter];
         this.messageEventEmitter = game.messageEmitter;
     }
 
@@ -36,7 +45,7 @@ export class UI extends Component<UIProps> {
 
     render() {
         return <div>
-            <UIStatBlock stats={this.playerStatComponent} componentChangedEmitter={this.statUpdatedEmitter} />
+            <UIStatBlock stats={this.playerStatComponent} componentChangedEmitters={this.emitters} health={this.playerHealthComponent} />
             <UIMessages messageEmitter={this.messageEventEmitter} />
         </div>
     }

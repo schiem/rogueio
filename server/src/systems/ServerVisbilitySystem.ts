@@ -3,6 +3,7 @@ import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
+import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
@@ -13,8 +14,8 @@ export class ServerVisbilitySystem extends VisibilitySystem {
     entityChangedVisibilityEmitter = new EventEmitter<{entityId: number, forEntities: number[], visible: boolean}>();
     private dungeon: Dungeon;
 
-    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, dungeonSize: Point) {
-        super(entityManager, allySystem, locationSystem, dungeonSize);
+    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point) {
+        super(entityManager, allySystem, locationSystem, healthSystem, dungeonSize);
 
         locationSystem.componentUpdatedEmitter.subscribe((data) => {
             this.recalculateVisibility(data.id);

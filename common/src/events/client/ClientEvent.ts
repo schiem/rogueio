@@ -1,7 +1,8 @@
 import { NetworkEvent } from "../NetworkEvent";
 
 export enum ClientEventType {
-    move
+    move,
+    action
 }
 export class ClientEvent extends NetworkEvent {
     type: ClientEventType;
