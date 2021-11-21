@@ -17,7 +17,7 @@ export const generateEventFromMovement = (game: ClientGame, direction: Point): M
         // Ensure that it has a health component, and that it is not an ally
         return game.systems.health.getComponent(id) && !game.systems.ally.entitiesAreAllies(entityId, id)
     });
-    if (enemyAtLocation) {
+    if (enemyAtLocation !== undefined) {
         // The first event is always the "default attack"
         return new ActionEvent(0, enemyAtLocation);
     }

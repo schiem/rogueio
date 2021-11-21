@@ -8,7 +8,7 @@ import { RemoveEntityComponentEvent } from "../../../common/src/events/server/Re
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { AddEntityEvent } from "../../../common/src/events/server/AddEntityEvent";
 import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntityEvent";
-import { ServerEvent, ServerEventType } from "../../../common/src/events/server/ServerEvent";
+import { ServerEvent } from "../../../common/src/events/server/ServerEvent";
 import { encode } from "messagepack";
 import { Player } from "../../../common/src/models/Player";
 import { ServerGame, ServerGameSystems } from "../models/ServerGame";

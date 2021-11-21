@@ -86,7 +86,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            movement: { minMovementDelay: 200 },
+            movement: { minMovementDelay: 400 },
             stats: {
                 current: {
                     str: 4,
@@ -117,7 +117,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            movement: { minMovementDelay: 200 },
+            movement: { minMovementDelay: 400 },
             stats: {
                 current: {
                     str: 8,
@@ -148,7 +148,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayers.character,
                 location: { x: 0, y: 0}
             },
-            movement: { minMovementDelay: 200 },
+            movement: { minMovementDelay: 400 },
             stats: {
                 current: {
                     str: 0,
