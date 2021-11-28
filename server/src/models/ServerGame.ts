@@ -12,6 +12,8 @@ import { AISystem } from "../systems/AISystem";
 import { MessageData, MessageEvent } from "../../../common/src/events/server/MessageEvent";
 import { ServerActionSystem } from "../systems/ServerActionSystem";
 import { ServerDungeon } from "./ServerDungeon";
+import { HealthSystem } from "../../../common/src/systems/HealthSystem";
+import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
@@ -39,21 +41,33 @@ export class ServerGame extends Game {
         const dungeonSize = {x: this.dungeonX, y: this.dungeonY };
         this.dungeonGenerator = new DungeonGenerator(dungeonSize, minRoomSize, maxRoomSize, minRoomSpacing, maxRoomSpacing, 500);
 
-
-        // set up the visibility system, after the dungeon has been created
-        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, dungeonSize);
-
-        // set up the AI system
-        this.systems.ai = new AISystem(this.entityManager);
-
-        this.newDungeon();
-        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health, this.currentLevel);
-        this.systems.visibility.setDungeon(this.currentLevel);
+        this.constructSystems();
 
         // Add the network manager to handle events
         this.networkEventManager = new NetworkEventManager(this.players, this.systems, this.entityManager);
 
         this.startTick();
+    }
+
+    constructSystems(): void {
+        this.systems.health = new HealthSystem(this.entityManager);
+        this.systems.location = new LocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
+
+        // Construct the common systems
+        super.constructSystems();
+
+
+        // set up the visibility system, after the dungeon has been created
+        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize);
+
+        // set up the AI system
+        this.systems.ai = new AISystem(this.entityManager);
+        
+
+        this.newDungeon();
+
+        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health, this.currentLevel);
+        this.systems.visibility.setDungeon(this.currentLevel);
     }
 
     startTick(): void {

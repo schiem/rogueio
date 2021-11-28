@@ -31,9 +31,10 @@ export class Game {
     systems: GameSystems = {} as GameSystems;
 
     constructor() {
-        this.systems.health = new HealthSystem(this.entityManager);
+    }
+
+    constructSystems(): void {
         this.systems.stats = new StatSystem(this.entityManager, this.systems.health);
-        this.systems.location = new LocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
         this.systems.ally = new AllySystem(this.entityManager, this.systems.health);
         this.systems.movement = new MovementSystem(this.entityManager, this.systems.location, this.systems.health);
     }

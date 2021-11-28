@@ -13,12 +13,6 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     replicationMode: ReplicationMode = 'visible';
     locationCache: number[][][];
 
-    componentPropertyUpdaters = {
-        location: (id: number, component: LocationComponent, newValue: Point) => {
-            this.moveEntity(id, newValue);
-        }
-    };
-
     constructor(
         entityManager: EntityManager,
         public size: Point
@@ -93,7 +87,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         return !dungeon.tileIsBlocked(location, component.movesThrough) && !this.isCollision(component, location);
     }
 
-    private moveEntity(id: number, newLocation: Point) {
+    protected moveEntity(id: number, newLocation: Point) {
         const component = this.getComponent(id);
         if (component === undefined) {
             return false;

@@ -1,4 +1,4 @@
-import { Game } from "../../../common/src/models/Game";
+import { Game, GameSystems } from "../../../common/src/models/Game";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { SpriteSheet } from "../rendering/SpriteSheet";
 import { Point } from "../../../common/src/types/Points";
@@ -15,8 +15,18 @@ import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { MessageData } from "../../../common/src/events/server/MessageEvent";
 import { ActionSystem } from "../../../common/src/systems/ActionSystem";
+import { ClientLocationSystem } from "../systems/ClientLocationSystem";
+import { ClientHealthSystem } from "../systems/ClientHealthSystem";
+import { ClientVisibilitySystem } from "../systems/ClientVisibilitySystem";
+
+export type ClientGameSystems = {
+    location: ClientLocationSystem;
+    visibility: ClientVisibilitySystem;
+    health: ClientHealthSystem;
+} & GameSystems
 
 export class ClientGame extends Game {
+    systems: ClientGameSystems;
     currentPlayerId: string;
     renderer: Renderer;
     inputEventHandler: InputEventHandler;
@@ -29,8 +39,7 @@ export class ClientGame extends Game {
         viewPort: ViewPort
     ) {
         super();
-        this.systems.visibility = new VisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY });
-        this.systems.action = new ActionSystem(this.entityManager);
+        this.constructSystems();
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
         this.inputEventHandler = new InputEventHandler(this);
@@ -66,6 +75,17 @@ export class ClientGame extends Game {
             });
             this.renderer.renderViewPort();
         });
+    }
+
+    constructSystems(): void {
+        this.systems.health = new ClientHealthSystem(this.entityManager, this);
+        this.systems.location = new ClientLocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
+
+        // Construct the common systems
+        super.constructSystems();
+
+        this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.action = new ActionSystem(this.entityManager);
     }
 
     postDeserialize(event: InitEvent) {

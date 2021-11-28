@@ -39,12 +39,12 @@ export class NetworkEventManager {
         private entityManager: EntityManager
     ) {
         entityManager.entityAddedEmitter.subscribe((entity) => {
-            this.queueEvent(new AddEntityEvent(entity), entity);
+            this.queueEvent(new AddEntityEvent(entity));
         });
 
         // TODO - removing an entity removes all it's components - shouldn't fire events for those
         entityManager.entityRemovedEmitter.subscribe((entity) => {
-            this.queueEvent(new RemoveEntityEvent(entity), entity);
+            this.queueEvent(new RemoveEntityEvent(entity));
         });
 
         // When the visibility of a component changes, send the visibility pieces to the relevant entities
@@ -90,15 +90,15 @@ export class NetworkEventManager {
 
             // any time a component is added / removed, reflect it across the network
             system.addedComponentEmitter.subscribe((data) => {
-                this.queueEvent(new AddEntityComponentsEvent(data.id, {[systemName]: data.component}), data.id, system);
+                this.queueEvent(new AddEntityComponentsEvent(data.id, {[systemName]: data.component}), system);
             });
 
             system.removedComponentEmitter.subscribe((data) => {
-                this.queueEvent(new RemoveEntityComponentEvent(data.id, systemName), data.id, system);
+                this.queueEvent(new RemoveEntityComponentEvent(data.id, systemName), system);
             });
 
             system.componentUpdatedEmitter.subscribe((data) => {
-                this.queueEvent(new UpdateEntityEvent(data.id, systemName, data.props), data.id, system);
+                this.queueEvent(new UpdateEntityEvent(data.id, systemName, data.props, data.triggeredBy), system);
             });
         });
     }
@@ -111,10 +111,20 @@ export class NetworkEventManager {
         delete this.eventQueue[playerId];
     }
 
-    queueEvent(event: NetworkEvent, triggeringId?: number, fromSystem?: ComponentSystem<unknown>): void {
+    queueEvent(event: NetworkEvent, fromSystem?: ComponentSystem<unknown>): void {
         for(let playerId in this.eventQueue) {
             const entityId = this.players[playerId].characterId;
-            if (!fromSystem || triggeringId === undefined || this.entityManager.entityIsAwareOfComponent(entityId, triggeringId, this.systems, fromSystem.replicationMode)) {
+            const appliesTo: number | undefined = event.data?.id;
+            // Ensure that:
+            //   * The entity is aware of the entity that this event corresponds to OR
+            //   * There is no entity that this event corresponds to OR
+            //   * This is a global event (no system)
+            if (!fromSystem || appliesTo === undefined || this.entityManager.entityIsAwareOfComponent(entityId, appliesTo, this.systems, fromSystem.replicationMode)) {
+                if (event instanceof UpdateEntityEvent && event.data.triggeredBy !== entityId && event.data.id !== entityId) {
+                    // Remove the triggered by property if the current player was not the cause / effect of this update
+                    // No need to waste the bandwidth
+                    delete event.data.triggeredBy;
+                }
                 this.queueEventForPlayer(playerId, event);
             }
         }

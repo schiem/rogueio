@@ -15,11 +15,11 @@ export abstract class ComponentSystem<T> {
     // A mapping of entities that this system manages to the component
     // that this sytem manages
     protected entities: Record<number, T> = {}
-    componentPropertyUpdaters: Record<string, (id: number, component: any, newValue: any) => void>;
+    componentPropertyUpdaters: Record<string, (id: number, component: T, newValue: any) => void>;
 
     addedComponentEmitter = new EventEmitter<IdComponent<T>>();
     removedComponentEmitter = new EventEmitter<IdComponent<T>>();
-    componentUpdatedEmitter = new EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>();
+    componentUpdatedEmitter = new EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>, triggeredBy?: number}>();
 
     constructor(entityManager: EntityManager) {
         entityManager.entityRemovedEmitter.subscribe((entityId) => {
@@ -39,7 +39,7 @@ export abstract class ComponentSystem<T> {
     /**
      * Updates the properties on a given component. 
      */
-    updateComponent(id: number, properties: Record<string, any>): void {
+    updateComponent(id: number, properties: Record<string, any>, triggeredBy?: number): void {
         const component: any = this.getComponent(id);
         if (!component) {
             return;
@@ -55,7 +55,7 @@ export abstract class ComponentSystem<T> {
                 const oldProp = this.updateNestedProperty(component, key, properties[key]);
 
                 // Emit the single value
-                this.componentUpdatedEmitter.emit({id, props: { [key]: properties[key] }, oldProps: {[key]: oldProp }});
+                this.componentUpdatedEmitter.emit({id, props: { [key]: properties[key] }, oldProps: {[key]: oldProp }, triggeredBy });
             }
         }
     }

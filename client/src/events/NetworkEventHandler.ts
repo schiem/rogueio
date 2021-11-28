@@ -53,7 +53,7 @@ export class NetworkEventHandler {
             if (!system) {
                 throw new Error('Invalid system');
             }
-            system.updateComponent(event.data.id, event.data.properties);
+            system.updateComponent(event.data.id, event.data.properties, event.data.triggeredBy);
         },
         [ServerEventType.addComponent]: (game: ClientGame, event: AddEntityComponentsEvent): void => {
             for(let systemName in event.data.components) {

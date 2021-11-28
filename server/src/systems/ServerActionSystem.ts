@@ -78,23 +78,23 @@ export class ServerActionSystem extends ActionSystem {
             }
 
             if (affectedEntities.length) {
-                this.applyEffect(affectedEntities, effect);
+                this.applyEffect(entityId, affectedEntities, effect);
             }
         });
     }
 
-    applyEffect(entities: number[], effect: Effect): void {
+    applyEffect(entityId: number, entities: number[], effect: Effect): void {
         switch(effect.type) {
             case EffectType.attack:
                 const attackEffect = effect as AttackEffect;
-                entities.forEach((entityId) => {
-                    const healthComponent = this.healthSystem.getComponent(entityId);
+                entities.forEach((id) => {
+                    const healthComponent = this.healthSystem.getComponent(id);
                     if (!healthComponent) {
                         return;
                     }
 
                     const damage = random(attackEffect.damage.min, attackEffect.damage.max + 1);
-                    this.healthSystem.updateComponent(entityId, { current: Math.max(healthComponent.current - damage, 0)})
+                    this.healthSystem.updateComponent(id, { current: Math.max(healthComponent.current - damage, 0)}, entityId);
                 });
         }
     }
