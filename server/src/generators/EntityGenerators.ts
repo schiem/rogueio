@@ -1,5 +1,6 @@
 import { ActionComponent, ActionTarget, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
+import { DescriptionComponent } from "../../../common/src/components/DescriptionComponent";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
@@ -19,7 +20,8 @@ export type ComponentBlock = {
     stats: StatComponent;
     ai: AIComponent;
     action: ActionComponent,
-    health: HealthComponent
+    health: HealthComponent,
+    description: DescriptionComponent
 }
 
 export enum EntityType {
@@ -31,6 +33,7 @@ export enum EntityType {
 export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     [EntityType.player]: () => {
         return {
+            description: {id: EntityType.player},
             health: {current: 10, max: 10},
             ally: {group: 'players'},
             location: {
@@ -75,6 +78,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
     [EntityType.bufonidWarrior]: () => {
         return {
+            description: {id: EntityType.bufonidWarrior},
             health: {current: 10, max: 10},
             ally: {group: 'enemies'},
             location: {
@@ -106,6 +110,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
     [EntityType.bufonidQueen]: () => {
         return {
+            description: {id: EntityType.bufonidQueen},
             health: {current: 10, max: 10},
             ally: {group: 'enemies'},
             location: {
@@ -137,6 +142,7 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
     [EntityType.bufonidSpawn]: () => {
         return {
+            description: {id: EntityType.bufonidSpawn},
             health: {current: 1, max: 1},
             ally: {group: 'enemies'},
             location: {

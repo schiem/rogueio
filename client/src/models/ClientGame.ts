@@ -18,10 +18,12 @@ import { ActionSystem } from "../../../common/src/systems/ActionSystem";
 import { ClientLocationSystem } from "../systems/ClientLocationSystem";
 import { ClientHealthSystem } from "../systems/ClientHealthSystem";
 import { ClientVisibilitySystem } from "../systems/ClientVisibilitySystem";
+import { ClientDescriptionSystem } from "../systems/ClientDescriptionSystem";
 
 export type ClientGameSystems = {
     location: ClientLocationSystem;
     visibility: ClientVisibilitySystem;
+    description: ClientDescriptionSystem,
     health: ClientHealthSystem;
 } & GameSystems
 
@@ -78,7 +80,8 @@ export class ClientGame extends Game {
     }
 
     constructSystems(): void {
-        this.systems.health = new ClientHealthSystem(this.entityManager, this);
+        this.systems.description = new ClientDescriptionSystem(this.entityManager);
+        this.systems.health = new ClientHealthSystem(this.entityManager, this.systems.description, this);
         this.systems.location = new ClientLocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
 
         // Construct the common systems

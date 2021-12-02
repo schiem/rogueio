@@ -8,14 +8,29 @@
     "system": {
         "gameStart": "You enter a dungeon dimly lit dungeon. Water drips in the distance and creatures scurry in the dark.  Nearly out of earshot, there is a faint chattering."
     },
-    "monsterBrief": {
+    "entity": {
         "bufonid": {
             "name": "Bufonid",
             "description": "A small frog-like creature whose back is covered in thick, warty skin."
+        },
+        "bufonidWarrior": {
+            "name": "Warrior",
+            "description": "The protectorates of the clan."
+        },
+        "bufonidSpawn": {
+            "name": "Spawn",
+            "description": "Entirely helpless, the next generation."
+        },
+        "bufonidQueen": {
+            "name": "Queen",
+            "description": "The fierce matrons of the bufonid clans."
         }
     },
     "action": {
-        "playerTakeDamage": "Ahh you were ouched.",
-        "playerDidDamage": "You did some damage."
+        "playerTakeDamage": "You were hurt by the {0}",
+        "playerDidDamage": "You hurt the {0}"
+    },
+    "misc": {
+        "unknown": "Unknown"
     }
 }

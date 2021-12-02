@@ -57,31 +57,33 @@ export const loadLibrary = (lib: string): Promise<void> => {
     return promise;
 }
 
-export const localize = (message: string, replacements?: string[]): Promise<string> => {
+export const localize = (message: string, replacements?: (Promise<string> | string)[]): Promise<string> => {
     const promises: Promise<void>[] = [];
-    if (replacements) {
-        replacements.unshift(message);
-    } else {
-        replacements = [message];
+    const messageArr = splitMessage(message);
+
+    if (shouldLoadLibrary(messageArr[0])) {
+        promises.push(loadLibrary(messageArr[0]));
     }
 
-    const splitReplacements: string[][] = [];
-    for(let i = 0; i < replacements.length; i++) {
-        const str = replacements[i];
-        const split = splitMessage(str);
-        splitReplacements.push(split);
-
-        if (shouldLoadLibrary(split[0])) {
-            promises.push(loadLibrary(split[0]));
+    let finalReplacements: string[] = new Array(replacements?.length);
+    if(replacements) {
+        for(let i = 0; i < replacements.length; i++) {
+            const str = replacements[i];
+            if (typeof str !== 'string') {
+                promises.push(str.then((str) => {
+                    finalReplacements[i] = str;
+                }));
+            } else {
+                finalReplacements[i] = str;
+            }
         }
     }
 
     return Promise.all(promises).then(() => {
-        let localizedMessage = lookupMessageInLibrary(splitReplacements[0]);
-        for(let i = 1; i < splitReplacements.length; i++) {
+        let localizedMessage = lookupMessageInLibrary(messageArr);
+        for(let i = 0; i < finalReplacements.length; i++) {
             const placeholder = `\\{${i}\\}`;
-            const localizedReplacement = lookupMessageInLibrary(splitReplacements[i]);
-            localizedMessage = message.replace(new RegExp(placeholder), localizedReplacement);
+            localizedMessage = localizedMessage.replace(new RegExp(placeholder), finalReplacements[i]);
         }
         return localizedMessage;
     });

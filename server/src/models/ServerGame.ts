@@ -14,6 +14,7 @@ import { ServerActionSystem } from "../systems/ServerActionSystem";
 import { ServerDungeon } from "./ServerDungeon";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
+import { DescriptionSystem } from "../../../common/src/systems/DescriptionSystem";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
@@ -50,6 +51,7 @@ export class ServerGame extends Game {
     }
 
     constructSystems(): void {
+        this.systems.description = new DescriptionSystem(this.entityManager);
         this.systems.health = new HealthSystem(this.entityManager);
         this.systems.location = new LocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
 

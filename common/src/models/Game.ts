@@ -8,8 +8,10 @@ import { AllySystem } from "../systems/AllySystem";
 import { StatSystem } from "../systems/StatSystem";
 import { ActionSystem } from "../systems/ActionSystem";
 import { HealthSystem } from "../systems/HealthSystem";
+import { DescriptionSystem } from "../systems/DescriptionSystem";
 
 export type GameSystems = {
+    description: DescriptionSystem;
     location: LocationSystem;
     movement: MovementSystem;
     visibility: VisibilitySystem;
