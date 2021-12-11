@@ -2,6 +2,7 @@ import { Rectangle } from "../../../common/src/models/Rectangle";
 import { Point } from "../../../common/src/types/Points";
 import { Sprite, SpriteColor } from "../../../common/src/types/Sprite";
 import { clamp } from "../../../common/src/utils/MathUtils";
+import { SpriteColors } from "./Sprites";
 import { SpriteSheet } from "./SpriteSheet";
 import { ViewPort } from "./ViewPort";
 
@@ -16,7 +17,7 @@ export class Renderer {
             this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     }
 
-    drawRectangle(sprite: Sprite, rect: Rectangle, fill: boolean = false) {
+    fillRectangle(sprite: Sprite, rect: Rectangle, fill: boolean = false) {
         if(fill) {
             for(let x = rect.topLeft.x; x <= rect.bottomRight.x; x++) {
                 for(let y = rect.topLeft.y; y <= rect.bottomRight.y; y++) {
@@ -36,6 +37,19 @@ export class Renderer {
                 }
             });
         }
+    }
+
+    outlineTile(location: Point): void {
+        this.ctx.beginPath();
+        this.ctx.rect(
+            location.x * this.spriteSheet.spriteSize.x + 1, 
+            location.y * this.spriteSheet.spriteSize.y + 1,
+            this.spriteSheet.spriteSize.x - 2,
+            this.spriteSheet.spriteSize.y - 2);
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = SpriteColors[SpriteColor.white];
+        this.ctx.stroke();
+        this.ctx.closePath();
     }
 
     drawSprite(sprite: Sprite, location: Point, colorOverride?: SpriteColor): void {
@@ -77,6 +91,10 @@ export class Renderer {
     clearSquare(location: Point, color: SpriteColor = SpriteColor.black): void {
         this.ctx.fillStyle = this.spriteSheet.spriteColors[color];
         this.ctx.fillRect(location.x * this.spriteSheet.spriteSize.x, location.y * this.spriteSheet.spriteSize.y, this.spriteSheet.spriteSize.x, this.spriteSheet.spriteSize.y);
+    }
+
+    viewPortToWorld(location: Point): Point {
+        return this.viewPort.convertToWorld(location);
     }
 
     centerViewPortOn(location: Point) : void {

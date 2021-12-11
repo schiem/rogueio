@@ -29,6 +29,7 @@ export enum SpriteColor {
     olive,
     apricot,
     navy,
+    white
 }
 export type Sprite = {
     name: SpriteName,

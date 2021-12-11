@@ -2,7 +2,7 @@ import { EntityType } from "../../../server/src/generators/EntityGenerators";
 
 export type DescriptionClass = {
     category: string;
-    base: string;
+    base?: string;
 }
 
 export type DescriptionComponent = {
@@ -24,6 +24,5 @@ export const entityDescriptions: Record<EntityType, DescriptionClass> = {
     },
     [EntityType.player]: {
         category: 'player',
-        base: ''
     }
 };

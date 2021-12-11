@@ -9,6 +9,7 @@ import { loadLibrary } from "../lang/Lang";
 import { ClientGame } from "../models/ClientGame";
 import { UIMessages } from "./components/UIMessages";
 import { UIStatBlock } from "./components/UIStatBlock";
+import { UIDescription } from "./components/UIFocus";
 
 type UIProps = {
     game: ClientGame,
@@ -16,40 +17,41 @@ type UIProps = {
 }
 
 export class UI extends Component<UIProps> {
-    playerStatComponent: StatComponent;
-    playerHealthComponent: HealthComponent;
-    emitters: EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>[];
-    messageEventEmitter: EventEmitter<MessageData>;
+    game: ClientGame;
+    currentPlayer: Player;
 
     constructor({ game, currentPlayer }: UIProps) {
         super();
         this.preloadLibraries();
-        const charId = currentPlayer.characterId;
-        const statComponent = game.systems.stats.getComponent(charId);
-        if (statComponent) {
-            this.playerStatComponent = statComponent;
-        }
-
-        const healthComponent = game.systems.health.getComponent(charId);
-        if (healthComponent) {
-            this.playerHealthComponent = healthComponent;
-        }
-        this.emitters = [game.systems.stats.componentUpdatedEmitter, game.systems.health.componentUpdatedEmitter];
-        this.messageEventEmitter = game.messageEmitter;
+        this.game = game;
+        this.currentPlayer = currentPlayer;
     }
 
-    preloadLibraries() {
+    preloadLibraries(): void {
         loadLibrary('common');
     }
 
     render() {
+        const charId = this.currentPlayer.characterId;
+        const statComponent = this.game.systems.stats.getComponent(charId) as StatComponent;
+        const healthComponent = this.game.systems.health.getComponent(charId) as HealthComponent;
         return <div>
-            <UIStatBlock stats={this.playerStatComponent} componentChangedEmitters={this.emitters} health={this.playerHealthComponent} />
-            <UIMessages messageEmitter={this.messageEventEmitter} />
+            <UIStatBlock 
+                stats={statComponent} 
+                componentChangedEmitters={[this.game.systems.stats.componentUpdatedEmitter, this.game.systems.health.componentUpdatedEmitter]} 
+                health={healthComponent} />
+            <UIMessages 
+                messageEmitter={this.game.messageEmitter} />
+            <UIDescription 
+                changeFocusToEntity={(id) => { this.game.changeFocus(id) }}
+                focusChangedEmitter={this.game.focusMaybeChangedEmitter}
+                descriptionSystem={this.game.systems.description}
+                locationSystem={this.game.systems.location}
+                dungeon={this.game.currentLevel} />
         </div>
     }
 }
 
-export const setupUI = (game: ClientGame, currentPlayer: Player) => {
+export const setupUI = (game: ClientGame, currentPlayer: Player): void => {
     render(<UI game={game} currentPlayer={currentPlayer} />, document.getElementById('ui') as HTMLElement);
 }

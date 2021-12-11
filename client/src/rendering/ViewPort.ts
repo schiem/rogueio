@@ -18,6 +18,10 @@ export class ViewPort {
         this.ctx = this.canvas.getContext('2d', {alpha: false}) as CanvasRenderingContext2D;
     }
 
+    convertToWorld(location: Point): Point {
+        return {x: location.x + this.offset.x, y: location.y + this.offset.y };
+    }
+
     renderFrom(canvas: HTMLCanvasElement) {
         // Multiple requests may come in before the paint actually happens
         // If there is already a pending paint request, ignore it.

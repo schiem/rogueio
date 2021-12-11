@@ -1,7 +1,7 @@
 import { Game, GameSystems } from "../../../common/src/models/Game";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { SpriteSheet } from "../rendering/SpriteSheet";
-import { Point } from "../../../common/src/types/Points";
+import { Point, pointsAreEqual } from "../../../common/src/types/Points";
 import { Renderer } from "../rendering/Renderer";
 import { ViewPort } from "../rendering/ViewPort";
 import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
@@ -34,6 +34,9 @@ export class ClientGame extends Game {
     inputEventHandler: InputEventHandler;
     timeInitialized: number;
     messageEmitter = new EventEmitter<MessageData>();
+    focusMaybeChangedEmitter = new EventEmitter<number | Point | undefined>();
+
+    currentFocus?: number | Point;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -44,16 +47,34 @@ export class ClientGame extends Game {
         this.constructSystems();
 
         this.renderer = new Renderer(canvas, spriteSheet, viewPort);
-        this.inputEventHandler = new InputEventHandler(this);
+        this.inputEventHandler = new InputEventHandler(this, viewPort.canvas);
 
         this.systems.location.removedComponentEmitter.subscribe((data) => {
             this.renderDungeonTileAtLocation(data.component.location);
             this.renderer.renderViewPort();
+
+            if (this.currentFocus !== undefined) {
+                const focusPoint = this.normalizeFocus(this.currentFocus);
+                if (focusPoint) {
+                    if (pointsAreEqual(focusPoint, data.component.location)) {
+                        this.focusMaybeChangedEmitter.emit(this.currentFocus);
+                    }
+                }
+            }
         });
 
         this.systems.location.addedComponentEmitter.subscribe((data) => {
             this.renderDungeonTileAtLocation(data.component.location);
             this.renderer.renderViewPort();
+
+            if (this.currentFocus !== undefined) {
+                const focusPoint = this.normalizeFocus(this.currentFocus);
+                if (focusPoint) {
+                    if (pointsAreEqual(focusPoint, data.component.location)) {
+                        this.focusMaybeChangedEmitter.emit(this.currentFocus);
+                    }
+                }
+            }
         });
 
         this.systems.location.componentUpdatedEmitter.subscribe((data) => {
@@ -65,6 +86,15 @@ export class ClientGame extends Game {
                 this.renderDungeonTileAtLocation(data.props.location);
                 this.renderDungeonTileAtLocation(data.oldProps.location);
                 this.renderer.renderViewPort();
+
+                if (this.currentFocus !== undefined) {
+                    const focusPoint = this.normalizeFocus(this.currentFocus);
+                    if (focusPoint) {
+                        if (pointsAreEqual(focusPoint, data.props.location) || pointsAreEqual(focusPoint, data.oldProps.location)) {
+                            this.focusMaybeChangedEmitter.emit(this.currentFocus);
+                        }
+                    }
+                }
             }
         });
 
@@ -120,6 +150,26 @@ export class ClientGame extends Game {
         setupUI(this, this.players[this.currentPlayerId]);
     }
 
+    changeFocus(target: number | Point): void {
+        const newFocus = this.normalizeFocus(target);
+        if (!newFocus) {
+            return;
+        }
+
+        let oldFocus;
+        if (this.currentFocus !== undefined) {
+            oldFocus = this.normalizeFocus(this.currentFocus);
+        }
+
+        this.currentFocus = target;
+        if (oldFocus !== undefined) {
+            this.renderDungeonTileAtLocation(oldFocus);
+        }
+        this.renderDungeonTileAtLocation(newFocus);
+        this.renderer.renderViewPort();
+        this.focusMaybeChangedEmitter.emit(this.currentFocus);
+    }
+
     addComponentsForEntity(entityId: number, components: Record<string, any>): void {
         const systems = this.systems as Record<string, ComponentSystem<unknown>>;
         for(const systemName in components) {
@@ -133,6 +183,11 @@ export class ClientGame extends Game {
     renderDungeonTileAtLocation(point: Point): void {
         const dungeon = this.currentLevel;
         let sprite: Sprite | undefined;
+        let drawOutline = false;
+        if(this.currentFocus !== undefined) {
+            const normalizedFocus = this.normalizeFocus(this.currentFocus);
+            drawOutline = normalizedFocus === undefined ? false : pointsAreEqual(normalizedFocus, point);
+        }
 
         // if the tile was never seen, then it should never render
         const playerId = this.currentPlayerId;
@@ -162,6 +217,9 @@ export class ClientGame extends Game {
         }
 
         this.renderer.drawSprite(sprite, point, colorOverride);
+        if (drawOutline) {
+            this.renderer.outlineTile(point);
+        }
     }
 
     /**
@@ -188,5 +246,13 @@ export class ClientGame extends Game {
         }
         this.recenterViewPort();
         this.renderer.renderViewPort();
+    }
+
+    private normalizeFocus(target: Point | number): Point | undefined {
+        if (typeof target === 'number') {
+            return this.systems.location.getComponent(target)?.location;
+        } else {
+            return target;
+        }
     }
 }

@@ -32,4 +32,5 @@ export const SpriteColors: Record<SpriteColor, string> = {
     [SpriteColor.olive]: '#9c9c05',
     [SpriteColor.apricot]: '#ffd8b1',
     [SpriteColor.navy]: '#7e85d6',
+    [SpriteColor.white]: '#fff'
 }

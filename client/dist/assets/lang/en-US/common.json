@@ -9,6 +9,10 @@
         "gameStart": "You enter a dungeon dimly lit dungeon. Water drips in the distance and creatures scurry in the dark.  Nearly out of earshot, there is a faint chattering."
     },
     "entity": {
+        "player": {
+            "name": "You",
+            "description": "It's a you!"
+        },
         "bufonid": {
             "name": "Bufonid",
             "description": "A small frog-like creature whose back is covered in thick, warty skin."
@@ -25,6 +29,11 @@
             "name": "Queen",
             "description": "The fierce matrons of the bufonid clans."
         }
+    },
+    "tiles": {
+        "wall": "A rough hewn stone wall.",
+        "rubble": "A mix of earth and stone, clearly leftover from an old civilization.",
+        "floor": "The earthen floor, littered with droppings and refuse." 
     },
     "action": {
         "playerTakeDamage": "You were hurt by the {0}",

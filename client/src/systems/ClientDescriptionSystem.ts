@@ -16,10 +16,13 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         if (!description) {
             return localize('common/misc/unknown');
         }
+        console.log(description);
         const promises: Promise<string>[] = [
             localize(`common/entity/${description.category}/description`),
-            localize(`common/entity/${description.base}/description`),
         ];
+        if (description.base) {
+            promises.push(localize(`common/entity/${description.base}/description`));
+        }
         return Promise.all(promises).then(strings => {
             return strings.join(' ');
         });
@@ -32,8 +35,10 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         }
         const promises: Promise<string>[] = [
             localize(`common/entity/${description.category}/name`),
-            localize(`common/entity/${description.base}/name`),
         ];
+        if (description.base) {
+            promises.push(localize(`common/entity/${description.base}/name`));
+        }
         return Promise.all(promises).then(strings => {
             return strings.join(' ');
         });

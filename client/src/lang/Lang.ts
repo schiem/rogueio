@@ -65,7 +65,7 @@ export const localize = (message: string, replacements?: (Promise<string> | stri
         promises.push(loadLibrary(messageArr[0]));
     }
 
-    let finalReplacements: string[] = new Array(replacements?.length);
+    let finalReplacements: string[] = new Array(replacements?.length || 0);
     if(replacements) {
         for(let i = 0; i < replacements.length; i++) {
             const str = replacements[i];
