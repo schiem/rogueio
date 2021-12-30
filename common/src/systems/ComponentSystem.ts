@@ -29,6 +29,10 @@ export abstract class ComponentSystem<T> {
         });
     }
 
+    getAllComponents(): Record<number, T> {
+        return this.entities;
+    }
+
     /**
      * Gets the component for a given entity, or undefined if it's not set.
      */

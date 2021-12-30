@@ -1,0 +1,15 @@
+This is a tiny embedded language used for executing scripted commands and printing state.
+
+It will be entirely inside this application, but could be easily separated. 
+
+Features of this language:
+* Interpreted
+* Fully integrates and is callable from NodeJS
+
+
+The language rules are as follows
+    * Variables:
+        * Declared with var
+        * Types are: boolean, number, string, object, array
+        * Functions are all declared with () => {} syntax
+        * No classes

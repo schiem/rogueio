@@ -78,9 +78,6 @@ export class ServerGame extends Game {
             const now = performance.now();
             const delta = now - this.lastTick;
             if (delta > this.tickSpeed) {
-                process.stdout.cursorTo(0);
-                process.stdout.write((`Framerate: ${1000 / (now - this.lastTick)}`));
-
                 this.lastTick = now;
                 this.systems.ai.runAI(delta, this.systems, this.currentLevel);
                 this.networkEventManager.flushEvents(this.clients);

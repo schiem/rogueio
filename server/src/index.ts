@@ -3,6 +3,8 @@ import { ServerGame } from './models/ServerGame';
 import { InitEvent } from '../../common/src/events/server/InitEvent';
 import { ClientEvent } from '../../common/src/events/client/ClientEvent';
 import { decode } from "messagepack";
+import * as readline from 'node:readline';
+import { stdin as input, stdout as output } from 'process';
 
 const game = new ServerGame();
 const wss = new WebSocket.Server({ port: 8888,   
@@ -41,4 +43,10 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         game.playerDisconnected(playerId);
     });
+});
+
+// TODO - abstract this? remove it from production builds?
+const rl = readline.createInterface({ input, output });
+rl.on('line', (line) => {
+    console.log(line);
 });

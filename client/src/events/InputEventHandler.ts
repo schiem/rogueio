@@ -76,10 +76,16 @@ export class InputEventHandler {
             }
         },
         [InputAction.focusClosestEntity]: () => {
-
+            const entity = this.game.findClosestEntity();
+            if (entity !== undefined) {
+                this.game.changeFocus(entity);
+            }
         },
         [InputAction.focusNextEntity]: () => {
-
+            const entity = this.game.findNextEntity();
+            if (entity !== undefined) {
+                this.game.changeFocus(entity);
+            }
         },
     };
 }

@@ -1,7 +1,7 @@
 import { Game, GameSystems } from "../../../common/src/models/Game";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { SpriteSheet } from "../rendering/SpriteSheet";
-import { Point, pointsAreEqual } from "../../../common/src/types/Points";
+import { Point, pointDistanceSquared, pointsAreEqual } from "../../../common/src/types/Points";
 import { Renderer } from "../rendering/Renderer";
 import { ViewPort } from "../rendering/ViewPort";
 import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
@@ -19,6 +19,7 @@ import { ClientLocationSystem } from "../systems/ClientLocationSystem";
 import { ClientHealthSystem } from "../systems/ClientHealthSystem";
 import { ClientVisibilitySystem } from "../systems/ClientVisibilitySystem";
 import { ClientDescriptionSystem } from "../systems/ClientDescriptionSystem";
+import { LocationComponent } from "../../../common/src/components/LocationComponent";
 
 export type ClientGameSystems = {
     location: ClientLocationSystem;
@@ -148,6 +149,62 @@ export class ClientGame extends Game {
 
         // Initialize the UI
         setupUI(this, this.players[this.currentPlayerId]);
+    }
+
+    findClosestEntity(): number | undefined {
+        const characterId = this.players[this.currentPlayerId].characterId;
+        const characterLocation = this.systems.location.getComponent(characterId);
+        if (!characterLocation) {
+            return;
+        }
+
+        const components = this.systems.location.getAllComponents();
+        let bestLengthSqr: number | undefined = undefined;
+        let closestEntity: number | undefined;  
+        for (let key in components) {
+            const id = parseInt(key);
+            if (id === characterId) {
+                continue;
+            }
+
+            const component = components[id];
+            const distanceSquared = pointDistanceSquared(component.location, characterLocation.location); 
+            if (bestLengthSqr === undefined || distanceSquared < bestLengthSqr) {
+                closestEntity = id;
+            }
+        }
+
+        return closestEntity === undefined ? closestEntity : closestEntity;
+    }
+
+    findNextEntity(): number | undefined {
+        let currentLocation: LocationComponent | undefined;
+        const characterId = this.players[this.currentPlayerId].characterId;
+        const characterLocation = this.systems.location.getComponent(characterId);
+        if (typeof this.currentFocus !== 'number' || (currentLocation = this.systems.location.getComponent(this.currentFocus)) === undefined || !characterLocation) {
+            return this.findClosestEntity();
+        }
+        const distSquared = pointDistanceSquared(currentLocation.location, characterLocation.location);
+        let bestDiffSquared: number | undefined = undefined;
+        let nextEntity: number | undefined = undefined;
+
+        const components = this.systems.location.getAllComponents();
+        for (let key in components) {
+            const id = parseInt(key);
+            if (id ===  characterId) {
+                continue;
+            }
+
+            const component = components[id];
+            const entityDistSquared = pointDistanceSquared(component.location, characterLocation.location); 
+            const newDist = entityDistSquared - distSquared;
+            if (bestDiffSquared === undefined || (newDist > 0 && newDist < bestDiffSquared)) {
+                bestDiffSquared = newDist;
+                nextEntity = id;
+            }
+        }
+
+        return nextEntity;
     }
 
     changeFocus(target: number | Point): void {
