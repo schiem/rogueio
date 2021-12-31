@@ -1,13 +1,16 @@
 import { TokenType } from "../Scan/Token";
 import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, Expression } from "./Expression";
 import { ExpressionVisitor } from "./ExpressionVisitor";
+import { ExpressionStatement, Statement } from "./Statement";
+import { StatementVisitor } from "./StatementVisitor";
 
-export class Interpreter implements ExpressionVisitor<any> {
-    constructor(private expression: Expression) {}
-
+export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<void> {
+    constructor(private statements: Statement[]) {}
     interpret(): undefined | RuntimeError {
         try {
-            console.log(this.evaluate(this.expression));
+            this.statements.forEach((statement) => {
+                this.execute(statement);
+            });
             return;
         } catch (e) {
             return e;
@@ -56,6 +59,11 @@ export class Interpreter implements ExpressionVisitor<any> {
         return null;
     }
 
+    visitExpression(statement: ExpressionStatement): void {
+        // TODO - remove the console.log
+        console.log(this.evaluate(statement.expression));
+    }
+
     visitUnary(expression: UnaryExpression) {
         const right = this.evaluate(expression.right);
 
@@ -87,6 +95,10 @@ export class Interpreter implements ExpressionVisitor<any> {
         if (typeof left !== leftType || typeof right !== rightType) {
             this.panic(RuntimeErrorType.BAD_TYPE);
         }
+    }
+
+    execute(statement: Statement): void {
+        statement.accept(this);
     }
 
     evaluate(expression: Expression): any {

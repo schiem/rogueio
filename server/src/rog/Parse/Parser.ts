@@ -1,8 +1,16 @@
 import { Token, TokenType } from "../Scan/Token";
 import { BinaryExpression, Expression, GroupingExpression, LiteralExpression, UnaryExpression } from "./Expression";
+import { ExpressionStatement, Statement } from "./Statement";
 
 /**
  * Formal Grammar:
+ * program        → statement* EOF ;
+ *
+ * statement      → exprStmt
+ *                  | printStmt ;
+ * exprStmt       → expression ";" ;
+ * 
+ * 
  * expression     → equality ;
  * equality       → comparison ( ( "!=" | "==" ) comparison )* ;
  * comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -17,12 +25,27 @@ export class Parser {
     private current: number = 0;
     constructor(private readonly tokens: Token[]) {}
 
-    parse(): Expression | ParseError {
+    parse(): Statement[] | ParseError {
+        const statements: Statement[] = [];
         try {
-            return this.expression();
+            while (!this.isAtEnd()) {
+                statements.push(this.statement());
+            }
+
+            return statements;
         } catch(e) {
-            return e;
+                return e;
         }
+    }
+
+    private statement(): Statement {
+        return this.expressionStatement();
+    }
+
+    private expressionStatement(): ExpressionStatement {
+        const statement = new ExpressionStatement(this.expression());
+        this.consume(TokenType.SEMICOLON, ParseErrorType.EXPECTED_SEMICOLON);
+        return statement;
     }
 
     private expression(): Expression {
@@ -165,6 +188,7 @@ export class Parser {
 export enum ParseErrorType {
     UNMATCHED_PAREN,
     EXPECTED_EXPRESSION,
+    EXPECTED_SEMICOLON
 }
 
 export class ParseError extends Error {

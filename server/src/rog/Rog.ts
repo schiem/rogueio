@@ -19,11 +19,11 @@ export class Rog {
             return;
         }
         const parser = new Parser(tokens);
-        const expression = parser.parse();
-        if (expression instanceof Error) {
+        const statements = parser.parse();
+        if (statements instanceof Error) {
             console.log("Error in parser!!!!");
         } else {
-            const interpreter = new Interpreter(expression);
+            const interpreter = new Interpreter(statements);
             const value = interpreter.interpret();
             if (value instanceof Error) {
                 console.log("Error in interpreter");
