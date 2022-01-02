@@ -1,5 +1,6 @@
 import { Token } from "../Scan/Token";
 import { ExpressionVisitor } from "./ExpressionVisitor";
+import { Statement } from "./Statement";
 
 export abstract class Expression {
     abstract accept<T>(visitor: ExpressionVisitor<T>): T;
@@ -54,4 +55,71 @@ export class UnaryExpression extends Expression {
     accept<T>(visitor: ExpressionVisitor<T>): T {
         return visitor.visitUnary(this);
     }
+}
+
+export class VariableExpression extends Expression {
+    constructor(
+        public readonly name: string 
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitVariable(this);
+    }
+}
+
+export class AssignmentExpression extends Expression {
+    constructor(
+        public readonly name: string,
+        public readonly value: Expression 
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitAssignment(this);
+    }
+}
+
+export class LogicalExpression extends Expression {
+    constructor(
+        public readonly left: Expression,
+        public readonly operator: Token,
+        public readonly right: Expression
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitLogical(this);
+    }
+}
+
+export class CallExpression extends Expression {
+    constructor(
+        public callee: Expression, 
+        public paren: Token, 
+        public args: Expression[]
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitCall(this);
+    }
+}
+
+export class FuncExpression extends Expression {
+    constructor(
+        public parameters: Token[],
+        public statements: Statement[]
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitFunc(this);
+    }
+
 }

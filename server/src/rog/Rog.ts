@@ -1,4 +1,4 @@
-import { Interpreter } from "./Parse/Interpreter";
+import { Interpreter } from "./Interpret/Interpreter";
 import { Parser } from "./Parse/Parser";
 import { ScanErrorType, Scanner } from "./Scan/Scanner";
 
@@ -7,6 +7,7 @@ export class Rog {
         [ScanErrorType.BAD_CHARACTER]: 'Invalid character',
         [ScanErrorType.UNTERMINATED_STRING]: 'No closing string found'
     }
+    private interpreter = new Interpreter();
     run(source: string): void {
         const scanner = new Scanner(source);
         const tokens = scanner.scan();
@@ -23,8 +24,7 @@ export class Rog {
         if (statements instanceof Error) {
             console.log("Error in parser!!!!");
         } else {
-            const interpreter = new Interpreter(statements);
-            const value = interpreter.interpret();
+            const value = this.interpreter.interpret(statements);
             if (value instanceof Error) {
                 console.log("Error in interpreter");
             }

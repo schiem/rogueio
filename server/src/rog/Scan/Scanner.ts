@@ -136,7 +136,7 @@ export class Scanner {
 
         const keywordMatch = this.source.slice(this.currentTokenIndex, this.current);
         let keyword = Scanner.keywords[keywordMatch];
-        if (!keyword === undefined) {
+        if (keyword === undefined) {
             keyword = TokenType.IDENTIFIER;
         }
         this.addToken(keyword);
