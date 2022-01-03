@@ -26,11 +26,11 @@ export class AstPrinter implements ExpressionVisitor<string> {
     }
 
     visitVariable(expression: VariableExpression): string {
-        return expression.name;
+        return expression.name.lexeme;
     }
 
     visitAssignment(expression: AssignmentExpression): string {
-        return `${expression.name} = ${this.toString(expression.value)}`;
+        return `${expression.name.lexeme} = ${this.toString(expression.value)}`;
     }
 
     visitLogical(expression: LogicalExpression): string {

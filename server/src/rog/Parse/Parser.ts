@@ -369,7 +369,7 @@ export class Parser {
         }
 
         if (this.match(TokenType.IDENTIFIER)) {
-            return new VariableExpression(this.previous().lexeme);
+            return new VariableExpression(this.previous());
         }
 
         this.panic(ParseErrorType.EXPECTED_EXPRESSION);

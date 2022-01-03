@@ -59,7 +59,7 @@ export class UnaryExpression extends Expression {
 
 export class VariableExpression extends Expression {
     constructor(
-        public readonly name: string 
+        public readonly name: Token 
     ) {
         super();
     }
@@ -71,7 +71,7 @@ export class VariableExpression extends Expression {
 
 export class AssignmentExpression extends Expression {
     constructor(
-        public readonly name: string,
+        public readonly name: Token,
         public readonly value: Expression 
     ) {
         super();

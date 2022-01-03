@@ -5,6 +5,32 @@ export class Environment {
     
     constructor(private parentEnvironment: Environment | undefined = undefined) {}
 
+    ancestor(distance: number): Environment | undefined {
+        let environment: Environment = this;
+        for(let i = 0; i < distance; i++) {
+            const nextEnvironment = environment.parentEnvironment;
+            if (nextEnvironment === undefined) {
+                return;
+            }
+            environment = nextEnvironment;
+        }
+        return environment;
+    }
+
+    assignAt(distance: number, name: string, value: any): void {
+        const environment = this.ancestor(distance);
+        if (!environment) {
+            return;
+        }
+
+        environment.assign(name, value);
+    }
+
+    getAt(distance: number, name: string): any {
+        const environment = this.ancestor(distance);
+        return environment ? environment.get(name) : null;
+    }
+
     get(name: string): any {
         if (this.variables[name] !== undefined) {
             return this.variables[name];

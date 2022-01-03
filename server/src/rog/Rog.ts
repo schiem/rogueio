@@ -1,5 +1,6 @@
 import { Interpreter } from "./Interpret/Interpreter";
 import { Parser } from "./Parse/Parser";
+import { Resolver } from "./Resolver/Resolver";
 import { ScanErrorType, Scanner } from "./Scan/Scanner";
 
 export class Rog {
@@ -23,11 +24,22 @@ export class Rog {
         const statements = parser.parse();
         if (statements instanceof Error) {
             console.log("Error in parser!!!!");
-        } else {
-            const value = this.interpreter.interpret(statements);
-            if (value instanceof Error) {
-                console.log("Error in interpreter");
-            }
+            return;
+        }
+
+        const resolver = new Resolver(this.interpreter);
+        try {
+            resolver.resolve(statements);
+        } catch(e) {
+            console.log(e);
+            console.log("Error in resolver!!!!");
+            return;
+        }
+
+        const value = this.interpreter.interpret(statements);
+        if (value instanceof Error) {
+            console.log("Error in interpreter");
+            return;
         }
     }
 }

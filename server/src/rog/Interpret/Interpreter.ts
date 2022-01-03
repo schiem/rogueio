@@ -1,4 +1,4 @@
-import { TokenType } from "../Scan/Token";
+import { Token, TokenType } from "../Scan/Token";
 import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, Expression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression } from "../Parse/Expression";
 import { ExpressionVisitor } from "../Parse/ExpressionVisitor";
 import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statement, VarDeclStatement, WhileStatement } from "../Parse/Statement";
@@ -9,6 +9,7 @@ import { Callable } from "./Callable";
 export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<void> {
     private environment: Environment;
     private global: Environment = new Environment();
+    private locals: Map<Expression, number> = new Map();
 
     private retVal: any = undefined;
 
@@ -163,12 +164,17 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
     }
 
     visitVariable(expression: VariableExpression): any {
-        return this.environment.get(expression.name);
+        return this.visitLocal(expression.name, expression);
     }
 
     visitAssignment(expression: AssignmentExpression): any {
         const value = this.evaluate(expression.value);
-        this.environment.assign(expression.name, value);
+        const distance = this.locals.get(expression);
+        if (distance !== undefined) {
+            this.environment.assignAt(distance, expression.name.lexeme, value);
+        } else {
+            this.global.assign(expression.name.lexeme, value);
+        }
     }
 
     visitLogical(expression: LogicalExpression): any {
@@ -206,18 +212,6 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return new Callable(expression, this.environment);
     }
 
-    checkType(val: any, type: string): void | never {
-        if (typeof val !== type) {
-            this.panic(RuntimeErrorType.BAD_TYPE);
-        }
-    }
-
-    checkTypes(left: any, right: any, leftType: string, rightType: string): void | never {
-        if (typeof left !== leftType || typeof right !== rightType) {
-            this.panic(RuntimeErrorType.BAD_TYPE);
-        }
-    }
-
     executeStatements(statements: Statement[], context?: Environment): any {
         let originalEnvironment = this.environment;
         if (context !== undefined) {
@@ -240,15 +234,36 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return retVal;
     }
 
-    execute(statement: Statement): void {
+
+    resolve(expression: Expression, depth: number): void {
+        this.locals.set(expression, depth);
+    }
+
+    private panic(type: RuntimeErrorType): never {
+        throw new RuntimeError(type);
+    }
+
+    private checkType(val: any, type: string): void | never {
+        if (typeof val !== type) {
+            this.panic(RuntimeErrorType.BAD_TYPE);
+        }
+    }
+
+    private checkTypes(left: any, right: any, leftType: string, rightType: string): void | never {
+        if (typeof left !== leftType || typeof right !== rightType) {
+            this.panic(RuntimeErrorType.BAD_TYPE);
+        }
+    }
+
+    private execute(statement: Statement): void {
         statement.accept(this);
     }
 
-    evaluate(expression: Expression): any {
+    private evaluate(expression: Expression): any {
         return expression.accept(this);
     }
 
-    isTruthy(val: any): boolean {
+    private isTruthy(val: any): boolean {
         if (val === undefined || val === null) {
             return false;
         }
@@ -258,8 +273,13 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return true;
     }
 
-    panic(type: RuntimeErrorType): never {
-        throw new RuntimeError(type);
+    private visitLocal(name: Token, expression: Expression): void {
+        const distance = this.locals.get(expression);
+        if (distance !== undefined) {
+            return this.environment.getAt(distance, name.lexeme);
+        } else {
+            return this.global.get(name.lexeme);
+        }
     }
 }
 
