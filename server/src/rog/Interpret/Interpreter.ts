@@ -212,6 +212,18 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return new Callable(expression, this.environment);
     }
 
+    visitArray(expression: ArrayExpression): any {
+
+    }
+
+    visitObject(expression: ObjectExpression): any {
+
+    }
+
+    visitGet(expression: GetExpression): any {
+
+    }
+
     executeStatements(statements: Statement[], context?: Environment): any {
         let originalEnvironment = this.environment;
         if (context !== undefined) {

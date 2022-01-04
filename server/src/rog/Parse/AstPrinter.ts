@@ -1,4 +1,4 @@
-import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, Expression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression } from "./Expression";
+import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, Expression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression, ObjectExpression, ArrayExpression, GetExpression } from "./Expression";
 import { ExpressionVisitor } from "./ExpressionVisitor";
 
 export class AstPrinter implements ExpressionVisitor<string> {
@@ -43,6 +43,23 @@ export class AstPrinter implements ExpressionVisitor<string> {
 
     visitFunc(expression: FuncExpression): string {
         return `(${expression.parameters.map((param) => param.lexeme).join(', ')}) => { ... }`;
+    }
+
+    visitObject(expression: ObjectExpression): string {
+        const kvps = [];
+        for (let i = 0; i < expression.keys.length; i++) {
+            kvps.push(`${expression.keys[i]}: ${this.toString(expression.values[i])}`);
+        }
+
+        return `{${kvps.join(',')}}`;
+    }
+
+    visitArray(expression: ArrayExpression): string {
+        return `[${expression.values.join(',')}]`;
+    }
+
+    visitGet(expression: GetExpression): string {
+        return `[${this.toString(expression.property)}`;
     }
 
     private parenthize(name: string, ...expressions: Expression[]): string {

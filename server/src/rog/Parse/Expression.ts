@@ -121,5 +121,41 @@ export class FuncExpression extends Expression {
     accept<T>(visitor: ExpressionVisitor<T>): T {
         return visitor.visitFunc(this);
     }
+}
 
+export class ObjectExpression extends Expression {
+    constructor(
+        public keys: Token[],
+        public values: Expression[]
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitObject(this);
+    }
+}
+
+export class ArrayExpression extends Expression {
+    constructor(
+        public values: Expression[]
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitArray(this);
+    }
+}
+
+export class GetExpression extends Expression {
+    constructor(
+        public property: Expression 
+    ) {
+        super();
+    }
+
+    accept<T>(visitor: ExpressionVisitor<T>): T {
+        return visitor.visitGet(this);
+    }
 }

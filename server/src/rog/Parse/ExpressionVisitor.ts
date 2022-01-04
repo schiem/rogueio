@@ -1,4 +1,4 @@
-import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression } from "./Expression";
+import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression, ObjectExpression, ArrayExpression, GetExpression } from "./Expression";
 
 export interface ExpressionVisitor<T> {
     visitBinary(expression: BinaryExpression): T;
@@ -10,4 +10,7 @@ export interface ExpressionVisitor<T> {
     visitLogical(expression: LogicalExpression): T;
     visitCall(expression: CallExpression): T;
     visitFunc(expression: FuncExpression): T;
+    visitObject(expression: ObjectExpression): T;
+    visitArray(expression: ArrayExpression): T;
+    visitGet(expression: GetExpression): T;
 }

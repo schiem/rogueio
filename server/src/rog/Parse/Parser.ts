@@ -1,5 +1,5 @@
 import { Token, TokenType } from "../Scan/Token";
-import { AssignmentExpression, BinaryExpression, CallExpression, Expression, FuncExpression, GroupingExpression, LiteralExpression, LogicalExpression, UnaryExpression, VariableExpression } from "./Expression";
+import { ArrayExpression, AssignmentExpression, BinaryExpression, CallExpression, Expression, FuncExpression, GetExpression, GroupingExpression, LiteralExpression, LogicalExpression, ObjectExpression, UnaryExpression, VariableExpression } from "./Expression";
 import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statement, VarDeclStatement, WhileStatement } from "./Statement";
 
 /**
@@ -39,12 +39,17 @@ import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statem
  * factor         → unary ( ( "/" | "*" ) unary )* ;
  * unary          → ( "!" | "-" ) unary
  *                  | call ;
- * call           → primary ( "(" arguments? ")" )* ; 
+ * call           → primary ( "(" arguments? ")" | "[" IDENTIFIER "]")* ; 
  * arguments      → expression ( "," expression )* ;
  * primary        → NUMBER | STRING | "true" | "false" | "nil"
  *                  | "(" expression ")" 
  *                  | func
+ *                  | object
+ *                  | array
  *                  | IDENTIFIER ;
+ * object         → "{" ( keyvalues )? "}" 
+ * keyvalues      → IDENTIFIER ":" expression ( "," IDENTIFIER ":" expression )*
+ * array          → "[" ( expression, ("," expression)* )? "]" 
  * func           → "(" parameters? ")" "=>" "{" ( statement )+ "}" ;
  */
 export class Parser {
@@ -318,6 +323,10 @@ export class Parser {
         while (true) {
             if (this.match(TokenType.LEFT_PAREN)) {
                 expression = this.finishCall(expression);
+            } else if (this.match(TokenType.LEFT_BRACKET)) {
+                const expression = this.expression();
+                this.consume(TokenType.RIGHT_BRACKET, ParseErrorType.EXPECTED_LITERAL);
+                return new GetExpression(expression);
             } else {
                 break;
             }
@@ -368,11 +377,44 @@ export class Parser {
             }
         }
 
+        if (this.match(TokenType.LEFT_BRACE)) {
+            this.object();
+        }
+
+        if (this.match(TokenType.LEFT_BRACKET)) {
+            this.array();
+        }
+
         if (this.match(TokenType.IDENTIFIER)) {
             return new VariableExpression(this.previous());
         }
 
         this.panic(ParseErrorType.EXPECTED_EXPRESSION);
+    }
+
+    private object(): Expression {
+        const keys = [];
+        const values = [];
+        if (!this.match(TokenType.RIGHT_BRACE)) {
+            do {
+                keys.push(this.consume(TokenType.IDENTIFIER, ParseErrorType.EXPECTED_IDENTIFIER));
+                this.consume(TokenType.COMMA, ParseErrorType.EXPECTED_LITERAL);
+                values.push(this.expression());
+            } while (this.consume(TokenType.COMMA, ParseErrorType.EXPECTED_LITERAL) && !this.isAtEnd());
+            this.consume(TokenType.RIGHT_BRACE, ParseErrorType.EXPECTED_LITERAL);
+        }
+
+        return new ObjectExpression(keys, values);
+    }
+
+    private array(): Expression {
+        const expressions = [];
+        do {
+            expressions.push(this.expression());
+        } while (this.consume(TokenType.COMMA, ParseErrorType.EXPECTED_LITERAL) && !this.isAtEnd());
+
+        this.consume(TokenType.RIGHT_BRACE, ParseErrorType.EXPECTED_LITERAL);
+        return new ArrayExpression(expressions);
     }
 
     private func(parameters: Token[], statements: Statement[]): FuncExpression {
