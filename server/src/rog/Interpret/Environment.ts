@@ -1,5 +1,4 @@
 import { RuntimeError, RuntimeErrorType } from "./Interpreter";
-
 export class Environment {
     private variables: Record<string, any> = {};
     
@@ -54,7 +53,6 @@ export class Environment {
             }
             throw new RuntimeError(RuntimeErrorType.VARIABLE_ASSIGNED_BEFORE_DEFINED);
         }
-
         this.variables[name] = value;
     }
 

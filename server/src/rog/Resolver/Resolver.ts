@@ -1,5 +1,5 @@
 import { Interpreter } from "../Interpret/Interpreter";
-import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression, Expression } from "../Parse/Expression";
+import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression, Expression, ArrayExpression, GetExpression, ObjectExpression } from "../Parse/Expression";
 import { ExpressionVisitor } from "../Parse/ExpressionVisitor";
 import { ExpressionStatement, VarDeclStatement, IfStatement, WhileStatement, ForStatement, ReturnStatement, Statement } from "../Parse/Statement";
 import { StatementVisitor } from "../Parse/StatementVisitor";
@@ -126,6 +126,22 @@ export class Resolver implements ExpressionVisitor<void>, StatementVisitor<void>
         this.resolve(expression.statements);
         this.endScope();
         this.inFunction = inFunction;
+    }
+
+    visitObject(expression: ObjectExpression): void {
+        expression.values.forEach((value) => {
+            this.resolveExpression(value);
+        });
+    }
+
+    visitArray(expression: ArrayExpression): void {
+        expression.values.forEach((value) => {
+            this.resolveExpression(value);
+        });
+    }
+
+    visitGet(expression: GetExpression): void {
+        this.resolveExpression(expression.object);
     }
 
     private beginScope(): void {

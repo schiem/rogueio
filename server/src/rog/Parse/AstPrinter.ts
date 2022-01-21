@@ -59,7 +59,7 @@ export class AstPrinter implements ExpressionVisitor<string> {
     }
 
     visitGet(expression: GetExpression): string {
-        return `[${this.toString(expression.property)}`;
+        return `${this.toString(expression.object)}[${expression.name.toString()}`;
     }
 
     private parenthize(name: string, ...expressions: Expression[]): string {

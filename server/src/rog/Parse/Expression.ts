@@ -125,7 +125,7 @@ export class FuncExpression extends Expression {
 
 export class ObjectExpression extends Expression {
     constructor(
-        public keys: Token[],
+        public keys: Expression[],
         public values: Expression[]
     ) {
         super();
@@ -150,7 +150,8 @@ export class ArrayExpression extends Expression {
 
 export class GetExpression extends Expression {
     constructor(
-        public property: Expression 
+        public object: Expression,
+        public name: Expression 
     ) {
         super();
     }

@@ -66,6 +66,7 @@ export class Scanner {
             case '-': this.addToken(TokenType.MINUS); break;
             case '+': this.addToken(TokenType.PLUS); break;
             case ';': this.addToken(TokenType.SEMICOLON); break;
+            case ':': this.addToken(TokenType.COLON); break;
             case '*': this.addToken(TokenType.STAR); break; 
             case '|': 
                 if (this.match('|')) {

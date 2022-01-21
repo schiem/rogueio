@@ -13,7 +13,7 @@ export class Token {
 
 export enum TokenType {
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, LEFT_BRACKET, RIGHT_BRACKET,
-    COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
+    COMMA, DOT, MINUS, PLUS, SEMICOLON, COLON, SLASH, STAR,
 
     // One or two character tokens.
     BANG, BANG_EQUAL,

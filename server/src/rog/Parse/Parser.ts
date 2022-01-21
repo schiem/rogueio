@@ -39,7 +39,7 @@ import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statem
  * factor         → unary ( ( "/" | "*" ) unary )* ;
  * unary          → ( "!" | "-" ) unary
  *                  | call ;
- * call           → primary ( "(" arguments? ")" | "[" IDENTIFIER "]")* ; 
+ * call           → primary ( "(" arguments? ")" | "[" primary "]")* ; 
  * arguments      → expression ( "," expression )* ;
  * primary        → NUMBER | STRING | "true" | "false" | "nil"
  *                  | "(" expression ")" 
@@ -319,14 +319,13 @@ export class Parser {
 
     private call(): Expression {
         let expression = this.primary();
-
         while (true) {
             if (this.match(TokenType.LEFT_PAREN)) {
                 expression = this.finishCall(expression);
             } else if (this.match(TokenType.LEFT_BRACKET)) {
-                const expression = this.expression();
+                const name = this.expression();
                 this.consume(TokenType.RIGHT_BRACKET, ParseErrorType.EXPECTED_LITERAL);
-                return new GetExpression(expression);
+                expression = new GetExpression(expression, name);
             } else {
                 break;
             }
@@ -340,7 +339,7 @@ export class Parser {
         if (!this.check(TokenType.RIGHT_PAREN)) {
             do {
                 args.push(this.expression());
-            } while (this.match(TokenType.COMMA));
+            } while (this.match(TokenType.COMMA) && !this.isAtEnd());
         }
 
         const paren = this.consume(TokenType.RIGHT_PAREN, ParseErrorType.UNMATCHED_PAREN);
@@ -378,11 +377,11 @@ export class Parser {
         }
 
         if (this.match(TokenType.LEFT_BRACE)) {
-            this.object();
+            return this.object();
         }
 
         if (this.match(TokenType.LEFT_BRACKET)) {
-            this.array();
+            return this.array();
         }
 
         if (this.match(TokenType.IDENTIFIER)) {
@@ -397,10 +396,14 @@ export class Parser {
         const values = [];
         if (!this.match(TokenType.RIGHT_BRACE)) {
             do {
-                keys.push(this.consume(TokenType.IDENTIFIER, ParseErrorType.EXPECTED_IDENTIFIER));
-                this.consume(TokenType.COMMA, ParseErrorType.EXPECTED_LITERAL);
+                const key = this.primary();
+                if (!(key instanceof LiteralExpression) || (typeof key.value !== 'string' && typeof key.value !== 'number')) {
+                    this.panic(ParseErrorType.EXPECTED_IDENTIFIER);
+                }
+                keys.push(key);
+                this.consume(TokenType.COLON, ParseErrorType.EXPECTED_LITERAL);
                 values.push(this.expression());
-            } while (this.consume(TokenType.COMMA, ParseErrorType.EXPECTED_LITERAL) && !this.isAtEnd());
+            } while (this.match(TokenType.COMMA) && !this.isAtEnd());
             this.consume(TokenType.RIGHT_BRACE, ParseErrorType.EXPECTED_LITERAL);
         }
 
@@ -409,11 +412,13 @@ export class Parser {
 
     private array(): Expression {
         const expressions = [];
-        do {
-            expressions.push(this.expression());
-        } while (this.consume(TokenType.COMMA, ParseErrorType.EXPECTED_LITERAL) && !this.isAtEnd());
+        if (!this.match(TokenType.RIGHT_BRACKET)) {
+            do {
+                expressions.push(this.expression());
+            } while (this.match(TokenType.COMMA) && !this.isAtEnd());
+            this.consume(TokenType.RIGHT_BRACKET, ParseErrorType.EXPECTED_LITERAL);
+        }
 
-        this.consume(TokenType.RIGHT_BRACE, ParseErrorType.EXPECTED_LITERAL);
         return new ArrayExpression(expressions);
     }
 

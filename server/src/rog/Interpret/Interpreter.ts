@@ -1,15 +1,35 @@
 import { Token, TokenType } from "../Scan/Token";
-import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, Expression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression } from "../Parse/Expression";
+import { BinaryExpression, UnaryExpression, LiteralExpression, GroupingExpression, Expression, VariableExpression, AssignmentExpression, LogicalExpression, CallExpression, FuncExpression, ArrayExpression, GetExpression, ObjectExpression } from "../Parse/Expression";
 import { ExpressionVisitor } from "../Parse/ExpressionVisitor";
 import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statement, VarDeclStatement, WhileStatement } from "../Parse/Statement";
 import { StatementVisitor } from "../Parse/StatementVisitor";
 import { Environment } from "./Environment";
-import { Callable } from "./Callable";
+import { Callable, CallableFunction, ExternalCallable } from "./Callable";
+import { RogType, RogVariable } from "./RogVariable";
 
 export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<void> {
     private environment: Environment;
     private global: Environment = new Environment();
     private locals: Map<Expression, number> = new Map();
+
+    // This is insanely inefficient.  But hey, so is a tree walking parser
+    private builtIns: Record<RogType, Record<string, (object: any) => Callable>> = {
+        [RogType.string]: {
+        },
+        [RogType.number]: {
+        },
+        [RogType.array]: {
+            length: (object: any[]) => new ExternalCallable(() => { return new RogVariable(object.length); }, 0)
+        },
+        [RogType.object]: {
+        },
+        [RogType.bool]: {
+        },
+        [RogType.nil]: {
+        },
+        [RogType.function]: {
+        }
+    }
 
     private retVal: any = undefined;
 
@@ -99,7 +119,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
     }
 
     //Expression visitors
-    visitBinary(expression: BinaryExpression) {
+    visitBinary(expression: BinaryExpression): any {
         const left = this.evaluate(expression.left);
         const right = this.evaluate(expression.right);
 
@@ -142,7 +162,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
     }
 
 
-    visitUnary(expression: UnaryExpression) {
+    visitUnary(expression: UnaryExpression): any {
         const right = this.evaluate(expression.right);
 
         switch (expression.operator.type) {
@@ -175,6 +195,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         } else {
             this.global.assign(expression.name.lexeme, value);
         }
+        return undefined;
     }
 
     visitLogical(expression: LogicalExpression): any {
@@ -201,27 +222,64 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
             this.panic(RuntimeErrorType.INCORRECT_ARG_LENGTH);
         }
 
-        const returnValue = callee.call(this, args);
+        const returnValue = callee.call(this, args).val;
         if (this.retVal !== undefined) {
             this.retVal = undefined;
         }
         return returnValue;
     }
 
-    visitFunc(expression: FuncExpression): any {
-        return new Callable(expression, this.environment);
+    visitFunc(expression: FuncExpression): Callable {
+        return new CallableFunction(expression, this.environment);
     }
 
     visitArray(expression: ArrayExpression): any {
-
+        return expression.values.map(value => {
+            return value;
+        });
     }
 
     visitObject(expression: ObjectExpression): any {
+        const object = new Map();
 
+        for (let i = 0; i < expression.keys.length; i++) {
+            const key = this.evaluate(expression.keys[i]);
+            const value = expression.values[i];
+            object.set(key, value);
+        }
+
+        return object;
     }
 
     visitGet(expression: GetExpression): any {
+        const object = this.evaluate(expression.object);
+        const name = this.evaluate(expression.name);
 
+        if (typeof name === 'string') {
+            const objAsRogVar = new RogVariable(object);
+            const builtIn = this.lookupBuiltin(objAsRogVar.type, name);
+            if (builtIn !== undefined) {
+                return builtIn(object);
+            }
+        }
+
+        if (typeof object !== 'object') {
+            this.panic(RuntimeErrorType.CANNOT_ACCESS_PROPERTY);
+        }
+
+        if (Array.isArray(object)) {
+            const index = parseInt(name);
+            if (isNaN(index)) {
+                this.panic(RuntimeErrorType.INVALID_ACCESS_TYPE);
+            }
+
+            if (index > object.length - 1) {
+                this.panic(RuntimeErrorType.BAD_INDEX);
+            }
+            return this.evaluate(object[index]);
+        } else if (object instanceof Map) {
+            return this.evaluate(object.get(name));
+        }
     }
 
     executeStatements(statements: Statement[], context?: Environment): any {
@@ -249,6 +307,10 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
 
     resolve(expression: Expression, depth: number): void {
         this.locals.set(expression, depth);
+    }
+
+    private lookupBuiltin(type: RogType, name: string): (object: any) => Callable | undefined {
+        return this.builtIns[type][name];
     }
 
     private panic(type: RuntimeErrorType): never {
@@ -285,7 +347,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return true;
     }
 
-    private visitLocal(name: Token, expression: Expression): void {
+    private visitLocal(name: Token, expression: Expression): any {
         const distance = this.locals.get(expression);
         if (distance !== undefined) {
             return this.environment.getAt(distance, name.lexeme);
@@ -306,5 +368,8 @@ export enum RuntimeErrorType {
     VARIABLE_USED_BEFORE_DECLARED,
     VARIABLE_ASSIGNED_BEFORE_DEFINED,
     INCORRECT_ARG_LENGTH,
-    CANNOT_CALL
+    CANNOT_CALL,
+    CANNOT_ACCESS_PROPERTY,
+    INVALID_ACCESS_TYPE,
+    BAD_INDEX
 }
