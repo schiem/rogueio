@@ -158,19 +158,20 @@ export class ClientGame extends Game {
             return;
         }
 
-        const components = this.systems.location.getAllComponents();
+        const components = this.systems.ally.getAlliesForGroup('enemy');
         let bestLengthSqr: number | undefined = undefined;
         let closestEntity: number | undefined;  
         for (let key in components) {
             const id = parseInt(key);
-            if (id === characterId) {
+            const locationComponent = this.systems.location.getComponent(id);
+
+            if (locationComponent === undefined) {
                 continue;
             }
-
-            const component = components[id];
-            const distanceSquared = pointDistanceSquared(component.location, characterLocation.location); 
+            const distanceSquared = pointDistanceSquared(locationComponent.location, characterLocation.location); 
             if (bestLengthSqr === undefined || distanceSquared < bestLengthSqr) {
                 closestEntity = id;
+                bestLengthSqr = distanceSquared;
             }
         }
 
@@ -179,32 +180,67 @@ export class ClientGame extends Game {
 
     findNextEntity(): number | undefined {
         let currentLocation: LocationComponent | undefined;
-        const characterId = this.players[this.currentPlayerId].characterId;
-        const characterLocation = this.systems.location.getComponent(characterId);
-        if (typeof this.currentFocus !== 'number' || (currentLocation = this.systems.location.getComponent(this.currentFocus)) === undefined || !characterLocation) {
+        if (typeof this.currentFocus !== 'number' || (currentLocation = this.systems.location.getComponent(this.currentFocus)) === undefined) {
             return this.findClosestEntity();
         }
-        const distSquared = pointDistanceSquared(currentLocation.location, characterLocation.location);
-        let bestDiffSquared: number | undefined = undefined;
-        let nextEntity: number | undefined = undefined;
 
-        const components = this.systems.location.getAllComponents();
-        for (let key in components) {
-            const id = parseInt(key);
-            if (id ===  characterId) {
-                continue;
-            }
-
-            const component = components[id];
-            const entityDistSquared = pointDistanceSquared(component.location, characterLocation.location); 
-            const newDist = entityDistSquared - distSquared;
-            if (bestDiffSquared === undefined || (newDist > 0 && newDist < bestDiffSquared)) {
-                bestDiffSquared = newDist;
-                nextEntity = id;
-            }
+        const sortedComponents = this.getSortedEnemyList();
+        if (sortedComponents.length === 0) {
+            return;
         }
 
-        return nextEntity;
+
+        const currentIndex = sortedComponents.findIndex((componentId) => componentId === this.currentFocus);
+        if (currentIndex === sortedComponents.length - 1) {
+            return sortedComponents[0];
+        } else {
+            return sortedComponents[currentIndex + 1];
+        }
+    }
+
+    findPreviousEntity(): number | undefined {
+        let currentLocation: LocationComponent | undefined;
+        if (typeof this.currentFocus !== 'number' || (currentLocation = this.systems.location.getComponent(this.currentFocus)) === undefined) {
+            return this.findClosestEntity();
+        }
+
+        const sortedComponents = this.getSortedEnemyList();
+        if (sortedComponents.length === 0) {
+            return;
+        }
+
+
+        const currentIndex = sortedComponents.findIndex((componentId) => componentId === this.currentFocus);
+        if (currentIndex === 0) {
+            return sortedComponents[sortedComponents.length - 1];
+        } else {
+            return sortedComponents[currentIndex - 1];
+        }
+    }
+
+    getSortedEnemyList(): number[] {
+        const characterId = this.players[this.currentPlayerId].characterId;
+        const characterLocation = this.systems.location.getComponent(characterId);
+        if (characterLocation === undefined) {
+            return [];
+        }
+
+        const components = this.systems.ally.getAlliesForGroup('enemy');
+        const componentIds: number[] = [];
+        components.forEach((componentId) => {
+            const locationComponent = this.systems.location.getComponent(componentId);
+            if (locationComponent !== undefined) {
+                componentIds.push(componentId);
+            }
+        });
+        return componentIds.sort((a, b) => {
+            const aLocation = this.systems.location.getComponent(a);
+            const bLocation = this.systems.location.getComponent(b);
+            if (aLocation === undefined || bLocation === undefined) {
+                return 0;
+            }
+            return pointDistanceSquared(aLocation.location, characterLocation.location) - pointDistanceSquared(bLocation.location, characterLocation.location);
+        });
     }
 
     changeFocus(target: number | Point): void {

@@ -15,6 +15,9 @@ export class InputEventHandler {
             if (event.ctrlKey) {
                 key = `ctrl-${key}`;
             }
+            if (event.shiftKey) {
+                key = `shift-${key}`;
+            }
             const action = InputEvents.actionForKey(key);
             if (action !== undefined) {
                 event.preventDefault();
@@ -83,6 +86,12 @@ export class InputEventHandler {
         },
         [InputAction.focusNextEntity]: () => {
             const entity = this.game.findNextEntity();
+            if (entity !== undefined) {
+                this.game.changeFocus(entity);
+            }
+        },
+        [InputAction.focusPreviousEntity]: () => {
+            const entity = this.game.findPreviousEntity();
             if (entity !== undefined) {
                 this.game.changeFocus(entity);
             }
