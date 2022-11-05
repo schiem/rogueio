@@ -1,3 +1,4 @@
+import { LiteralRogType } from "../Interpret/RogVariable";
 import { Token, TokenType } from "./Token";
 /**
  * A scanner which defines the grammar.
@@ -226,7 +227,7 @@ export class Scanner {
         return true;
     }
 
-    private addToken(type: TokenType, literal?: any): void {
+    private addToken(type: TokenType, literal?: LiteralRogType): void {
         this.tokens.push(new Token(type, this.source.slice(this.currentTokenIndex, this.current), literal, this.line));
     }
 

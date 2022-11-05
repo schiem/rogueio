@@ -1,8 +1,10 @@
+import { LiteralRogType } from "../Interpret/RogVariable";
+
 export class Token {
     constructor(
         public readonly type: TokenType,
         public readonly lexeme: string,
-        public readonly literal: any,
+        public readonly literal: LiteralRogType | undefined,
         public readonly line: number,
     ) {}
 

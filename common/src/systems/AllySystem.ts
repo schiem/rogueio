@@ -30,7 +30,6 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
     }
 
     addComponentForEntity(id: number, component: AllyComponent): void {
-        console.log('adding');
         const group = this.groups[component.group];
         if (!group || this.entities[id]) {
             return;

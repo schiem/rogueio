@@ -174,13 +174,13 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
     },
 };
 
-export const SpawnEntity = (entityId: number, components: Record<string, any>, systems: GameSystems): void => {
+export const SpawnEntity = (entityId: number, components: Record<string, unknown>, systems: GameSystems): void => {
     for(const system in components) {
         if(!(system in systems)) {
             throw new Error(`System does not exist: ${system}`);
         }
 
         // Add the component to the given system
-        ((systems as any)[system] as ComponentSystem<any>).addComponentForEntity(entityId, components[system]);
+        ((systems as Record<string, ComponentSystem<unknown>>)[system]).addComponentForEntity(entityId, components[system]);
     }
 };

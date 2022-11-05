@@ -4,14 +4,14 @@ export type UpdateEntityData = {
     id: number;
     triggeredBy?: number;
     system: string;
-    properties: Record<string, any>
+    properties: Record<string, unknown>
 };
 
 export class UpdateEntityEvent extends ServerEvent {
     type = ServerEventType.update;
     data: UpdateEntityData;
 
-    constructor(id: number, system: string, properties: Record<string, any>, triggeredBy?: number) {
+    constructor(id: number, system: string, properties: Record<string, unknown>, triggeredBy?: number) {
         super();
         this.data = {
             id,

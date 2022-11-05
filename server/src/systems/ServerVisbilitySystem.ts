@@ -30,8 +30,8 @@ export class ServerVisbilitySystem extends VisibilitySystem {
                     if(allyToExclude && group === allyToExclude.group) {
                         return;
                     }
-                    const oldVisible = this.groupTileIsVisible(allyGroup, data.oldProps.location);
-                    const visible = this.groupTileIsVisible(allyGroup, data.props.location);
+                    const oldVisible = this.groupTileIsVisible(allyGroup, data.oldProps.location as Point);
+                    const visible = this.groupTileIsVisible(allyGroup, data.props.location as Point);
 
                     if(oldVisible && !visible) {
                         this.entityChangedVisibilityEmitter.emit({

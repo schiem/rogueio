@@ -1,6 +1,7 @@
 import { RuntimeError, RuntimeErrorType } from "./Interpreter";
+import { LiteralRogType } from "./RogVariable";
 export class Environment {
-    private variables: Record<string, any> = {};
+    private variables: Record<string, LiteralRogType> = {};
     
     constructor(private parentEnvironment: Environment | undefined = undefined) {}
 
@@ -16,7 +17,7 @@ export class Environment {
         return environment;
     }
 
-    assignAt(distance: number, name: string, value: any): void {
+    assignAt(distance: number, name: string, value: LiteralRogType): void {
         const environment = this.ancestor(distance);
         if (!environment) {
             return;
@@ -25,14 +26,12 @@ export class Environment {
         environment.assign(name, value);
     }
 
-    getAt(distance: number, name: string): any {
+    getAt(distance: number, name: string): LiteralRogType {
         const environment = this.ancestor(distance);
         return environment ? environment.get(name) : null;
     }
 
-    get(name: string): any {
-        console.log(`getting ${name}`);
-        console.log(this.variables);
+    get(name: string): LiteralRogType {
         if (this.variables[name] !== undefined) {
             return this.variables[name];
         }
@@ -44,11 +43,11 @@ export class Environment {
         throw new RuntimeError(RuntimeErrorType.VARIABLE_USED_BEFORE_DECLARED);
     }
 
-    define(name: string, value: any): void {
+    define(name: string, value: LiteralRogType): void {
         this.variables[name] = value;
     }
 
-    assign(name: string, value: any): void {
+    assign(name: string, value: LiteralRogType): void {
         if (this.variables[name] === undefined) {
             if (this.parentEnvironment !== undefined) {
                 return this.parentEnvironment.assign(name, value);

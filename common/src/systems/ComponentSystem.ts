@@ -15,11 +15,11 @@ export abstract class ComponentSystem<T> {
     // A mapping of entities that this system manages to the component
     // that this sytem manages
     protected entities: Record<number, T> = {}
-    componentPropertyUpdaters: Record<string, (id: number, component: T, newValue: any) => void>;
+    componentPropertyUpdaters: Record<string, (id: number, component: T, newValue: unknown) => void>;
 
     addedComponentEmitter = new EventEmitter<IdComponent<T>>();
     removedComponentEmitter = new EventEmitter<IdComponent<T>>();
-    componentUpdatedEmitter = new EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>, triggeredBy?: number}>();
+    componentUpdatedEmitter = new EventEmitter<{id: number, props: Record<string, unknown>, oldProps: Record<string, unknown>, triggeredBy?: number}>();
 
     constructor(entityManager: EntityManager) {
         entityManager.entityRemovedEmitter.subscribe((entityId) => {
@@ -43,8 +43,8 @@ export abstract class ComponentSystem<T> {
     /**
      * Updates the properties on a given component. 
      */
-    updateComponent(id: number, properties: Record<string, any>, triggeredBy?: number): void {
-        const component: any = this.getComponent(id);
+    updateComponent(id: number, properties: Record<string, unknown>, triggeredBy?: number): void {
+        const component: T | undefined = this.getComponent(id);
         if (!component) {
             return;
         }
@@ -89,14 +89,14 @@ export abstract class ComponentSystem<T> {
      * Fetches any additional data in the system associated with this component (e.g. data shared between multiple components) 
      * Returns undefined if no data is needed
      */
-    additionalDataForEntity(entityId: number): any {
+    additionalDataForEntity(entityId: number): unknown {
         return;
     }
 
-    private updateNestedProperty(component: T, property: string, value: any): any {
+    private updateNestedProperty(component: T, property: string, value: unknown): unknown {
         const properties = property.split('.');
-        let currentObj: any = component;
-        let oldProp: any;
+        let currentObj = component as Record<string, unknown>;
+        let oldProp: unknown;
         for(let i = 0; i < properties.length; i++) {
             const prop = properties[i];
             if (currentObj[prop] === undefined) {
@@ -107,7 +107,7 @@ export abstract class ComponentSystem<T> {
                 oldProp = currentObj[prop];
                 currentObj[prop] = value;
             } else {
-                currentObj = currentObj[prop];
+                currentObj = currentObj[prop] as Record<string, unknown>;
             }
         }
         return oldProp;

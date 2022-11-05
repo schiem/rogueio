@@ -5,21 +5,22 @@ import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statem
 import { StatementVisitor } from "../Parse/StatementVisitor";
 import { Environment } from "./Environment";
 import { Callable, CallableFunction, ExternalCallable } from "./Callable";
-import { RogType, RogVariable } from "./RogVariable";
+import { RogType, LiteralRogType, RogVariable } from "./RogVariable";
 
-export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<void> {
+export class Interpreter implements ExpressionVisitor<LiteralRogType>, StatementVisitor<LiteralRogType | void> {
     private environment: Environment;
     private global: Environment = new Environment();
     private locals: Map<Expression, number> = new Map();
 
     // This is insanely inefficient.  But hey, so is a tree walking parser
-    private builtIns: Record<RogType, Record<string, (object: any) => Callable>> = {
+    private builtIns: Record<RogType, Record<string, (object: LiteralRogType) => Callable>> = {
         [RogType.string]: {
+            length: (object: LiteralRogType) => new ExternalCallable(() => { return (object as string).length; }, 0)
         },
         [RogType.number]: {
         },
         [RogType.array]: {
-            length: (object: any[]) => new ExternalCallable(() => { return new RogVariable(object.length); }, 0)
+            length: (object: LiteralRogType) => new ExternalCallable(() => { return (object as unknown[]).length; }, 0)
         },
         [RogType.object]: {
         },
@@ -31,29 +32,42 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         }
     }
 
-    private retVal: any = undefined;
+    private retVal: LiteralRogType = null;
 
     constructor() {
         this.environment = this.global;
+        this.bindDefaultFunctions();
     }
-    interpret(statements: Statement[]): undefined | RuntimeError {
+
+    bindDefaultFunctions(): void {
+        this.bindGlobalVariable('dump', new ExternalCallable((value: LiteralRogType): LiteralRogType => {
+            return RogVariable.toString(value);
+        }, 1));
+    }
+
+    interpret(statements: Statement[]): string[] | RuntimeError {
         try {
+            const strings: string[] = [];
             statements.forEach((statement) => {
-                this.execute(statement);
+                const result = this.execute(statement);
+                if (result !== undefined) {
+                    strings.push(result?.toString() || 'nil');
+                }
             });
-            return;
+            return strings;
         } catch (e) {
             return e as RuntimeError;
         }
     }
 
     // Statement visitors
-    visitVarDecl(statement: VarDeclStatement): void {
+    visitVarDecl(statement: VarDeclStatement): null {
         let value = null;
         if (statement.initializer !== undefined) {
             value = this.evaluate(statement.initializer);
         }
         this.environment.define(statement.name.lexeme, value);
+        return null;
     }
 
     visitFor(statement: ForStatement): void {
@@ -112,42 +126,41 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         }
     }
 
-    visitExpression(statement: ExpressionStatement): void {
-        // TODO - remove the console.log
-        console.log(this.evaluate(statement.expression));
+    visitExpression(statement: ExpressionStatement): LiteralRogType {
+        return this.evaluate(statement.expression);
     }
 
     //Expression visitors
-    visitBinary(expression: BinaryExpression): any {
+    visitBinary(expression: BinaryExpression): LiteralRogType {
         const left = this.evaluate(expression.left);
         const right = this.evaluate(expression.right);
 
         switch (expression.operator.type) {
             case TokenType.LESS:
                 this.checkType(right, 'number');
-                return left < right;
+                return (left as boolean) < (right as boolean);
             case TokenType.LESS_EQUAL:
                 this.checkType(right, 'number');
-                return left <= right;
+                return (left as boolean) <= (right as boolean);
             case TokenType.GREATER:
                 this.checkType(right, 'number');
-                return left > right;
+                return (left as boolean) > (right as boolean);
             case TokenType.GREATER_EQUAL:
                 this.checkType(right, 'number');
-                return left >= right;
+                return (left as boolean) >= (right as boolean);
             case TokenType.EQUAL_EQUAL:
                 return left === right;
             case TokenType.BANG_EQUAL:
                 return left !== right;
             case TokenType.MINUS:
                 this.checkTypes(left, right, 'number', 'number');
-                return left - right;
+                return (left as number) - (right as number);
             case TokenType.STAR:
                 this.checkTypes(left, right, 'number', 'number');
-                return left * right;
+                return (left as number) * (right as number);
             case TokenType.SLASH:
                 this.checkTypes(left, right, 'number', 'number');
-                return left / right;
+                return (left as number) / (right as number);
             case TokenType.PLUS:
                 if (typeof left === 'number' && typeof right === 'number') {
                     return left + right;
@@ -161,13 +174,13 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
     }
 
 
-    visitUnary(expression: UnaryExpression): any {
+    visitUnary(expression: UnaryExpression): LiteralRogType {
         const right = this.evaluate(expression.right);
 
         switch (expression.operator.type) {
             case TokenType.MINUS:
                 this.checkType(right, 'number');
-                return -1 * right;
+                return -1 * (right as number);
             case TokenType.BANG:
                 return !this.isTruthy(right);
         }
@@ -175,18 +188,18 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return null;
     }
 
-    visitLiteral(expression: LiteralExpression): any {
+    visitLiteral(expression: LiteralExpression): LiteralRogType {
         return expression.value;
     }
-    visitGrouping(expression: GroupingExpression): any {
+    visitGrouping(expression: GroupingExpression): LiteralRogType {
         return this.evaluate(expression.expr);
     }
 
-    visitVariable(expression: VariableExpression): any {
+    visitVariable(expression: VariableExpression): LiteralRogType {
         return this.visitLocal(expression.name, expression);
     }
 
-    visitAssignment(expression: AssignmentExpression): any {
+    visitAssignment(expression: AssignmentExpression): LiteralRogType {
         const value = this.evaluate(expression.value);
         const distance = this.locals.get(expression);
         if (distance !== undefined) {
@@ -194,10 +207,10 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         } else {
             this.global.assign(expression.name.lexeme, value);
         }
-        return undefined;
+        return null;
     }
 
-    visitLogical(expression: LogicalExpression): any {
+    visitLogical(expression: LogicalExpression): LiteralRogType {
         const left = this.evaluate(expression.left);
 
         const leftIsTruthy = this.isTruthy(left);
@@ -209,7 +222,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return this.evaluate(expression.right);
     }
 
-    visitCall(expression: CallExpression): any {
+    visitCall(expression: CallExpression): LiteralRogType {
         const callee = this.evaluate(expression.callee);
         const args = expression.args.map((arg) => this.evaluate(arg));
 
@@ -221,9 +234,9 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
             this.panic(RuntimeErrorType.INCORRECT_ARG_LENGTH);
         }
 
-        const returnValue = callee.call(this, args).val;
+        const returnValue = callee.call(this, ...args);
         if (this.retVal !== undefined) {
-            this.retVal = undefined;
+            this.retVal = null;
         }
         return returnValue;
     }
@@ -232,31 +245,30 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return new CallableFunction(expression, this.environment);
     }
 
-    visitArray(expression: ArrayExpression): any {
+    visitArray(expression: ArrayExpression): LiteralRogType {
         return expression.values.map(value => {
-            return value;
+            return this.evaluate(value);
         });
     }
 
-    visitObject(expression: ObjectExpression): any {
+    visitObject(expression: ObjectExpression): LiteralRogType {
         const object = new Map();
 
         for (let i = 0; i < expression.keys.length; i++) {
             const key = this.evaluate(expression.keys[i]);
-            const value = expression.values[i];
+            const value = this.evaluate(expression.values[i]);
             object.set(key, value);
         }
 
         return object;
     }
 
-    visitGet(expression: GetExpression): any {
+    visitGet(expression: GetExpression): LiteralRogType {
         const object = this.evaluate(expression.object);
-        const name = this.evaluate(expression.name);
+        const name = this.evaluate(expression.name) as string;
 
         if (typeof name === 'string') {
-            const objAsRogVar = new RogVariable(object);
-            const builtIn = this.lookupBuiltin(objAsRogVar.type, name);
+            const builtIn = this.lookupBuiltin(RogVariable.getType(object), name);
             if (builtIn !== undefined) {
                 return builtIn(object);
             }
@@ -272,22 +284,27 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
                 this.panic(RuntimeErrorType.INVALID_ACCESS_TYPE);
             }
 
-            if (index > object.length - 1) {
+            if (index > object.length - 1 || index < 0) {
                 this.panic(RuntimeErrorType.BAD_INDEX);
             }
-            return this.evaluate(object[index]);
+            return object[index];
         } else if (object instanceof Map) {
-            return this.evaluate(object.get(name));
+            if (!object.has(name)) {
+                this.panic(RuntimeErrorType.CANNOT_ACCESS_PROPERTY);
+            }
+            return object.get(name) as LiteralRogType;
         }
+
+        return null;
     }
 
-    executeStatements(statements: Statement[], context?: Environment): any {
+    executeStatements(statements: Statement[], context?: Environment): LiteralRogType {
         let originalEnvironment = this.environment;
         if (context !== undefined) {
             this.environment = context;
         }
 
-        let retVal: any = null;
+        let retVal: LiteralRogType = null;
         for (let i = 0; i < statements.length; i++) {
             this.execute(statements[i]);
             if (this.retVal) {
@@ -308,7 +325,11 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         this.locals.set(expression, depth);
     }
 
-    private lookupBuiltin(type: RogType, name: string): (object: any) => Callable | undefined {
+    bindGlobalVariable(name: string, value: LiteralRogType): void {
+        this.global.define(name, value);
+    }
+
+    private lookupBuiltin(type: RogType, name: string): (object: LiteralRogType) => Callable {
         return this.builtIns[type][name];
     }
 
@@ -316,27 +337,27 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         throw new RuntimeError(type);
     }
 
-    private checkType(val: any, type: string): void | never {
+    private checkType(val: unknown, type: string): void | never {
         if (typeof val !== type) {
             this.panic(RuntimeErrorType.BAD_TYPE);
         }
     }
 
-    private checkTypes(left: any, right: any, leftType: string, rightType: string): void | never {
+    private checkTypes(left: unknown, right: unknown, leftType: string, rightType: string): void | never {
         if (typeof left !== leftType || typeof right !== rightType) {
             this.panic(RuntimeErrorType.BAD_TYPE);
         }
     }
 
-    private execute(statement: Statement): void {
-        statement.accept(this);
+    private execute(statement: Statement): LiteralRogType | void {
+        return statement.accept(this as StatementVisitor<void | LiteralRogType>);
     }
 
-    private evaluate(expression: Expression): any {
+    private evaluate(expression: Expression): LiteralRogType {
         return expression.accept(this);
     }
 
-    private isTruthy(val: any): boolean {
+    private isTruthy(val: unknown): boolean {
         if (val === undefined || val === null) {
             return false;
         }
@@ -346,7 +367,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
         return true;
     }
 
-    private visitLocal(name: Token, expression: Expression): any {
+    private visitLocal(name: Token, expression: Expression): LiteralRogType {
         const distance = this.locals.get(expression);
         if (distance !== undefined) {
             return this.environment.getAt(distance, name.lexeme);

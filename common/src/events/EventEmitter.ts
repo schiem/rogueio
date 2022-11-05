@@ -13,8 +13,8 @@ export class EventEmitter<T> {
     }
 
     emit(data: T): void {
-        Object.keys(this.events).forEach((id: any) => {
-            this.events[id](data);
+        Object.keys(this.events).forEach((id: string) => {
+            this.events[id as unknown as number](data);
         });
     }
 }

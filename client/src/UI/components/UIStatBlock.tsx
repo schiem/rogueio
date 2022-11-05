@@ -16,11 +16,11 @@ type StatState = {
 type StatProps = {
     stats: StatComponent;
     health: HealthComponent,
-    componentChangedEmitters: EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>[];
+    componentChangedEmitters: EventEmitter<{id: number, props: Record<string, unknown>, oldProps: Record<string, unknown>}>[];
 };
 
 export class UIStatBlock extends Component<StatProps, StatState> {
-    componentChangedEmitters: EventEmitter<{id: number, props: Record<string, any>, oldProps: Record<string, any>}>[];
+    componentChangedEmitters: EventEmitter<{id: number, props: Record<string, unknown>, oldProps: Record<string, unknown>}>[];
     subscriptions?: number[];
 
     constructor({ stats, health, componentChangedEmitters }: StatProps) {
@@ -38,7 +38,7 @@ export class UIStatBlock extends Component<StatProps, StatState> {
             }
         };
 
-        const promises: Promise<any>[] = [
+        const promises: Promise<unknown>[] = [
             localize(`common/stats/hp`).then((localized) => {
                 this.state.health.lang = localized
             })
@@ -82,7 +82,7 @@ export class UIStatBlock extends Component<StatProps, StatState> {
               <ul>
                   <li class="columned"><span>{this.state.health.lang}</span><span>{this.state.health.component.current + ' / ' + this.state.health.component.max}</span></li>
                   {Object.keys(this.state.statNameList).map(key => 
-                    <li class="columned"><span>{this.state.statNameList[key]}</span><span>{(this.state.stats.current as any)[key] + ' / ' + (this.state.stats.max as any)[key]}</span></li>
+                    <li class="columned"><span>{this.state.statNameList[key]}</span><span>{(this.state.stats.current as Record<string, number>)[key] + ' / ' + (this.state.stats.max as Record<string, number>)[key]}</span></li>
                   )}
               </ul>
             </div>

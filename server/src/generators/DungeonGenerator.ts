@@ -84,9 +84,13 @@ export class DungeonGenerator {
         }
     }
 
-    spreadWater(point: Point, waterAmount: number, dungeon: ServerDungeon): void {
-        const surroundingTiles: Point[] = [];
+    spreadWater(point: Point, waterAmount: number, dungeon: ServerDungeon, depth = 0): void {
+        // Bail after a certain amount, no matter what
+        if (depth > 8) {
+            return;
+        }
 
+        const surroundingTiles: Point[] = [];
         [
             {x: point.x - 1, y: point.y },
             {x: point.x + 1, y: point.y },
@@ -108,7 +112,7 @@ export class DungeonGenerator {
             });
             // Do this twice so all the tiles have their water set before recursing into them
             surroundingTiles.forEach((tile) => {
-                this.spreadWater(tile, avgWater, dungeon);
+                this.spreadWater(tile, avgWater, dungeon, depth + 1);
             });
         }
     }

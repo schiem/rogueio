@@ -86,7 +86,7 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
         this.sharedComponents[group] = component;
     }
 
-    additionalDataForEntity(entityId: number): any {
+    additionalDataForEntity(entityId: number): unknown {
         const sharedComponent = this.getSharedVisibilityComponent(entityId);
         const allyComponent = this.allySystem.getComponent(entityId);
         if (!sharedComponent || !allyComponent) {

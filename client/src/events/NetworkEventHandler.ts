@@ -50,7 +50,7 @@ export class NetworkEventHandler {
             game.messageEmitter.emit(event.data);
         },
         [ServerEventType.update]: (game: ClientGame, event: UpdateEntityEvent): void => {
-            const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
+            const system = (game.systems as Record<string, ComponentSystem<unknown>>)[event.data.system];
             if (!system) {
                 throw new Error('Invalid system');
             }
@@ -58,7 +58,7 @@ export class NetworkEventHandler {
         },
         [ServerEventType.addComponent]: (game: ClientGame, event: AddEntityComponentsEvent): void => {
             for(let systemName in event.data.components) {
-                const system: ComponentSystem<any> = (game.systems as any)[systemName];
+                const system = (game.systems as Record<string, ComponentSystem<unknown>>)[systemName];
                 if (!system) {
                     throw new Error('Invalid system');
                 }
@@ -66,7 +66,7 @@ export class NetworkEventHandler {
             }
         },
         [ServerEventType.removeComponent]: (game: ClientGame, event: RemoveEntityComponentEvent): void => {
-            const system: ComponentSystem<any> = (game.systems as any)[event.data.system];
+            const system = (game.systems as Record<string, ComponentSystem<unknown>>)[event.data.system];
             if (!system) {
                 throw new Error('Invalid system');
             }

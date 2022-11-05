@@ -59,7 +59,7 @@ export class NetworkEventManager {
             let event: NetworkEvent;
             if (data.visible) {
                 // Add all the visible components for the entity
-                const components: Record<string, any> = {};
+                const components: Record<string, unknown> = {};
                 for(let systemName in systems) {
                     const system = (systems as Record<string, ComponentSystem<unknown>>)[systemName];
                     if (system.replicationMode === 'visible') {
@@ -83,7 +83,7 @@ export class NetworkEventManager {
         });
 
         Object.keys(systems).forEach((systemName) => {
-            const system: ComponentSystem<unknown> = (systems as any)[systemName];
+            const system: ComponentSystem<unknown> = (systems as Record<string, ComponentSystem<unknown>>)[systemName];
 
             // Don't replicate this ever
             if (system.replicationMode === 'none') {

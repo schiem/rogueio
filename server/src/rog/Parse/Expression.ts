@@ -1,3 +1,4 @@
+import { LiteralRogType } from "../Interpret/RogVariable";
 import { Token } from "../Scan/Token";
 import { ExpressionVisitor } from "./ExpressionVisitor";
 import { Statement } from "./Statement";
@@ -34,7 +35,7 @@ export class GroupingExpression extends Expression {
 
 export class LiteralExpression extends Expression {
     constructor(
-        public readonly value: any,
+        public readonly value: LiteralRogType,
     ) {
         super();
     }

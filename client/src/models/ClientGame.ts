@@ -21,12 +21,12 @@ import { ClientVisibilitySystem } from "../systems/ClientVisibilitySystem";
 import { ClientDescriptionSystem } from "../systems/ClientDescriptionSystem";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 
-export type ClientGameSystems = {
+export type ClientGameSystems = GameSystems & {
     location: ClientLocationSystem;
     visibility: ClientVisibilitySystem;
     description: ClientDescriptionSystem,
     health: ClientHealthSystem;
-} & GameSystems
+};
 
 export class ClientGame extends Game {
     systems: ClientGameSystems;
@@ -84,14 +84,17 @@ export class ClientGame extends Game {
                     this.recenterViewPort();
                 }
 
-                this.renderDungeonTileAtLocation(data.props.location);
-                this.renderDungeonTileAtLocation(data.oldProps.location);
+                const newLocation = data.props.location as Point;
+                const oldLocation = data.oldProps.location as Point;
+
+                this.renderDungeonTileAtLocation(newLocation);
+                this.renderDungeonTileAtLocation(oldLocation);
                 this.renderer.renderViewPort();
 
                 if (this.currentFocus !== undefined) {
                     const focusPoint = this.normalizeFocus(this.currentFocus);
                     if (focusPoint) {
-                        if (pointsAreEqual(focusPoint, data.props.location) || pointsAreEqual(focusPoint, data.oldProps.location)) {
+                        if (pointsAreEqual(focusPoint, newLocation) || pointsAreEqual(focusPoint, oldLocation)) {
                             this.focusMaybeChangedEmitter.emit(this.currentFocus);
                         }
                     }
@@ -262,7 +265,7 @@ export class ClientGame extends Game {
         this.focusMaybeChangedEmitter.emit(this.currentFocus);
     }
 
-    addComponentsForEntity(entityId: number, components: Record<string, any>): void {
+    addComponentsForEntity(entityId: number, components: Record<string, unknown>): void {
         const systems = this.systems as Record<string, ComponentSystem<unknown>>;
         for(const systemName in components) {
             const component = components[systemName];

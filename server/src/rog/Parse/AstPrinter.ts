@@ -18,7 +18,7 @@ export class AstPrinter implements ExpressionVisitor<string> {
         if (expression.value === undefined || expression.value === null) {
             return 'nil';
         }
-        return expression.value.toString();
+        return (expression.value as string).toString();
     }
 
     visitGrouping(expression: GroupingExpression): string {

@@ -357,7 +357,7 @@ export class Parser {
         }
 
         if (this.match(TokenType.NUMBER, TokenType.STRING)) {
-            return new LiteralExpression(this.previous().literal);
+            return new LiteralExpression(this.previous().literal as string | number);
         }
 
         // Group or function

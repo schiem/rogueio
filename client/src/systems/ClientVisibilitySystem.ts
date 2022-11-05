@@ -7,8 +7,9 @@ import { Tile } from "../../../common/src/types/Tile";
 export class ClientVisibilitySystem extends VisibilitySystem {
     visionPointsChanged = new EventEmitter<{point: Point, tile?: Tile}[]>();
 
-    componentPropertyUpdaters = {
-        added: (id: number, component: VisibilityComponent, added: Point[]) => {
+    componentPropertyUpdaters: Record<string, (id: number, component: VisibilityComponent, newValue: unknown) => void> = {
+        added: (id: number, component: VisibilityComponent, newValue: unknown) => {
+            const added = newValue as Point[];
             added.forEach((point) => {
                 if (!component.visible[point.x]) {
                     component.visible[point.x] = {};
@@ -17,13 +18,15 @@ export class ClientVisibilitySystem extends VisibilitySystem {
                 this.visionPointsChanged.emit([{point}]);
             });
         },
-        removed: (id: number, component: VisibilityComponent, removed: Point[]) => {
+        removed: (id: number, component: VisibilityComponent, newValue: unknown) => {
+            const removed = newValue as Point[];
             removed.forEach((point) => {
                 delete component.visible[point.x]?.[point.y];
                 this.visionPointsChanged.emit([{point}]);
             });
         },
-        seen: (id: number, component: VisibilityComponent, seen: Tile[]) => {
+        seen: (id: number, component: VisibilityComponent, newValue: unknown) => {
+            const seen = newValue as Tile[];
             const sharedComponent = this.getSharedVisibilityComponent(id);
             if (!sharedComponent) {
                 return;
@@ -60,6 +63,4 @@ export class ClientVisibilitySystem extends VisibilitySystem {
         this.visionPointsChanged.emit(points);
         super.removeComponentFromEntity(id);
     }
-
-
 }
