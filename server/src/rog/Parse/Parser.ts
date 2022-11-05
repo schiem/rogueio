@@ -11,7 +11,7 @@ import { ExpressionStatement, ForStatement, IfStatement, ReturnStatement, Statem
  *                  | ifStmt
  *                  | whileStmt
  *                  | varDeclStmt 
- *                  | funStmt ;
+ *                  | returnStmt ;
  * 
  * forStmt        → "for" "(" ( varDeclStmt | exprStmt | ";" )
  *                  expression? ";"
@@ -65,7 +65,6 @@ export class Parser {
 
             return statements;
         } catch(e: any) {
-            console.log(e);
             return e;
         }
     }
@@ -528,6 +527,15 @@ export enum ParseErrorType {
     EXPECTED_IDENTIFIER,
     EXPECTED_LITERAL,
     INVALID_ASSIGNMENT
+}
+
+export const ParseErrorStrings: Record<ParseErrorType, string>  = {
+    [ParseErrorType.UNMATCHED_PAREN]: 'Unmatched parenthesis',
+    [ParseErrorType.EXPECTED_EXPRESSION]: 'Expected expression',
+    [ParseErrorType.EXPECTED_SEMICOLON]: 'Expected semicolon',
+    [ParseErrorType.EXPECTED_IDENTIFIER]: 'Expected identifier',
+    [ParseErrorType.EXPECTED_LITERAL]: 'Expected literal',
+    [ParseErrorType.INVALID_ASSIGNMENT]: 'Invalid assignment'
 }
 
 export class ParseError extends Error {

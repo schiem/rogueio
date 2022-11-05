@@ -158,22 +158,21 @@ export class ClientGame extends Game {
             return;
         }
 
-        const components = this.systems.ally.getAlliesForGroup('enemy');
+        const components = this.systems.ally.getAlliesForGroup('enemies');
         let bestLengthSqr: number | undefined = undefined;
         let closestEntity: number | undefined;  
-        for (let key in components) {
-            const id = parseInt(key);
+        components.forEach((id) => {
             const locationComponent = this.systems.location.getComponent(id);
 
             if (locationComponent === undefined) {
-                continue;
+                return;
             }
-            const distanceSquared = pointDistanceSquared(locationComponent.location, characterLocation.location); 
+            const distanceSquared = pointDistanceSquared(locationComponent.location, characterLocation.location);
             if (bestLengthSqr === undefined || distanceSquared < bestLengthSqr) {
                 closestEntity = id;
                 bestLengthSqr = distanceSquared;
             }
-        }
+        });
 
         return closestEntity === undefined ? closestEntity : closestEntity;
     }
@@ -225,7 +224,7 @@ export class ClientGame extends Game {
             return [];
         }
 
-        const components = this.systems.ally.getAlliesForGroup('enemy');
+        const components = this.systems.ally.getAlliesForGroup('enemies');
         const componentIds: number[] = [];
         components.forEach((componentId) => {
             const locationComponent = this.systems.location.getComponent(componentId);

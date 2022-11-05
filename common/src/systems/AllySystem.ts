@@ -1,4 +1,4 @@
-import { AllyComponent } from "../components/AllyComponent";
+import { AllyComponent, AllyGroup } from "../components/AllyComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { HealthSystem } from "./HealthSystem";
@@ -10,10 +10,10 @@ import { HealthSystem } from "./HealthSystem";
  * Each group of allies will have a list of entities belonging to it.
  */
 export class AllySystem extends ComponentSystem<AllyComponent> {
-    replicationMode: ReplicationMode = 'ally';
+    replicationMode: ReplicationMode = 'visible';
 
     // A mapping of groups to entities
-    groups: Record<string, number[]>;
+    groups: Partial<Record<AllyGroup, number[]>>;
     constructor(entityManager: EntityManager, healthSystem: HealthSystem) {
         super(entityManager);
 
@@ -30,6 +30,7 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
     }
 
     addComponentForEntity(id: number, component: AllyComponent): void {
+        console.log('adding');
         const group = this.groups[component.group];
         if (!group || this.entities[id]) {
             return;
@@ -45,12 +46,17 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
             return;
         }
 
+        const group = this.groups[component.group];
+        if (group === undefined) {
+            return;
+        }
+
         // A find / splice is faster than than deleting from an 
         // object for up to ~3000 items, which we will hopefully
         // never hit.
-        const idx = this.groups[component.group].indexOf(id);
+        const idx = group.indexOf(id);
         if (idx !== -1) {
-            this.groups[component.group].splice(idx, 1);
+            group.splice(idx, 1);
         }
 
         super.removeComponentFromEntity(id);
@@ -64,8 +70,8 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
         return this.getAlliesForGroup(component.group);
     }
 
-    getAlliesForGroup(group: string): number[] {
-        return this.groups[group];
+    getAlliesForGroup(group: AllyGroup): number[] {
+        return this.groups[group] || [];
     }
 
     entitiesAreAllies(id: number, other: number): boolean {

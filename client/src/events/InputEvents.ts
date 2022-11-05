@@ -9,16 +9,6 @@ export enum InputAction {
 };
 
 export class InputEvents {
-    static readonly actionNames: Record<InputAction, string> = {
-        [InputAction.moveLeft]: 'moveLeft',
-        [InputAction.moveRight]: 'moveRight',
-        [InputAction.moveDown]: 'moveDown',
-        [InputAction.moveUp]: 'moveUp',
-        [InputAction.focusClosestEntity]: 'focusClosestEntity',
-        [InputAction.focusNextEntity]: 'focusNextEntity',
-        [InputAction.focusPreviousEntity]: 'focusPreviousEntity'
-    }
-
     private static defaultInputEventMap: Record<string, InputAction> = {
         a: InputAction.moveLeft,
         s: InputAction.moveDown,
@@ -26,7 +16,7 @@ export class InputEvents {
         w: InputAction.moveUp,
         c: InputAction.focusClosestEntity,
         Tab: InputAction.focusNextEntity,
-        'Shift-Tab': InputAction.focusPreviousEntity
+        'shift-Tab': InputAction.focusPreviousEntity
     }
     private static inputEventMap: Record<string, InputAction> = {}
 

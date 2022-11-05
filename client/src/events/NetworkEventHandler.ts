@@ -1,6 +1,7 @@
 import { ServerEvent, ServerEventType } from "../../../common/src/events/server/ServerEvent";
 import { ClientGame } from "../models/ClientGame";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
+import { MessageEvent } from "../../../common/src/events/server/MessageEvent";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { NetworkEvent } from "../../../common/src/events/NetworkEvent";
 import { UpdateEntityEvent } from "../../../common/src/events/server/UpdateEntityEvent";
@@ -32,14 +33,14 @@ export class NetworkEventHandler {
     }
 
     static handleEvent(game: ClientGame, serverEvent: ServerEvent): void {
-        const handler = (this.eventHandlers as any)[serverEvent.type];
+        const handler = this.eventHandlers[serverEvent.type];
         if (handler !== undefined) {
-            handler(game, serverEvent as any);
+            handler(game, serverEvent);
         }
     }
 
     // the functions for handling any events received from the server
-    private static eventHandlers = {
+    private static eventHandlers: Record<ServerEventType, (game: ClientGame, event: ServerEvent) => void> = {
         [ServerEventType.init]: (game: ClientGame, event: InitEvent): void => {
             game.postDeserialize(event);
             game.renderDungeon(game.currentLevel);

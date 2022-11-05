@@ -43,8 +43,7 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
             });
             return;
         } catch (e) {
-            console.log(e);
-            return e;
+            return e as RuntimeError;
         }
     }
 
@@ -357,12 +356,6 @@ export class Interpreter implements ExpressionVisitor<any>, StatementVisitor<voi
     }
 }
 
-export class RuntimeError extends Error {
-    constructor(public type: RuntimeErrorType) {
-        super();
-    }
-}
-
 export enum RuntimeErrorType {
     BAD_TYPE,
     VARIABLE_USED_BEFORE_DECLARED,
@@ -372,4 +365,21 @@ export enum RuntimeErrorType {
     CANNOT_ACCESS_PROPERTY,
     INVALID_ACCESS_TYPE,
     BAD_INDEX
+}
+
+export const RuntimeErrorStrings: Record<RuntimeErrorType, string> = {
+    [RuntimeErrorType.BAD_TYPE]: 'Bad type',
+    [RuntimeErrorType.VARIABLE_USED_BEFORE_DECLARED]: 'Variable used before declaraction',
+    [RuntimeErrorType.VARIABLE_ASSIGNED_BEFORE_DEFINED]: 'Variable assigned before definition',
+    [RuntimeErrorType.INCORRECT_ARG_LENGTH]: 'Incorrect number of args',
+    [RuntimeErrorType.CANNOT_CALL]: 'Cannot call non-function',
+    [RuntimeErrorType.CANNOT_ACCESS_PROPERTY]: 'Cannot access invalid property',
+    [RuntimeErrorType.INVALID_ACCESS_TYPE]: 'Cannot index array with non-number',
+    [RuntimeErrorType.BAD_INDEX]: 'Cannot fetch item at array index'
+}
+
+export class RuntimeError extends Error {
+    constructor(public type: RuntimeErrorType) {
+        super();
+    }
 }

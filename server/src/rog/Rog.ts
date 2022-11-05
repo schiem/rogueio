@@ -1,13 +1,9 @@
-import { Interpreter } from "./Interpret/Interpreter";
-import { Parser } from "./Parse/Parser";
-import { Resolver } from "./Resolver/Resolver";
-import { ScanErrorType, Scanner } from "./Scan/Scanner";
+import { Interpreter, RuntimeErrorStrings } from "./Interpret/Interpreter";
+import { ParseErrorStrings, Parser } from "./Parse/Parser";
+import { Resolver, ResolverError, ResolverErrorStrings } from "./Resolver/Resolver";
+import { ScanErrorStrings,  Scanner } from "./Scan/Scanner";
 
 export class Rog {
-    static scanErrorStrings: Record<ScanErrorType, string> = {
-        [ScanErrorType.BAD_CHARACTER]: 'Invalid character',
-        [ScanErrorType.UNTERMINATED_STRING]: 'No closing string found'
-    }
     private interpreter = new Interpreter();
     run(source: string): void {
         const scanner = new Scanner(source);
@@ -16,14 +12,14 @@ export class Rog {
 
         if (errors.length > 0) {
             errors.forEach((error) => {
-                console.log(`Received error "${Rog.scanErrorStrings[error.errorCode]}" at ${error.line}:${error.index}`);
+                console.log(`Received error "${ScanErrorStrings[error.errorCode]}" at ${error.line}:${error.index}`);
             });
             return;
         }
         const parser = new Parser(tokens);
         const statements = parser.parse();
         if (statements instanceof Error) {
-            console.log("Error in parser!!!!");
+            console.log(`Parse Error: ${ParseErrorStrings[statements.type]}`);
             return;
         }
 
@@ -32,13 +28,14 @@ export class Rog {
             resolver.resolve(statements);
         } catch(e) {
             console.log(e);
-            console.log("Error in resolver!!!!");
+            console.log(ResolverErrorStrings);
+            console.log(`Resolve Error: ${ResolverErrorStrings[(e as ResolverError).type]}`);
             return;
         }
 
         const value = this.interpreter.interpret(statements);
         if (value instanceof Error) {
-            console.log("Error in interpreter");
+            console.log(`Runtime Error: ${RuntimeErrorStrings[value.type]}`);
             return;
         }
     }

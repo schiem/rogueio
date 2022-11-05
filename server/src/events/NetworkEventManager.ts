@@ -20,7 +20,9 @@ import { NetworkEvent } from '../../../common/src/events/NetworkEvent';
  * Handles both incoming and outgoing events.
  */
 export class NetworkEventManager {
-    eventQueue: Record<string, NetworkEvent[]> = {};
+    eventSendQueue: Record<string, NetworkEvent[]> = {};
+    private playerEventQueue: Record<string, ClientEvent> = {};
+
     private eventHandlers: Record<ClientEventType, (playerId: string, game: ServerGame, event: ClientEvent) => void> = {
         [ClientEventType.move]: (playerId: string, game: ServerGame, event: MoveEvent) => {
             const characterId = game.players[playerId].characterId;
@@ -49,7 +51,7 @@ export class NetworkEventManager {
 
         // When the visibility of a component changes, send the visibility pieces to the relevant entities
         systems.visibility.entityChangedVisibilityEmitter.subscribe((data) => {
-            const charLookup: Record<number, string> = {}
+            const charLookup: Record<number, string> = {};
             for(let playerId in players) {
                 charLookup[players[playerId].characterId] = playerId;
             }
@@ -104,15 +106,15 @@ export class NetworkEventManager {
     }
 
     addPlayerEventQueue(playerId: string): void {
-        this.eventQueue[playerId] = [];
+        this.eventSendQueue[playerId] = [];
     }
 
     removePlayerEventQueue(playerId: string): void {
-        delete this.eventQueue[playerId];
+        delete this.eventSendQueue[playerId];
     }
 
     queueEvent(event: NetworkEvent, fromSystem?: ComponentSystem<unknown>): void {
-        for(let playerId in this.eventQueue) {
+        for(let playerId in this.eventSendQueue) {
             const entityId = this.players[playerId].characterId;
             const appliesTo: number | undefined = event.data?.id;
             // Ensure that:
@@ -120,38 +122,44 @@ export class NetworkEventManager {
             //   * There is no entity that this event corresponds to OR
             //   * This is a global event (no system)
             if (!fromSystem || appliesTo === undefined || this.entityManager.entityIsAwareOfComponent(entityId, appliesTo, this.systems, fromSystem.replicationMode)) {
-                if (event instanceof UpdateEntityEvent && event.data.triggeredBy !== entityId && event.data.id !== entityId) {
-                    // Remove the triggered by property if the current player was not the cause / effect of this update
-                    // No need to waste the bandwidth
-                    delete event.data.triggeredBy;
-                }
                 this.queueEventForPlayer(playerId, event);
             }
         }
     }
 
     queueEventForPlayer(playerId: string, event: NetworkEvent): void {
-        const queue = this.eventQueue[playerId];
+        const queue = this.eventSendQueue[playerId];
         queue.push(event);
     }
 
     /**
      * Responsible for handling any incoming events.
-     * These will be passed to the systems, which may
-     * cause side effects to the game state which will need
-     * to be reflected across the network.
+     * Each player may only take 1 action / tick.  I may change this later
+     * so certain actions will be processed immediately.
      */
-    handleEvent(playerId: string, game: ServerGame, event: ClientEvent): void {
+    handleEvent(playerId: string, event: ClientEvent): void {
         if (this.eventHandlers[event.type] !== undefined) {
-            this.eventHandlers[event.type](playerId, game, event);
+            this.playerEventQueue[playerId] = event;
         }
     }
 
-    flushEvents(clients: Record<string, WebSocket>): void {
+    /**
+     * Flushes received events
+     */
+    doReceivedEvents(game: ServerGame): void {
+        for (const playerId in this.playerEventQueue) {
+            const event = this.playerEventQueue[playerId];
+            this.eventHandlers[event.type](playerId, game, event);
+        }
+
+        this.playerEventQueue = {};
+    }
+
+    flushSendEvents(clients: Record<string, WebSocket>): void {
         for(let playerId in clients) {
-            if (this.eventQueue[playerId] && this.eventQueue[playerId].length) {
-                clients[playerId].send(this.serializeEvents(this.eventQueue[playerId]));
-                this.eventQueue[playerId] = [];
+            if (this.eventSendQueue[playerId] && this.eventSendQueue[playerId].length) {
+                clients[playerId].send(this.serializeEvents(this.eventSendQueue[playerId]));
+                this.eventSendQueue[playerId] = [];
             }
         }
     }

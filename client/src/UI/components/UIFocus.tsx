@@ -42,7 +42,6 @@ export class UIDescription extends Component<FocusProps, FocusState> {
 
     componentDidMount(): void {
         this.subscription = this.focusChangedEmitter.subscribe((data) => {
-            console.log(data);
             this.updateState(data);
         });
     }

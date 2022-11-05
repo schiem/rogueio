@@ -26,6 +26,7 @@ export class ServerGame extends Game {
     dungeonGenerator: DungeonGenerator;
     currentLevel: ServerDungeon;
     networkEventManager: NetworkEventManager;
+    paused = false;
     private clients: Record<string, WebSocket> = {};
     private fps = 15;
     private tickSpeed: number
@@ -79,8 +80,7 @@ export class ServerGame extends Game {
             const delta = now - this.lastTick;
             if (delta > this.tickSpeed) {
                 this.lastTick = now;
-                this.systems.ai.runAI(delta, this.systems, this.currentLevel);
-                this.networkEventManager.flushEvents(this.clients);
+                this.tick(delta);
             }
         }, 2);
     }
@@ -158,5 +158,20 @@ export class ServerGame extends Game {
         this.networkEventManager.removePlayerEventQueue(playerId);
         delete this.players[playerId];
         delete this.clients[playerId];
+    }
+
+    private tick(delta: number): void {
+        if (this.paused) {
+            return;
+        }
+
+        // Run received events from player
+        this.networkEventManager.doReceivedEvents(this);
+
+        // Run the AI
+        this.systems.ai.runAI(delta, this.systems, this.currentLevel);
+
+        // Send the modified state back to the player
+        this.networkEventManager.flushSendEvents(this.clients);
     }
 }

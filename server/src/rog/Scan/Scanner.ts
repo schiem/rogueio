@@ -248,6 +248,11 @@ export enum ScanErrorType {
     UNTERMINATED_STRING
 }
 
+export const ScanErrorStrings: Record<ScanErrorType, string> = {
+    [ScanErrorType.BAD_CHARACTER]: 'Bad character',
+    [ScanErrorType.UNTERMINATED_STRING]: 'Unterminated string'
+}
+
 class ScanError {
     constructor(
         public line: number,

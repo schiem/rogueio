@@ -16,7 +16,6 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         if (!description) {
             return localize('common/misc/unknown');
         }
-        console.log(description);
         const promises: Promise<string>[] = [
             localize(`common/entity/${description.category}/description`),
         ];

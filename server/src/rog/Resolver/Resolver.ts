@@ -159,7 +159,7 @@ export class Resolver implements ExpressionVisitor<void>, StatementVisitor<void>
 
         const scope = this.peekScope();
         if (scope[token.lexeme] !== undefined) {
-            throw new ResolverError(ResolverErrorType.REASSIGNED_VARIABLE);
+            throw new ResolverError(ResolverErrorType.REDECLARE_VARIABLE);
         }
         scope[token.lexeme] = false;
     }
@@ -208,14 +208,20 @@ export class Resolver implements ExpressionVisitor<void>, StatementVisitor<void>
     }
 }
 
+export enum ResolverErrorType {
+    READ_DURING_INITIALIZATION,
+    REDECLARE_VARIABLE,
+    INVALID_RETURN
+}
+
+export const ResolverErrorStrings: Record<ResolverErrorType, string> = {
+    [ResolverErrorType.READ_DURING_INITIALIZATION]: 'Cannot read variable while its being initialized',
+    [ResolverErrorType.REDECLARE_VARIABLE]: 'Cannot redeclare variable',
+    [ResolverErrorType.INVALID_RETURN]: 'Invalid return statement'
+}
+
 export class ResolverError extends Error {
     constructor(public type: ResolverErrorType) {
         super();
     }
-}
-
-export enum ResolverErrorType {
-    READ_DURING_INITIALIZATION,
-    REASSIGNED_VARIABLE,
-    INVALID_RETURN
 }

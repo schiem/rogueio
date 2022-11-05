@@ -37,7 +37,7 @@ wss.on('connection', (ws) => {
 
     ws.onmessage = (event) => {
         const eventData: ClientEvent = decode(event.data as Buffer);
-        game.networkEventManager.handleEvent(playerId, game, eventData);
+        game.networkEventManager.handleEvent(playerId, eventData);
     };
 
     ws.on('close', () => {

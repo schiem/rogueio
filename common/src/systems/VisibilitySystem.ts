@@ -1,3 +1,4 @@
+import { AllyGroup } from "../components/AllyComponent";
 import { SharedVisibilityComponent, VisibilityComponent } from "../components/VisibilityComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
@@ -63,7 +64,7 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
         return this.groupTileIsVisible(allyComponent.group, location);
     }
 
-    groupTileIsVisible(group: string, location: Point): boolean {
+    groupTileIsVisible(group: AllyGroup, location: Point): boolean {
         const allies = this.allySystem.getAlliesForGroup(group);
         return allies?.find((entityId) => {
             return this.tileIsVisible(entityId, location);

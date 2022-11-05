@@ -31,6 +31,8 @@ export class Environment {
     }
 
     get(name: string): any {
+        console.log(`getting ${name}`);
+        console.log(this.variables);
         if (this.variables[name] !== undefined) {
             return this.variables[name];
         }

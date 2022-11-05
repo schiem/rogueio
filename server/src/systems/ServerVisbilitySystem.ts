@@ -1,3 +1,4 @@
+import { AllyGroup } from "../../../common/src/components/AllyComponent";
 import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
@@ -25,22 +26,23 @@ export class ServerVisbilitySystem extends VisibilitySystem {
             if(data.props.location !== undefined) {
                 const allyToExclude = allySystem.getComponent(data.id);
                 for(const group in allySystem.groups) {
+                    const allyGroup = group as AllyGroup;
                     if(allyToExclude && group === allyToExclude.group) {
                         return;
                     }
-                    const oldVisible = this.groupTileIsVisible(group, data.oldProps.location);
-                    const visible = this.groupTileIsVisible(group, data.props.location);
+                    const oldVisible = this.groupTileIsVisible(allyGroup, data.oldProps.location);
+                    const visible = this.groupTileIsVisible(allyGroup, data.props.location);
 
                     if(oldVisible && !visible) {
                         this.entityChangedVisibilityEmitter.emit({
                             entityId: data.id,
-                            forEntities: this.allySystem.getAlliesForGroup(group), 
+                            forEntities: this.allySystem.getAlliesForGroup(allyGroup), 
                             visible: false
                         });
                     } else if(!oldVisible && visible) {
                         this.entityChangedVisibilityEmitter.emit({
                             entityId: data.id,
-                            forEntities: this.allySystem.getAlliesForGroup(group), 
+                            forEntities: this.allySystem.getAlliesForGroup(allyGroup), 
                             visible: true 
                         });
                     }
