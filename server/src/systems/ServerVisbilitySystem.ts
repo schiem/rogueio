@@ -70,7 +70,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         }
         const seen: Tile[] = [];
         for(let x = 0; x < component.seen.length; x++) {
-            for(let y = 0; y < component.seen.length; y++) {
+            for(let y = 0; y < component.seen[x].length; y++) {
                 if (!component.seen[x][y]) {
                     continue;
                 }

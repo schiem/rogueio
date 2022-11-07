@@ -41,7 +41,7 @@ export class UIMessages extends Component<MessageProps, MessageState> {
     }
 
     render(): ComponentChild {
-        return <div id="messages">
+        return <div id="messages" class="ui-block">
             <div class="terminal">
                 <div class="terminal-title">Messages</div>
                 <div class="terminal-content">

@@ -5,9 +5,8 @@
     color: $white;
     min-width: 300px;
     border-radius: $border-radius;
-    box-shadow: $box-shadow;
     overflow: hidden;
-    margin: $spacing 0 $spacing $spacing;
+    margin: 0 $spacing $spacing $spacing;
 
     .terminal-title {
         padding: 0 $spacing;

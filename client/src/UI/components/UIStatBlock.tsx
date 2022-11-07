@@ -75,7 +75,7 @@ export class UIStatBlock extends Component<StatProps, StatState> {
     }
 
     render() {
-        return <div id="stats">
+        return <div id="stats" class="ui-block">
           <div class="terminal">
             <div class="terminal-title">Stats</div>
             <div class="terminal-content">

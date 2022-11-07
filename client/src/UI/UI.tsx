@@ -1,4 +1,4 @@
-import { Component, render } from "preact";
+import { Component, Fragment, render } from "preact";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { StatComponent } from "../../../common/src/components/StatComponent";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
@@ -35,7 +35,7 @@ export class UI extends Component<UIProps> {
         const charId = this.currentPlayer.characterId;
         const statComponent = this.game.systems.stats.getComponent(charId) as StatComponent;
         const healthComponent = this.game.systems.health.getComponent(charId) as HealthComponent;
-        return <div>
+        return <Fragment>
             <UIStatBlock 
                 stats={statComponent} 
                 componentChangedEmitters={[this.game.systems.stats.componentUpdatedEmitter, this.game.systems.health.componentUpdatedEmitter]} 
@@ -48,7 +48,7 @@ export class UI extends Component<UIProps> {
                 descriptionSystem={this.game.systems.description}
                 locationSystem={this.game.systems.location}
                 dungeon={this.game.currentLevel} />
-        </div>
+        </Fragment>
     }
 }
 

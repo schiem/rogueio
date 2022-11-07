@@ -1,8 +1,10 @@
 #ui {
     flex: 1;
+    display: flex;
+    flex-wrap: wrap;
 
-    & > div {
-        display: flex;
+    .ui-block {
+        flex: 1;
     }
 
     .columned {

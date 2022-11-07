@@ -4,9 +4,10 @@ import { GameSystems } from "../../../common/src/models/Game";
 import { RoomFeatureNames } from "../models/RoomFeatures";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
-import { baseEntities, EntityType, SpawnEntity } from "./EntityGenerators";
+import { baseEntities, SpawnEntity } from "./EntityGenerators";
 import { Condition, Room } from "../models/Room";
 import { ServerDungeon } from "../models/ServerDungeon";
+import { EntityType } from "../../../common/src/components/DescriptionComponent";
 
 export enum MobSpawnGeneratorName {
     bufonid

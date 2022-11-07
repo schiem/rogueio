@@ -1,6 +1,7 @@
 #game {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     max-width: 1600px;
     margin: auto;
     padding: $spacing;

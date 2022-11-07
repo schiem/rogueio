@@ -106,7 +106,7 @@ export class UIDescription extends Component<FocusProps, FocusState> {
     }
 
     render() {
-        return <div id="focus">
+        return <div id="focus" class="ui-block">
           <div class="terminal">
             <div class="terminal-title">Focus</div>
             <div class="terminal-content">

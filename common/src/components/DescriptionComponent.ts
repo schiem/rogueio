@@ -1,4 +1,9 @@
-import { EntityType } from "../../../server/src/generators/EntityGenerators";
+export enum EntityType {
+    player = 1,
+    bufonidWarrior,
+    bufonidQueen,
+    bufonidSpawn
+}
 
 export type DescriptionClass = {
     category: string;

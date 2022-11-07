@@ -4,7 +4,6 @@ import { Player } from "../../models/Player";
 import { ComponentSystem } from "../../systems/ComponentSystem";
 import { Game } from "../../models/Game";
 import { EntityManager } from "../../entities/EntityManager";
-import { ServerVisbilitySystem } from "../../../../server/src/systems/ServerVisbilitySystem";
 
 type InitData = {
     gameData: { 
@@ -51,7 +50,9 @@ export class InitEvent extends ServerEvent {
             gameData: {
                 dungeonX: game.dungeonX,
                 dungeonY: game.dungeonY,
-                tiles: (game.systems.visibility as ServerVisbilitySystem).getSeenTilesForEntity(characterId),
+                // TODO - these constructors should really be on the server, there's no reason for them to be in the client
+                // Leave the data though
+                tiles: (game.systems.visibility as any).getSeenTilesForEntity(characterId),
                 players: game.players,
                 entities: entities,
                 additionalSystemData
