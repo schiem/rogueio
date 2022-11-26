@@ -24,7 +24,7 @@ export abstract class ComponentSystem<T> {
     constructor(entityManager: EntityManager) {
         entityManager.entityRemovedEmitter.subscribe((entityId) => {
             if (this.getComponent(entityId)) {
-                this.removeComponentFromEntity(entityId);
+                this.removeComponentFromEntity(entityId, true);
             }
         });
     }
@@ -77,13 +77,15 @@ export abstract class ComponentSystem<T> {
     /**
      * Removes the given component from this entity. 
      */
-    removeComponentFromEntity(id: number): void {
+    removeComponentFromEntity(id: number, supressEvent = false): void {
         const component = this.getComponent(id);
         if (!component) {
             return;
         }
         delete this.entities[id];
-        this.removedComponentEmitter.emit({id, component});
+        if (!supressEvent) {
+            this.removedComponentEmitter.emit({id, component});
+        }
     }
     /**
      * Fetches any additional data in the system associated with this component (e.g. data shared between multiple components) 

@@ -4,20 +4,13 @@ import { Dungeon } from "../models/Dungeon";
 import { Point } from "../types/Points";
 import { clamp } from "../utils/MathUtils";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
-import { HealthSystem } from "./HealthSystem";
 import { LocationSystem } from "./LocationSystem";
 
 export class MovementSystem extends ComponentSystem<MovementComponent> {
     replicationMode: ReplicationMode = 'visible';
 
-    constructor(entityManager: EntityManager, public locationSystem: LocationSystem, healthSystem: HealthSystem) {
+    constructor(entityManager: EntityManager, public locationSystem: LocationSystem) {
         super(entityManager);
-
-        healthSystem.removedComponentEmitter.subscribe((data) => {
-            if (entityManager.hasEntity(data.id)) {
-                this.removeComponentFromEntity(data.id);
-            }
-        });
     }
 
     attemptMove(id: number, direction: Point, dungeon: Dungeon): boolean {

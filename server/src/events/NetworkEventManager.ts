@@ -44,9 +44,34 @@ export class NetworkEventManager {
             this.queueEvent(new AddEntityEvent(entity));
         });
 
-        // TODO - removing an entity removes all it's components - shouldn't fire events for those
         entityManager.entityRemovedEmitter.subscribe((entity) => {
             this.queueEvent(new RemoveEntityEvent(entity));
+        });
+
+        // TODO - move this into the health system
+        systems.health.componentUpdatedEmitter.subscribe((data) => {
+            if (data.props.current !== undefined) {
+                // Oh dear, the entity has died
+                if ((data.props.current as number) <= 0) {
+                    // Allow all other events to fire before removing the entity
+                    // Otherwise no update events will fire
+                    queueMicrotask(() => {
+                        entityManager.removeEntity(data.id);
+                    });
+                }
+            } 
+        });
+
+        // Location is a special case - it's only sent on visible, but when it's removed
+        // the entity is no longer considered visible, so the event to remove it doesn't send
+        systems.location.removedComponentEmitter.subscribe((data) => {
+            for (let playerId in this.eventSendQueue) {
+                const entityId = this.players[playerId].characterId;
+
+                if (systems.visibility.tileIsVisible(entityId, data.component.location)) {
+                    this.queueEventForPlayer(playerId, new RemoveEntityComponentEvent(data.id, 'location'));
+                }
+            }
         });
 
         // When the visibility of a component changes, send the visibility pieces to the relevant entities
@@ -77,6 +102,7 @@ export class NetworkEventManager {
 
             data.forEntities.forEach((entityId) => {
                 if (charLookup[entityId]) {
+                    // Bypass the visibility check - the event is being queued directly for a player
                     this.queueEventForPlayer(charLookup[entityId], event);
                 }
             });

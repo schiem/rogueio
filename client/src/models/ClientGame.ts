@@ -121,7 +121,7 @@ export class ClientGame extends Game {
         // Construct the common systems
         super.constructSystems();
 
-        this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY });
+        this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY }, this.systems.inventory);
         this.systems.action = new ActionSystem(this.entityManager);
     }
 

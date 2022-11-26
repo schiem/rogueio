@@ -1,7 +1,6 @@
 import { AllyComponent, AllyGroup } from "../components/AllyComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
-import { HealthSystem } from "./HealthSystem";
 
 /**
  * Contains all of the allies.
@@ -14,19 +13,13 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
 
     // A mapping of groups to entities
     groups: Partial<Record<AllyGroup, number[]>>;
-    constructor(entityManager: EntityManager, healthSystem: HealthSystem) {
+    constructor(entityManager: EntityManager) {
         super(entityManager);
 
         this.groups = {
             players: [],
             enemies: []
         };
-
-        healthSystem.removedComponentEmitter.subscribe((data) => {
-            if (entityManager.hasEntity(data.id)) {
-                this.removeComponentFromEntity(data.id);
-            }
-        });
     }
 
     addComponentForEntity(id: number, component: AllyComponent): void {

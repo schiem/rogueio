@@ -51,6 +51,7 @@ export class NetworkEventHandler {
         },
         [ServerEventType.update]: (game: ClientGame, event: UpdateEntityEvent): void => {
             const system = (game.systems as Record<string, ComponentSystem<unknown>>)[event.data.system];
+
             if (!system) {
                 throw new Error('Invalid system');
             }

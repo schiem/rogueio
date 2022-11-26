@@ -74,6 +74,48 @@ rog.bindFunction('teleportEntity', (entityId: number, x: number, y: number) => {
     return system.moveAndCollideEntity(entityId, { x, y }, game.currentLevel);
 }, 3);
 
+rog.bindFunction('teleportPlayersToEnemy', () => {
+    const characters = Object.keys(game.players).map(x => game.players[x].characterId);
+    const firstEnemy = game.systems.ally.getAlliesForGroup('enemies')[0];
+    if (firstEnemy === undefined) {
+        return;
+    }
+
+    const entityLocation = game.systems.location.getComponent(firstEnemy);
+    if (!entityLocation) {
+        return;
+    }
+
+    characters.forEach((character) => {
+        const location = game.systems.location.getComponent(character);
+        if (!location) {
+            return;
+        }
+
+        outer_loop:
+        for (let x = entityLocation.location.x - 1; x <= entityLocation.location.x + 1; x++) {
+            for (let y = entityLocation.location.y - 1; y <= entityLocation.location.y + 1; y++) {
+                if (game.systems.location.moveAndCollideEntity(character, { x, y }, game.currentLevel)) {
+                    break outer_loop;
+                }
+            }
+        }
+    });
+}, 0);
+
+rog.bindFunction('removeComponent', (systemName: string, entityId: number) => {
+    const system = (game.systems as Record<string, ComponentSystem<unknown>>)[systemName];
+    if (!system) {
+        return;
+    }
+
+    system.removeComponentFromEntity(entityId);
+}, 2);
+
+rog.bindFunction('showPlayers', () => {
+    return Object.keys(game.players).map(x => game.players[x].characterId);
+}, 0);
+
 rl.on('line', (line) => {
     const result = rog.run(line);
     result.stderr.forEach((err) => {

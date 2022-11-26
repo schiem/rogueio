@@ -59,9 +59,8 @@ export class ServerGame extends Game {
         // Construct the common systems
         super.constructSystems();
 
-
         // set up the visibility system, after the dungeon has been created
-        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize);
+        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize, this.systems.inventory);
 
         // set up the AI system
         this.systems.ai = new AISystem(this.entityManager);

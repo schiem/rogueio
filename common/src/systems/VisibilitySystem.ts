@@ -5,6 +5,7 @@ import { Point } from "../types/Points";
 import { AllySystem } from "./AllySystem";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { HealthSystem } from "./HealthSystem";
+import { InventorySystem } from "./InventorySystem";
 import { LocationSystem } from "./LocationSystem";
 
 export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
@@ -13,7 +14,7 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
     entities: Record<number, VisibilityComponent>;
     sharedComponents: Record<string, SharedVisibilityComponent> = {};
     
-    constructor(entityManager: EntityManager, public allySystem: AllySystem, protected locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point) {
+    constructor(entityManager: EntityManager, public allySystem: AllySystem, protected locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point, protected inventorySystem: InventorySystem) {
         super(entityManager);
 
         // Add a visibility component for every set of allies
@@ -99,4 +100,14 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
             }
         };
     }
+
+    entityIsVisible(entityId: number, visibleEntity: number): boolean {
+        const location = this.locationSystem.getComponent(visibleEntity);
+        return !!(this.entityHasNonLocationVision(entityId, visibleEntity) || (location && this.sharedTileIsVisible(entityId, location.location)));
+    }
+
+    entityHasNonLocationVision(entityId: number, otherEntity: number): boolean {
+        return this.inventorySystem.entityIsCarrying(entityId, otherEntity);
+    }
+
 }

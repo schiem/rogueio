@@ -5,6 +5,7 @@ import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
+import { InventorySystem } from "../../../common/src/systems/InventorySystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
@@ -12,45 +13,28 @@ import { Tile } from "../../../common/src/types/Tile";
 import { GetVisibleTiles } from "../utils/ShadowCast";
 
 export class ServerVisbilitySystem extends VisibilitySystem {
+    /**
+     * Fires whenever an entity changes visibility.  This happens when an entity changes location, gains a location component, or loses a location component.
+     */
     entityChangedVisibilityEmitter = new EventEmitter<{entityId: number, forEntities: number[], visible: boolean}>();
     private dungeon: Dungeon;
 
-    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point) {
-        super(entityManager, allySystem, locationSystem, healthSystem, dungeonSize);
+    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point, inventorySystem: InventorySystem) {
+        super(entityManager, allySystem, locationSystem, healthSystem, dungeonSize, inventorySystem);
 
+        // Modifying the location forces visibility to change
         locationSystem.componentUpdatedEmitter.subscribe((data) => {
-            this.recalculateVisibility(data.id);
-
-            // Check if any non-allies can see / no longer see and fire the event for that
-            // TODO - right now this only applies to ally groups, not individuals who are not in a group
             if(data.props.location !== undefined) {
-                const allyToExclude = allySystem.getComponent(data.id);
-                for(const group in allySystem.groups) {
-                    const allyGroup = group as AllyGroup;
-                    if(allyToExclude && group === allyToExclude.group) {
-                        return;
-                    }
-                    const oldVisible = this.groupTileIsVisible(allyGroup, data.oldProps.location as Point);
-                    const visible = this.groupTileIsVisible(allyGroup, data.props.location as Point);
-
-                    if(oldVisible && !visible) {
-                        this.entityChangedVisibilityEmitter.emit({
-                            entityId: data.id,
-                            forEntities: this.allySystem.getAlliesForGroup(allyGroup), 
-                            visible: false
-                        });
-                    } else if(!oldVisible && visible) {
-                        this.entityChangedVisibilityEmitter.emit({
-                            entityId: data.id,
-                            forEntities: this.allySystem.getAlliesForGroup(allyGroup), 
-                            visible: true 
-                        });
-                    }
-                }
+                this.entityChangedLocation(data.id, data.oldProps.location as Point | undefined, data.props.location as Point | undefined);
             }
         });
+
         locationSystem.addedComponentEmitter.subscribe((data) => {
-            this.recalculateVisibility(data.id);
+            this.entityChangedLocation(data.id, undefined, data.component.location);
+        });
+
+        locationSystem.removedComponentEmitter.subscribe((data) => {
+            this.entityChangedLocation(data.id, data.component.location, undefined);
         });
     }
 
@@ -161,7 +145,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
                         if (!allyComponent || !otherGroup || allyComponent.group !== otherGroup.group) {
                             this.entityChangedVisibilityEmitter.emit({
                                 entityId: otherId,
-                                forEntities: allies,
+                                forEntities: this.filterAllyListWithNoVision(allies, otherId),
                                 visible: false 
                             });
                         }
@@ -172,5 +156,41 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         component.visible = newVision;
 
         this.componentUpdatedEmitter.emit({id: entityId, props: { added: toAdd, removed: toDelete, seen: newSeen}, oldProps: {}});
+    }
+
+    private filterAllyListWithNoVision(allies: number[], entityId: number): number[] {
+        // TODO - is there a more efficient way to do this?
+        return allies.filter(x => !this.entityHasNonLocationVision(x, entityId));
+    }
+
+    private entityChangedLocation(entityId: number, oldLocation?: Point, newLocation?: Point): void {
+        this.recalculateVisibility(entityId);
+        // Check if any non-allies can see / no longer see and fire the event for that
+        // TODO - right now this only applies to ally groups, not individuals who are not in a group
+        const allyToExclude = this.allySystem.getComponent(entityId);
+        for(const group in this.allySystem.groups) {
+            const allyGroup = group as AllyGroup;
+            if(allyToExclude && group === allyToExclude.group) {
+                return;
+            }
+            // Check if this entity moved out of vision of any other group,
+            // or if it moved into vision of any group
+            const oldVisible = oldLocation === undefined ? false : this.groupTileIsVisible(allyGroup, oldLocation);
+            const visible = newLocation === undefined ? false : this.groupTileIsVisible(allyGroup, newLocation);
+
+            if(oldVisible && !visible) {
+                this.entityChangedVisibilityEmitter.emit({
+                    entityId,
+                    forEntities: this.filterAllyListWithNoVision(this.allySystem.getAlliesForGroup(allyGroup), entityId), 
+                    visible: false
+                });
+            } else if(!oldVisible && visible) {
+                this.entityChangedVisibilityEmitter.emit({
+                    entityId,
+                    forEntities: this.filterAllyListWithNoVision(this.allySystem.getAlliesForGroup(allyGroup), entityId), 
+                    visible: true 
+                });
+            }
+        }
     }
 }

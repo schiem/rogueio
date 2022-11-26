@@ -94,8 +94,9 @@ export class ServerActionSystem extends ActionSystem {
                     }
 
                     const damage = random(attackEffect.damage.min, attackEffect.damage.max + 1);
-                    this.healthSystem.updateComponent(id, { current: Math.max(healthComponent.current - damage, 0)}, entityId);
+                    this.healthSystem.updateComponent(id, { current: Math.max(healthComponent.current - damage, 0) }, entityId);
                 });
+                break;
         }
     }
     

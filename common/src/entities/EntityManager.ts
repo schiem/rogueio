@@ -61,13 +61,7 @@ export class EntityManager {
                 }
 
                 const visibilitySystem = systems.visibility;
-                const locationSystem = systems.location;
-
-                const locationComponent = locationSystem.getComponent(entityId);
-                if (!locationComponent) {
-                    return false;
-                }
-                return visibilitySystem.sharedTileIsVisible(entityToSendTo, locationComponent.location);
+                return visibilitySystem.entityIsVisible(entityToSendTo, entityId);
 
             default: 
                 return false;

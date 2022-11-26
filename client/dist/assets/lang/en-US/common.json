@@ -37,7 +37,9 @@
     },
     "action": {
         "playerTakeDamage": "You were hurt by the {0}",
-        "playerDidDamage": "You hurt the {0}"
+        "playerDidDamage": "You hurt the {0}",
+        "playerDied": "You have died",
+        "playerKilled": "You killed the {0}"
     },
     "misc": {
         "unknown": "Unknown"
