@@ -28,6 +28,10 @@
         "bufonidQueen": {
             "name": "Queen",
             "description": "The fierce matrons of the bufonid clans."
+        },
+        "dagger": {
+            "name": "Dagger",
+            "description": "Stick them with the pointy end."
         }
     },
     "tiles": {

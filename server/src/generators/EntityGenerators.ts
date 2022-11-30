@@ -1,6 +1,6 @@
 import { ActionComponent, ActionTarget, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
-import { DescriptionComponent, EntityType } from "../../../common/src/components/DescriptionComponent";
+import { DescriptionComponent, CharacterType, EntityCategory, ItemType } from "../../../common/src/components/DescriptionComponent";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
@@ -24,10 +24,10 @@ export type ComponentBlock = {
     description: DescriptionComponent
 }
 
-export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
-    [EntityType.player]: () => {
+export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> = {
+    [CharacterType.player]: () => {
         return {
-            description: {id: EntityType.player},
+            description: { id: CharacterType.player, category: EntityCategory.character },
             health: {current: 10, max: 10},
             ally: {group: 'players'},
             location: {
@@ -70,9 +70,9 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
             }
         };
     },
-    [EntityType.bufonidWarrior]: () => {
+    [CharacterType.bufonidWarrior]: () => {
         return {
-            description: {id: EntityType.bufonidWarrior},
+            description: { id: CharacterType.bufonidWarrior, category: EntityCategory.character  },
             health: {current: 10, max: 10},
             ally: {group: 'enemies'},
             location: {
@@ -102,9 +102,9 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
             }
         };
     },
-    [EntityType.bufonidQueen]: () => {
+    [CharacterType.bufonidQueen]: () => {
         return {
-            description: {id: EntityType.bufonidQueen},
+            description: { id: CharacterType.bufonidQueen, category: EntityCategory.character  },
             health: {current: 10, max: 10},
             ally: {group: 'enemies'},
             location: {
@@ -134,9 +134,9 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
             }
         };
     },
-    [EntityType.bufonidSpawn]: () => {
+    [CharacterType.bufonidSpawn]: () => {
         return {
-            description: {id: EntityType.bufonidSpawn},
+            description: { id: CharacterType.bufonidSpawn, category: EntityCategory.character  },
             health: {current: 1, max: 1},
             ally: {group: 'enemies'},
             location: {
@@ -167,6 +167,26 @@ export const baseEntities: Record<EntityType, () => Partial<ComponentBlock>> = {
         };
     },
 };
+
+export const itemEntities: Record<ItemType, () => Partial<ComponentBlock>> = {
+    [ItemType.dagger]: () => {
+        return {
+            description: { id: ItemType.dagger, category: EntityCategory.item },
+            location: {
+                sprite: {
+                    name: SpriteName.dagger,
+                    color: SpriteColor.grey
+                },
+                movesThrough: [],
+                layer: LocationComponentLayers.item,
+                location: { x: 0, y: 0}
+            },
+            carryable: {
+                weight: 2
+            }
+        }
+    }
+}
 
 export const SpawnEntity = (entityId: number, components: Record<string, unknown>, systems: GameSystems): void => {
     for(const system in components) {

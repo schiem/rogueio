@@ -104,8 +104,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     private isCollision(component: LocationComponent, location: Point): boolean {
         const components = this.locationCache[location.x][location.y];
         // check if any of the components at this location collide with the current component
-        // TODO - add collision layers
-        return components?.length > 0;
+        return components?.filter(x => this.getComponent(x)?.layer === component.layer).length > 0;
     }
 
     /**

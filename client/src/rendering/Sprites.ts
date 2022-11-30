@@ -7,7 +7,8 @@ export const Sprites: Record<SpriteName, number> = {
     [SpriteName.floor]: 118,
     [SpriteName.spawn]: 240,
     [SpriteName.bufonid]: 66,
-    [SpriteName.water]: 243
+    [SpriteName.water]: 243,
+    [SpriteName.dagger]: 108 
 }
 
 export const SpriteColors: Record<SpriteColor, string> = {

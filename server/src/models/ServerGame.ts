@@ -6,7 +6,6 @@ import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
-import { MobSpawnGenerator, MobSpawnGeneratorName, MobSpawnGenerators, SpawnPlayerCharacter } from "../generators/SpawnGenerator";
 import { random } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
 import { MessageData, MessageEvent } from "../../../common/src/events/server/MessageEvent";
@@ -15,6 +14,8 @@ import { ServerDungeon } from "./ServerDungeon";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { DescriptionSystem } from "../../../common/src/systems/DescriptionSystem";
+import { SpawnPlayerCharacter } from "../generators/PlayerSpawner";
+import { Spawner, Spawners, SpawnerType } from "../generators/Spawner";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
@@ -92,9 +93,9 @@ export class ServerGame extends Game {
 
     spawnMobs(): void {
         this.currentLevel.rooms.forEach((room) => {
-            const possibleSpawners: MobSpawnGenerator[] = [];
-            for(let spawnName in MobSpawnGenerators) {
-                const spawner = MobSpawnGenerators[spawnName as unknown as MobSpawnGeneratorName];
+            const possibleSpawners: Spawner[] = [];
+            for(let spawnName in Spawners) {
+                const spawner = Spawners[spawnName as unknown as SpawnerType];
                 if (room.spawnerIsValid(spawner)) {
                     possibleSpawners.push(spawner);
                 }

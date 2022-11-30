@@ -8,7 +8,7 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         if (!component) {
             return;
         }
-        return entityDescriptions[component.id];
+        return (entityDescriptions[component.category] as Record<number, DescriptionClass>)[component.id];
     }
 
     getLocalizedDescription(entityId: number): Promise<string> {
@@ -19,8 +19,8 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         const promises: Promise<string>[] = [
             localize(`common/entity/${description.category}/description`),
         ];
-        if (description.base) {
-            promises.push(localize(`common/entity/${description.base}/description`));
+        if (description.specific) {
+            promises.push(localize(`common/entity/${description.specific}/description`));
         }
         return Promise.all(promises).then(strings => {
             return strings.join(' ');
@@ -35,8 +35,8 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         const promises: Promise<string>[] = [
             localize(`common/entity/${description.category}/name`),
         ];
-        if (description.base) {
-            promises.push(localize(`common/entity/${description.base}/name`));
+        if (description.specific) {
+            promises.push(localize(`common/entity/${description.specific}/name`));
         }
         return Promise.all(promises).then(strings => {
             return strings.join(' ');
