@@ -11,6 +11,7 @@ import { RemoveEntityEvent } from "../../../common/src/events/server/RemoveEntit
 import { encode } from "messagepack";
 import { RemoveVisibleComponentsEvent } from "../../../common/src/events/server/RemoveVisibleComponentsEvent";
 import { RemoveEntityComponentEvent } from "../../../common/src/events/server/RemoveEntityComponentEvent";
+import { Bus } from "../../../common/src/bus/Buses";
 
 /**
  * The client network event handler is completely unrelated to the server event handler.
@@ -44,10 +45,10 @@ export class NetworkEventHandler {
         [ServerEventType.init]: (game: ClientGame, event: InitEvent): void => {
             game.postDeserialize(event);
             game.renderDungeon(game.currentLevel);
-            game.messageEmitter.emit({message: "common/system/gameStart"});
+            Bus.messageEmitter.emit({message: "common/system/gameStart", entities: []});
         },
         [ServerEventType.message]: (game: ClientGame, event: MessageEvent): void => {
-            game.messageEmitter.emit(event.data);
+            Bus.messageEmitter.emit({ message: event.data.message, replacements: event.data.replacements, entities: [] });
         },
         [ServerEventType.update]: (game: ClientGame, event: UpdateEntityEvent): void => {
             const system = (game.systems as Record<string, ComponentSystem<unknown>>)[event.data.system];

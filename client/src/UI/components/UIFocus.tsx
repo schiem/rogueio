@@ -21,35 +21,24 @@ type FocusProps = {
 };
 
 export class UIDescription extends Component<FocusProps, FocusState> {
-    changeFocusToEntity: (entityId: number) => void;
-    focusChangedEmitter: EventEmitter<number | Point | undefined>;
     subscription?: number;
-    descriptionSystem: ClientDescriptionSystem;
-    locationSystem: LocationSystem;
-    dungeon: Dungeon;
 
-    constructor({ focusChangedEmitter, changeFocusToEntity, descriptionSystem, locationSystem, dungeon }: FocusProps) {
+    constructor() {
         super();
-
-        this.changeFocusToEntity = changeFocusToEntity;
-        this.focusChangedEmitter = focusChangedEmitter;
-        this.descriptionSystem = descriptionSystem;
-        this.locationSystem = locationSystem;
-        this.dungeon = dungeon;
-
-        this.updateState;
     }
 
     componentDidMount(): void {
-        this.subscription = this.focusChangedEmitter.subscribe((data) => {
+        this.subscription = this.props.focusChangedEmitter.subscribe((data) => {
             this.updateState(data);
         });
+
+        this.updateState;
     }
 
     componentWillUnmount(): void {
         const subscription = this.subscription;
         if (subscription) {
-            this.focusChangedEmitter.unsubscribe(subscription);
+            this.props.focusChangedEmitter.unsubscribe(subscription);
             this.subscription = undefined;
         }
     }
@@ -66,25 +55,25 @@ export class UIDescription extends Component<FocusProps, FocusState> {
         let otherEntities: number[] | undefined;
         const promises: Promise<unknown>[] = [];
         if (typeof newFocus === 'object') {
-            focusedEntity = this.locationSystem.getHighestComponentAtLocation(newFocus)?.id;
-            otherEntities = this.locationSystem.getEntitiesAtLocation(newFocus);
+            focusedEntity = this.props.locationSystem.getHighestComponentAtLocation(newFocus)?.id;
+            otherEntities = this.props.locationSystem.getEntitiesAtLocation(newFocus);
             focusedPoint = newFocus;
         } else if (typeof newFocus === 'number') {
             focusedEntity = newFocus;
-            focusedPoint = this.locationSystem.getComponent(newFocus)?.location;
+            focusedPoint = this.props.locationSystem.getComponent(newFocus)?.location;
             if (focusedPoint) {
-                otherEntities = this.locationSystem.getEntitiesAtLocation(focusedPoint);
+                otherEntities = this.props.locationSystem.getEntitiesAtLocation(focusedPoint);
             }
         }
 
         if (focusedEntity !== undefined) {
-            promises.push(this.descriptionSystem.getLocalizedDescription(focusedEntity).then((description) => {
+            promises.push(this.props.descriptionSystem.getLocalizedDescription(focusedEntity).then((description) => {
                 newState.entityDescription = description;
             }));
         }
 
-        if (focusedPoint!== undefined) {
-            const definition = this.dungeon.getVisibleTileDefinition(focusedPoint);
+        if (focusedPoint !== undefined) {
+            const definition = this.props.dungeon.getVisibleTileDefinition(focusedPoint);
             if (definition) {
                 promises.push(localize(`common/tiles/${definition.name}`).then((description) => {
                     newState.tileDescription =  description;
@@ -94,12 +83,12 @@ export class UIDescription extends Component<FocusProps, FocusState> {
 
         if (otherEntities !== undefined) {
             otherEntities.forEach((entityId) => {
-                promises.push(this.descriptionSystem.getLocalizedName(entityId).then((name) => {
+                promises.push(this.props.descriptionSystem.getLocalizedName(entityId).then((name) => {
                     newState.entityNames[entityId] = name;
                 }));
             });
         }
-
+        
         Promise.all(promises).then(() => {
             this.setState(newState);
         });
@@ -107,24 +96,24 @@ export class UIDescription extends Component<FocusProps, FocusState> {
 
     render() {
         return <div id="focus" class="ui-block">
-          <div class="terminal">
-            <div class="terminal-title">Focus</div>
-            <div class="terminal-content">
-                <div class="tile-description">{ this.state.tileDescription }</div>
-                <div class="entities">
-                    <ul class="entity-picker">
-                        { this.state.entityNames && Object.keys(this.state.entityNames).map(entityId => 
-                            <li class="separated-row">
-                                <button onClick={() => { this.changeFocusToEntity(parseInt(entityId)) }}>{ this.state.entityNames[entityId as unknown as number] }</button>
-                            </li>
-                        )}
-                    </ul>
-                    <div class="entity-description">
-                        { this.state.entityDescription }
+            <div class="terminal">
+                <div class="terminal-title">Focus</div>
+                <div class="terminal-content">
+                    <div class="tile-description">{this.state.tileDescription}</div>
+                    <div class="entities">
+                        <ul class="entity-picker">
+                            {this.state.entityNames && Object.keys(this.state.entityNames).map(entityId =>
+                                <li class="separated-row">
+                                    <button onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}>{this.state.entityNames[entityId as unknown as number]}</button>
+                                </li>
+                            )}
+                        </ul>
+                        <div class="entity-description">
+                            {this.state.entityDescription}
+                        </div>
                     </div>
                 </div>
             </div>
-          </div>
         </div>
     }
 }

@@ -1,23 +1,17 @@
-import { Attributes, Component, ComponentChild, ComponentChildren, Ref } from "preact";
-import { resolveProjectReferencePath } from "typescript";
-import { EventEmitter } from "../../../../common/src/events/EventEmitter";
-import { MessageData } from "../../../../common/src/events/server/MessageEvent";
+import { Component, ComponentChild } from "preact";
+import { Bus } from "../../../../common/src/bus/Buses";
 import { localize } from "../../lang/Lang";
 
 type MessageState = {
     messages: string[]
 }
 
-type MessageProps = {
-    messageEmitter: EventEmitter<MessageData>
-}
-
-export class UIMessages extends Component<MessageProps, MessageState> {
+export class UIMessages extends Component<{}, MessageState> {
     maxMessages = 50;
     messageSubscription: number;
 
-    constructor(props: MessageProps) {
-        super(props);
+    constructor() {
+        super();
         this.state = {
             messages: []
         };
@@ -25,7 +19,7 @@ export class UIMessages extends Component<MessageProps, MessageState> {
     }
 
     componentDidMount(): void {
-        this.messageSubscription = this.props.messageEmitter.subscribe((data) => {
+        this.messageSubscription = Bus.messageEmitter.subscribe((data) => {
             localize(data.message, data.replacements).then((msg) => {
                 this.addMessage(msg);
             })
@@ -33,11 +27,11 @@ export class UIMessages extends Component<MessageProps, MessageState> {
     }
 
     addMessage(message: string): void {
-        this.state.messages.push(message);
-        if (this.state.messages.length > this.maxMessages) {
-            this.state.messages.splice(0, 1);
+        const messages = [...this.state.messages, message];
+        if (messages.length > this.maxMessages) {
+            messages.splice(0, 1);
         }
-        this.forceUpdate();
+        this.setState({messages});
     }
 
     render(): ComponentChild {

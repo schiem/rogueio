@@ -8,7 +8,6 @@ import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
 import { random } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
-import { MessageData, MessageEvent } from "../../../common/src/events/server/MessageEvent";
 import { ServerActionSystem } from "../systems/ServerActionSystem";
 import { ServerDungeon } from "./ServerDungeon";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
@@ -110,31 +109,6 @@ export class ServerGame extends Game {
 
     spawnItems(): void {
 
-    }
-
-    sendMessage(to: string, message: MessageData): void {
-        if (!this.players[to]) {
-            throw new Error('could not send message to player');
-        }
-        this.networkEventManager.queueEventForPlayer(to, new MessageEvent(message))
-    }
-
-    sendMessageForCharacterId(id: number, message: MessageData): void {
-        let playerId: string | undefined;
-        for(const key in this.players) {
-            if (this.players[key].characterId === id) {
-                playerId = key;
-            }
-        }
-
-        if (playerId === undefined) {
-            return;
-        }
-        this.sendMessage(playerId, message);
-    }
-
-    broadCastMessage(message: MessageData): void {
-        this.networkEventManager.queueEvent(new MessageEvent(message));
     }
 
     playerConnected(ws: WebSocket, playerId?: string): string {

@@ -15,6 +15,9 @@ import { ServerGame, ServerGameSystems } from "../models/ServerGame";
 import { RemoveVisibleComponentsEvent } from "../../../common/src/events/server/RemoveVisibleComponentsEvent";
 import { ActionEvent } from "../../../common/src/events/client/ActionEvent";
 import { NetworkEvent } from '../../../common/src/events/NetworkEvent';
+import { Bus } from '../../../common/src/bus/Buses';
+import { MessageEventData, MessageEvent } from '../../../common/src/events/server/MessageEvent';
+import { GrabEvent } from '../../../common/src/events/client/GrabEvent';
 
 /**
  * Handles both incoming and outgoing events.
@@ -33,6 +36,10 @@ export class NetworkEventManager {
             // Do action handles all validation, so they can attmept to do an invalid action as much
             // as they would like
             game.systems.action.doAction(characterId, event.data.id, event.data.target);
+        },
+        [ClientEventType.grab]: (playerId: string, game: ServerGame, event: GrabEvent) => {
+            const characterId = game.players[playerId].characterId;
+            game.systems.inventory.attemptPickUp(characterId, event.data.target);
         }
     }
     constructor(
@@ -129,6 +136,15 @@ export class NetworkEventManager {
                 this.queueEvent(new UpdateEntityEvent(data.id, systemName, data.props, data.triggeredBy), system);
             });
         });
+
+        Bus.messageEmitter.subscribe((data) => {
+            data.entities.forEach((entity) => {
+                this.sendMessageForCharacterId(entity, {
+                    message: data.message,
+                    replacements: data.replacements
+                });
+            });
+        });
     }
 
     addPlayerEventQueue(playerId: string): void {
@@ -192,5 +208,26 @@ export class NetworkEventManager {
 
     serializeEvents(events: ServerEvent[]): string | ArrayBuffer {
         return encode(events);
+    }
+
+    private sendMessage(to: string, message: MessageEventData): void {
+        if (!this.players[to]) {
+            throw new Error('could not send message to player');
+        }
+        this.queueEventForPlayer(to, new MessageEvent(message))
+    }
+
+    private sendMessageForCharacterId(id: number, message: MessageEventData): void {
+        let playerId: string | undefined;
+        for(const key in this.players) {
+            if (this.players[key].characterId === id) {
+                playerId = key;
+            }
+        }
+
+        if (playerId === undefined) {
+            return;
+        }
+        this.sendMessage(playerId, message);
     }
 }

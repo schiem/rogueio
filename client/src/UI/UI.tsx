@@ -2,7 +2,7 @@ import { Component, Fragment, render } from "preact";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { StatComponent } from "../../../common/src/components/StatComponent";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
-import { MessageData } from "../../../common/src/events/server/MessageEvent";
+import { MessageEventData } from "../../../common/src/events/server/MessageEvent";
 import { Game, GameSystems } from "../../../common/src/models/Game";
 import { Player } from "../../../common/src/models/Player";
 import { loadLibrary } from "../lang/Lang";
@@ -10,6 +10,7 @@ import { ClientGame } from "../models/ClientGame";
 import { UIMessages } from "./components/UIMessages";
 import { UIStatBlock } from "./components/UIStatBlock";
 import { UIDescription } from "./components/UIFocus";
+import { UIInventory } from "./components/UIInventory";
 
 type UIProps = {
     game: ClientGame,
@@ -37,11 +38,14 @@ export class UI extends Component<UIProps> {
         const healthComponent = this.game.systems.health.getComponent(charId) as HealthComponent;
         return <Fragment>
             <UIStatBlock 
-                stats={statComponent} 
-                componentChangedEmitters={[this.game.systems.stats.componentUpdatedEmitter, this.game.systems.health.componentUpdatedEmitter]} 
-                health={healthComponent} />
-            <UIMessages 
-                messageEmitter={this.game.messageEmitter} />
+                statSystem={this.game.systems.stats} 
+                healthSystem={this.game.systems.health}
+                playerId={this.game.players[this.game.currentPlayerId].characterId} />
+            <UIMessages />
+            <UIInventory
+                descriptionSystem={this.game.systems.description}
+                inventorySystem={this.game.systems.inventory} 
+                playerId={this.game.players[this.game.currentPlayerId].characterId} />
             <UIDescription 
                 changeFocusToEntity={(id) => { this.game.changeFocus(id) }}
                 focusChangedEmitter={this.game.focusMaybeChangedEmitter}

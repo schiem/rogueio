@@ -5,7 +5,7 @@ export const pointsAreEqual = (point: Point, otherPoint: Point): boolean => {
 }
 
 export const pointDistanceSquared = (point: Point, otherPoint: Point): number => {
-    return Math.pow(point.x - otherPoint.y, 2) + Math.pow(point.y - otherPoint.y, 2);
+    return Math.pow(point.x - otherPoint.x, 2) + Math.pow(point.y - otherPoint.y, 2);
 }
 
 export const pointDistance = (point: Point, otherPoint: Point): number => {

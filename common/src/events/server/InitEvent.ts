@@ -29,8 +29,9 @@ export class InitEvent extends ServerEvent {
             const systems: Record<string, unknown> = {};
             for(const systemName in game.systems) {
                 const system = (game.systems as Record<string, ComponentSystem<unknown>>)[systemName];
-                if (entityManager.entityIsAwareOfComponent(characterId, id, game.systems, system.replicationMode)) {
-                    systems[systemName] = system.getComponent(id);
+                const component = system.getComponent(id);
+                if (component && entityManager.entityIsAwareOfComponent(characterId, id, game.systems, system.replicationMode)) {
+                    systems[systemName] = component;
                 }
             }
 

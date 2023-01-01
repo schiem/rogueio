@@ -15,7 +15,7 @@ export abstract class ComponentSystem<T> {
     // A mapping of entities that this system manages to the component
     // that this sytem manages
     protected entities: Record<number, T> = {}
-    componentPropertyUpdaters: Record<string, (id: number, component: T, newValue: unknown) => void>;
+    componentPropertyUpdaters: Record<string, (id: number, component: T, newValue: unknown) => unknown>;
 
     addedComponentEmitter = new EventEmitter<IdComponent<T>>();
     removedComponentEmitter = new EventEmitter<IdComponent<T>>();
@@ -49,19 +49,19 @@ export abstract class ComponentSystem<T> {
             return;
         }
 
+        const oldProps: Record<string, unknown> = {};
         for (let key in properties) {
             if (this.componentPropertyUpdaters?.[key] !== undefined) {
                 // If there's a "special" handling case, then allow the specific system to handle it
-                // Each special case is responsible for firing the propertyUpdated handler on it's own
-                this.componentPropertyUpdaters[key](id, component, properties[key]);
+                oldProps[key] = this.componentPropertyUpdaters[key](id, component, properties[key]);
             } else {
                 // Just update the property without fanfare
-                const oldProp = this.updateNestedProperty(component, key, properties[key]);
-
-                // Emit the single value
-                this.componentUpdatedEmitter.emit({id, props: { [key]: properties[key] }, oldProps: {[key]: oldProp }, triggeredBy });
+                oldProps[key] = this.updateNestedProperty(component, key, properties[key]);
             }
         }
+
+        // Emit that the values changed 
+        this.componentUpdatedEmitter.emit({id, props: properties, oldProps, triggeredBy });
     }
 
     /**

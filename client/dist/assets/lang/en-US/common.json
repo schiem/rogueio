@@ -45,6 +45,10 @@
         "playerDied": "You have died",
         "playerKilled": "You killed the {0}"
     },
+    "messages": {
+        "inventoryFull": "Your inventory is full.",
+        "objectTooHeavy": "You cannot carry that much weight."
+    },
     "misc": {
         "unknown": "Unknown"
     }

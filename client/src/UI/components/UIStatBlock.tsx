@@ -1,77 +1,84 @@
 import { localize } from "../../lang/Lang";
 import { StatComponent } from "../../../../common/src/components/StatComponent";
-import { Attributes, Component, ComponentChild, ComponentChildren, Ref, render } from "preact";
-import { EventEmitter } from "../../../../common/src/events/EventEmitter";
+import { Component } from "preact";
 import { HealthComponent } from "../../../../common/src/components/HealthComponent";
+import { StatSystem } from "../../../../common/src/systems/StatSystem";
+import { HealthSystem } from "../../../../common/src/systems/HealthSystem";
 
 type StatState = {
     stats: StatComponent;
-    health: {
-        component: HealthComponent;
-        lang: string,
-    }
-    statNameList: Record<string, string>;
+    health: HealthComponent
 };
 
 type StatProps = {
-    stats: StatComponent;
-    health: HealthComponent,
-    componentChangedEmitters: EventEmitter<{id: number, props: Record<string, unknown>, oldProps: Record<string, unknown>}>[];
+    statSystem: StatSystem,
+    healthSystem: HealthSystem,
+    playerId: number,
 };
 
 export class UIStatBlock extends Component<StatProps, StatState> {
-    componentChangedEmitters: EventEmitter<{id: number, props: Record<string, unknown>, oldProps: Record<string, unknown>}>[];
-    subscriptions?: number[];
+    statSubscription: number;
+    healthSubscription: number;
+    statLang: Record<string, string> = {
+        str: '',
+        con: '',
+        dex: ''
+    };
+    healthLang: string;
 
-    constructor({ stats, health, componentChangedEmitters }: StatProps) {
+    constructor() {
         super();
-        this.state = {
-            stats,
-            health: {
-                lang: '',
-                component: health
-            },
-            statNameList:  {
-                'str': '',
-                'dex': '',
-                'con': ''
-            }
-        };
 
         const promises: Promise<unknown>[] = [
             localize(`common/stats/hp`).then((localized) => {
-                this.state.health.lang = localized
+                this.healthLang = localized;
             })
         ];
-        for(const statName in this.state['statNameList']) {
+        for(const statName in this.statLang) {
             promises.push(localize(`common/stats/${statName}`).then(localized => {
-                this.state.statNameList[statName] = localized;
+                this.statLang[statName] = localized;
             }));
         }
+
         Promise.all(promises).then(() => {
-            this.forceUpdate();
+            this.updateStats();
         });
-        this.componentChangedEmitters = componentChangedEmitters;
     }
 
     componentDidMount(): void {
-        this.subscriptions = this.componentChangedEmitters.map(subscription => {
-            return subscription.subscribe((data) => {
-                // Force the update because the state has mutated
-                // Fuck immutable states, all my homies hate immutable states
-                this.forceUpdate();
-            })
+        this.healthSubscription = this.props.healthSystem.componentUpdatedEmitter.subscribe((data) => {
+            if (data.id === this.props.playerId) {
+                this.updateStats();
+            }
+        });
+
+        this.statSubscription = this.props.statSystem.componentUpdatedEmitter.subscribe((data) => {
+            if (data.id === this.props.playerId) {
+                this.updateStats();
+            }
         });
     }
 
-    componentWillUnmount(): void {
-        const subscriptions = this.subscriptions;
-        if (subscriptions) {
-            this.componentChangedEmitters.forEach((emitter, index) => {
-                emitter.unsubscribe(subscriptions[index]);
-            });
-            this.subscriptions = undefined;
+    updateStats(): void {
+        const healthComponent = this.props.healthSystem.getComponent(this.props.playerId);
+        const statsComponent = this.props.statSystem.getComponent(this.props.playerId);
+
+        if (healthComponent) {
+            this.setState({
+                health: {...healthComponent}
+            })
         }
+
+        if (statsComponent) {
+            this.setState({
+                stats: {...statsComponent}
+            })
+        }
+    }
+
+    componentWillUnmount(): void {
+        this.props.healthSystem.componentUpdatedEmitter.unsubscribe(this.healthSubscription);
+        this.props.statSystem.componentUpdatedEmitter.unsubscribe(this.statSubscription);
     }
 
     render() {
@@ -80,9 +87,9 @@ export class UIStatBlock extends Component<StatProps, StatState> {
             <div class="terminal-title">Stats</div>
             <div class="terminal-content">
               <ul>
-                  <li class="columned"><span>{this.state.health.lang}</span><span>{this.state.health.component.current + ' / ' + this.state.health.component.max}</span></li>
-                  {Object.keys(this.state.statNameList).map(key => 
-                    <li class="columned"><span>{this.state.statNameList[key]}</span><span>{(this.state.stats.current as Record<string, number>)[key] + ' / ' + (this.state.stats.max as Record<string, number>)[key]}</span></li>
+                  <li class="columned"><span>{this.healthLang}</span><span>{this.state.health?.current + ' / ' + this.state.health?.max}</span></li>
+                  {this.state.stats && Object.keys(this.statLang).map(key => 
+                    <li class="columned"><span>{this.statLang[key]}</span><span>{(this.state.stats.current as Record<string, number>)[key] + ' / ' + (this.state.stats.max as Record<string, number>)[key]}</span></li>
                   )}
               </ul>
             </div>

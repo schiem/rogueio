@@ -3,6 +3,9 @@ import { ClientGame } from "../models/ClientGame";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { generateEventFromMovement } from "./EventGenerators";
 import { NetworkEventHandler } from "./NetworkEventHandler";
+import { CarryableComponent } from "../../../common/src/components/CarryableComponent";
+import { Bus } from "../../../common/src/bus/Buses";
+import { GrabEvent } from "../../../common/src/events/client/GrabEvent";
 
 export class InputEventHandler {
      constructor(private game: ClientGame, viewport: HTMLElement) {
@@ -96,5 +99,23 @@ export class InputEventHandler {
                 this.game.changeFocus(entity);
             }
         },
+        [InputAction.grab]: () => {
+            const entityId = this.game.players[this.game.currentPlayerId].characterId;
+            const locationComponent = this.game.systems.location.getComponent(entityId);
+            const inventoryComponent = this.game.systems.inventory.getComponent(entityId);
+            if (!locationComponent || !inventoryComponent) {
+                return;
+            }
+
+            const locationEntities = this.game.systems.location.getEntitiesAtLocation(locationComponent.location).filter(x => x !== entityId && this.game.systems.carryable.getComponent(x) !== undefined);
+            if (locationEntities.length === 0) {
+                return;
+            }
+
+            // TODO - add a way to choose which item to pick up
+            if (this.game.systems.inventory.canPickUp(entityId, locationEntities[0])) {
+                NetworkEventHandler.sendEvent(new GrabEvent(locationEntities[0]));
+            }
+        }
     };
 }

@@ -2,6 +2,7 @@ import { ActionComponent, ActionTarget, EffectTarget, EffectType } from "../../.
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { DescriptionComponent, CharacterType, EntityCategory, ItemType } from "../../../common/src/components/DescriptionComponent";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
+import { InventoryComponent } from "../../../common/src/components/InventoryComponent";
 import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
 import { StatComponent } from "../../../common/src/components/StatComponent";
@@ -22,6 +23,7 @@ export type ComponentBlock = {
     action: ActionComponent,
     health: HealthComponent,
     description: DescriptionComponent
+    inventory: InventoryComponent;
 }
 
 export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> = {
@@ -67,6 +69,12 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                         }
                     ]
                 }]
+            },
+            inventory: {
+                currentWeight: 0,
+                items: [],
+                maxSpace: 10,
+                maxWeight: 20
             }
         };
     },

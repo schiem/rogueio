@@ -8,24 +8,24 @@ import { TileDefinitions } from "../../../common/src/consts/TileDefinitions";
 import { InitEvent } from "../../../common/src/events/server/InitEvent";
 import { Sprite, SpriteColor } from "../../../common/src/types/Sprite";
 import { InputEventHandler } from "../events/InputEventHandler";
-import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { setupUI } from "../UI/UI";
 import { TileName } from "../../../common/src/types/Tile";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
-import { MessageData } from "../../../common/src/events/server/MessageEvent";
 import { ActionSystem } from "../../../common/src/systems/ActionSystem";
 import { ClientLocationSystem } from "../systems/ClientLocationSystem";
 import { ClientHealthSystem } from "../systems/ClientHealthSystem";
 import { ClientVisibilitySystem } from "../systems/ClientVisibilitySystem";
 import { ClientDescriptionSystem } from "../systems/ClientDescriptionSystem";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
+import { ClientInventorySystem } from "../systems/ClientInventorySystem";
 
 export type ClientGameSystems = GameSystems & {
     location: ClientLocationSystem;
     visibility: ClientVisibilitySystem;
     description: ClientDescriptionSystem,
     health: ClientHealthSystem;
+    inventory: ClientInventorySystem;
 };
 
 export class ClientGame extends Game {
@@ -34,7 +34,6 @@ export class ClientGame extends Game {
     renderer: Renderer;
     inputEventHandler: InputEventHandler;
     timeInitialized: number;
-    messageEmitter = new EventEmitter<MessageData>();
     focusMaybeChangedEmitter = new EventEmitter<number | Point | undefined>();
 
     currentFocus?: number | Point;
@@ -122,6 +121,7 @@ export class ClientGame extends Game {
         super.constructSystems();
 
         this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY }, this.systems.inventory);
+        this.systems.inventory = new ClientInventorySystem(this.entityManager, this.systems.location, this.systems.carryable);
         this.systems.action = new ActionSystem(this.entityManager);
     }
 
