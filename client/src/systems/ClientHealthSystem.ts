@@ -13,17 +13,16 @@ export class ClientHealthSystem extends HealthSystem {
             if (data.props.current !== undefined) {
                 const characterId = game.players[game.currentPlayerId].characterId;
                 if (data.triggeredBy === characterId) {
-                    clientDescriptionSystem.getLocalizedName(data.id).then((name) => {
-                        Bus.messageEmitter.emit({ message: 'common/action/playerDidDamage', replacements: [name], entities: [] })
+                    const name = clientDescriptionSystem.getLocalizedName(data.id);
+                    Bus.messageEmitter.emit({ message: 'action/playerDidDamage', replacements: [name], entities: [] })
 
-                        if (data.props.current as number <= 0) {
-                            Bus.messageEmitter.emit({message: 'common/action/playerKilled', replacements: [name], entities: [] })
-                        }
-                    });
-                } else if(data.id === characterId) {
-                    Bus.messageEmitter.emit({message: 'common/action/playerTookDamage', entities: [] })
                     if (data.props.current as number <= 0) {
-                        Bus.messageEmitter.emit({message: 'common/action/playerDied', entities: [] })
+                        Bus.messageEmitter.emit({message: 'action/playerKilled', replacements: [name], entities: [] })
+                    }
+                } else if(data.id === characterId) {
+                    Bus.messageEmitter.emit({message: 'action/playerTookDamage', entities: [] })
+                    if (data.props.current as number <= 0) {
+                        Bus.messageEmitter.emit({message: 'action/playerDied', entities: [] })
                     }
                 }
             }

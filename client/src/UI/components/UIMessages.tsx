@@ -15,14 +15,12 @@ export class UIMessages extends Component<{}, MessageState> {
         this.state = {
             messages: []
         };
-
     }
 
     componentDidMount(): void {
+        this.addMessage(localize('system/gameStart'));
         this.messageSubscription = Bus.messageEmitter.subscribe((data) => {
-            localize(data.message, data.replacements).then((msg) => {
-                this.addMessage(msg);
-            })
+            this.addMessage(localize(data.message, data.replacements));
         });
     }
 
@@ -40,6 +38,9 @@ export class UIMessages extends Component<{}, MessageState> {
                 <div class="terminal-title">Messages</div>
                 <div class="terminal-content">
                     <ul class="scrollable-list scroll-bottom">
+                        { !this.state.messages.length && 
+                            <li class="separated-row">{ localize('messages/noMessages')}</li>
+                        }
                         { this.state.messages.map(message => 
                             <li class="separated-row">{ message }</li>
                         )}

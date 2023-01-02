@@ -3,7 +3,7 @@ const languageAliases: Record<string, string> = {
     en: 'en-US'
 }
 const supportedLanguages = ['en-US'];
-const languageStrings: Record<string, Record<string, any>> = {};
+const languageStrings: Record<string, any> = {};
 
 
 const getNormalizedLang = (): string => {
@@ -20,16 +20,9 @@ const getNormalizedLang = (): string => {
 }
 const currentLang = getNormalizedLang();
 
-const shouldLoadLibrary = (lib: string): boolean => {
-    if (languageStrings[currentLang]?.[lib]) {
-        return false;
-    }
-    return true;
-}
-
 const lookupMessageInLibrary = (keys: string[]): string => {
-    let curObj = languageStrings[currentLang][keys[0]];
-    for(let i = 1; i < keys.length; i++) {
+    let curObj = languageStrings[currentLang];
+    for(let i = 0; i < keys.length; i++) {
         curObj = curObj[keys[i]];
     }
     return curObj;
@@ -50,41 +43,27 @@ export const loadLibrary = (lib: string): Promise<void> => {
 
     const url = `/dist/assets/lang/${currentLang}/${lib}.json`;
     const promise = fetch(url).then(resp => resp.json()).then((json: Record<string, string>) => {
-        languageStrings[currentLang][lib] = json;
+        languageStrings[currentLang] = json;
         delete promiseCache[lib];
     });
     promiseCache[lib] = promise;
     return promise;
 }
 
-export const localize = (message: string, replacements?: (Promise<string> | string)[]): Promise<string> => {
-    const promises: Promise<void>[] = [];
+export const loadLang = (): Promise<void> => {
+    return loadLibrary('common');
+}
+
+const regex = new RegExp(/\{(\d+)\}/g);
+export const localize = (message: string, replacements?: string[]): string => {
     const messageArr = splitMessage(message);
 
-    if (shouldLoadLibrary(messageArr[0])) {
-        promises.push(loadLibrary(messageArr[0]));
+    let localizedMessage = lookupMessageInLibrary(messageArr);
+    if (replacements?.length) {
+        localizedMessage = localizedMessage.replace(regex, (_, capture) => {
+            const idx = parseInt(capture);
+            return replacements[idx];
+        });
     }
-
-    let finalReplacements: string[] = new Array(replacements?.length || 0);
-    if(replacements) {
-        for(let i = 0; i < replacements.length; i++) {
-            const str = replacements[i];
-            if (typeof str !== 'string') {
-                promises.push(str.then((str) => {
-                    finalReplacements[i] = str;
-                }));
-            } else {
-                finalReplacements[i] = str;
-            }
-        }
-    }
-
-    return Promise.all(promises).then(() => {
-        let localizedMessage = lookupMessageInLibrary(messageArr);
-        for(let i = 0; i < finalReplacements.length; i++) {
-            const placeholder = `\\{${i}\\}`;
-            localizedMessage = localizedMessage.replace(new RegExp(placeholder), finalReplacements[i]);
-        }
-        return localizedMessage;
-    });
+    return localizedMessage;
 }

@@ -2,7 +2,7 @@ import { EventEmitter } from "../events/EventEmitter";
 
 export type MessageData = {
     message: string;
-    replacements?: (string | Promise<string>)[];
+    replacements?: string[];
     entities: number[]
 }
 

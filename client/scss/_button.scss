@@ -1,0 +1,26 @@
+button {
+    font-family: $font;
+    border: 1px solid $white;
+    background: $black;
+    color: $white;
+    padding: $spacing-xs;
+    outline: none;
+    box-shadow: none;
+    border-radius: 0;
+    transition: color $transition-speed ease, background-color $transition-speed ease;
+    display: inline-block;
+    vertical-align: middle;
+
+    &.icon {
+        width: $spacing-sm;
+        height: $spacing-sm;
+        line-height: $spacing-sm - 2px;
+        padding: 0;
+    }
+
+    &:hover,
+    &:focus {
+        background: $light-gray;
+        color: $black;
+    }
+}

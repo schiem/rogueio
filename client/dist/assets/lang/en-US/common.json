@@ -43,11 +43,22 @@
         "playerTakeDamage": "You were hurt by the {0}",
         "playerDidDamage": "You hurt the {0}",
         "playerDied": "You have died",
-        "playerKilled": "You killed the {0}"
+        "playerKilled": "You killed the {0}",
+        "focus": "Focus"
     },
     "messages": {
         "inventoryFull": "Your inventory is full.",
-        "objectTooHeavy": "You cannot carry that much weight."
+        "objectTooHeavy": "You cannot carry that much weight.",
+        "noMessages": "No messages received."
+    },
+    "focus": {
+        "currentFocus": "Current Focus",
+        "floor": "Floor",
+        "others": "Others",
+        "nothingFocused": "Nothing focused."
+    },
+    "inventory": {
+        "empty": "Your inventory is empty."
     },
     "misc": {
         "unknown": "Unknown"

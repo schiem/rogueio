@@ -16,8 +16,9 @@ export type InventoryState = {
 }
 
 export class UIInventory extends Component<InventoryProps, InventoryState> {
-    private allNamesFetchedPromise?: Promise<unknown>;
-
+    labels = {
+        emptyInventory: localize('inventory/empty')
+    }
     componentDidMount(): void {
         this.props.inventorySystem.componentUpdatedEmitter.subscribe((data) => {
             if (data.id !== this.props.playerId) {
@@ -39,28 +40,16 @@ export class UIInventory extends Component<InventoryProps, InventoryState> {
     }
 
     updateState(component: InventoryComponent): void {
-        const items: { name: string, weight: number}[] = new Array(component.items.length);
-        const promises: Promise<void>[] = [];
+        const items: { name: string, weight: number}[] = component.items.map(item => {
+            return {
+                name: this.props.descriptionSystem.getLocalizedName(item.id),
+                weight: item.weight
 
-        for (let i = 0; i < component.items.length; i++) {
-            promises.push(this.props.descriptionSystem.getLocalizedName(component.items[i].id).then((name) => {
-                items[i] = {
-                    name,
-                    weight: component.items[i].weight
-                }
-            }));
-        }
-
-        const finishedPromise = Promise.all(promises).then(() => {
-            if (finishedPromise === this.allNamesFetchedPromise) {
-                this.setState({
-                    items
-                });
-                this.allNamesFetchedPromise = undefined;
             }
         });
-
-        this.allNamesFetchedPromise = finishedPromise;
+        this.setState({
+            items
+        });
     }
 
     render(): ComponentChild {
@@ -68,11 +57,14 @@ export class UIInventory extends Component<InventoryProps, InventoryState> {
             <div class="terminal">
                 <div class="terminal-title">Inventory</div>
                 <div class="terminal-content">
-                    <ul>
-                        {this.state.items?.map((item) =>
-                            <li class="columned"><span>{item.name}</span><span>{item.weight.toFixed(1)}</span></li>
-                        )}
-                    </ul>
+                    {   this.state.items?.length ? 
+                        <ul>
+                            {this.state.items.map((item) =>
+                                <li class="columned"><span>{item.name}</span><span>{item.weight.toFixed(1)}</span></li>
+                            )}
+                        </ul> : 
+                        <p>{ this.labels.emptyInventory }</p>
+                    }
                 </div>
             </div>
         </div>

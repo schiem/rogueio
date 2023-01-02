@@ -9,9 +9,9 @@
     margin: 0 $spacing $spacing $spacing;
 
     .terminal-title {
-        padding: 0 $spacing;
+        padding: $spacing-xs $spacing;
         color: $black;
-        background: $white;
+        background: $light-gray;
     }
 
     .terminal-content {

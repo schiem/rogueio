@@ -29,20 +29,10 @@ export class UIStatBlock extends Component<StatProps, StatState> {
     constructor() {
         super();
 
-        const promises: Promise<unknown>[] = [
-            localize(`common/stats/hp`).then((localized) => {
-                this.healthLang = localized;
-            })
-        ];
+        this.healthLang = localize(`stats/hp`);
         for(const statName in this.statLang) {
-            promises.push(localize(`common/stats/${statName}`).then(localized => {
-                this.statLang[statName] = localized;
-            }));
+            this.statLang[statName] = localize(`stats/${statName}`);
         }
-
-        Promise.all(promises).then(() => {
-            this.updateStats();
-        });
     }
 
     componentDidMount(): void {
@@ -57,6 +47,8 @@ export class UIStatBlock extends Component<StatProps, StatState> {
                 this.updateStats();
             }
         });
+
+        this.updateStats();
     }
 
     updateStats(): void {

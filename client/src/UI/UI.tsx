@@ -1,11 +1,6 @@
 import { Component, Fragment, render } from "preact";
-import { HealthComponent } from "../../../common/src/components/HealthComponent";
-import { StatComponent } from "../../../common/src/components/StatComponent";
-import { EventEmitter } from "../../../common/src/events/EventEmitter";
-import { MessageEventData } from "../../../common/src/events/server/MessageEvent";
-import { Game, GameSystems } from "../../../common/src/models/Game";
 import { Player } from "../../../common/src/models/Player";
-import { loadLibrary } from "../lang/Lang";
+import { loadLang } from "../lang/Lang";
 import { ClientGame } from "../models/ClientGame";
 import { UIMessages } from "./components/UIMessages";
 import { UIStatBlock } from "./components/UIStatBlock";
@@ -17,25 +12,40 @@ type UIProps = {
     currentPlayer: Player;
 }
 
-export class UI extends Component<UIProps> {
+type UIState = {
+    loaded: boolean;
+}
+
+export class UI extends Component<UIProps, UIState> {
     game: ClientGame;
     currentPlayer: Player;
 
     constructor({ game, currentPlayer }: UIProps) {
         super();
-        this.preloadLibraries();
         this.game = game;
         this.currentPlayer = currentPlayer;
+
+        this.state = {
+            loaded: false
+        }
+
     }
 
-    preloadLibraries(): void {
-        loadLibrary('common');
+    componentDidMount(): void {
+        this.preloadLibraries().then(() => {
+            this.setState({ loaded: true });
+        });
+    }
+
+    preloadLibraries(): Promise<void> {
+        return loadLang();
     }
 
     render() {
-        const charId = this.currentPlayer.characterId;
-        const statComponent = this.game.systems.stats.getComponent(charId) as StatComponent;
-        const healthComponent = this.game.systems.health.getComponent(charId) as HealthComponent;
+        if (!this.state.loaded) {
+            return <Fragment></Fragment>
+        }
+
         return <Fragment>
             <UIStatBlock 
                 statSystem={this.game.systems.stats} 

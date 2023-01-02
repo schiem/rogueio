@@ -11,35 +11,33 @@ export class ClientDescriptionSystem extends DescriptionSystem {
         return (entityDescriptions[component.category] as Record<number, DescriptionClass>)[component.id];
     }
 
-    getLocalizedDescription(entityId: number): Promise<string> {
+    getLocalizedDescription(entityId: number): string {
         const description = this.getDescriptionClass(entityId);
         if (!description) {
-            return localize('common/misc/unknown');
+            return localize('misc/unknown');
         }
-        const promises: Promise<string>[] = [
-            localize(`common/entity/${description.category}/description`),
+        const strings: string[] = [
+            localize(`entity/${description.category}/description`),
         ];
+
         if (description.specific) {
-            promises.push(localize(`common/entity/${description.specific}/description`));
+            strings.push(localize(`entity/${description.specific}/description`));
         }
-        return Promise.all(promises).then(strings => {
-            return strings.join(' ');
-        });
+
+        return strings.join(' ');
     }
 
-    getLocalizedName(entityId: number): Promise<string> {
+    getLocalizedName(entityId: number): string {
         const description = this.getDescriptionClass(entityId);
         if (!description) {
-            return localize('common/misc/unknown');
+            return localize('misc/unknown');
         }
-        const promises: Promise<string>[] = [
-            localize(`common/entity/${description.category}/name`),
+        const strings: string[] = [
+            localize(`entity/${description.category}/name`),
         ];
         if (description.specific) {
-            promises.push(localize(`common/entity/${description.specific}/name`));
+            strings.push(localize(`entity/${description.specific}/name`));
         }
-        return Promise.all(promises).then(strings => {
-            return strings.join(' ');
-        });
+        return strings.join(' ');
     }
 }
