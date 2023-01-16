@@ -7,14 +7,16 @@
         flex: 1;
     }
 
-    .columned {
-        display: flex;
-        justify-content: space-between;
-    }
+}
 
-    .separated-row:not(:first-child) {
-        margin-top: $spacing-xs;
-        padding-top: $spacing-xs;
-        border-top: $border;
-    }
+.columned {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.separated-row:not(:first-child) {
+    margin-top: $spacing-xs;
+    padding-top: $spacing-xs;
+    border-top: $border;
 }

@@ -23,4 +23,16 @@ button {
         background: $light-gray;
         color: $black;
     }
+
+    &.light {
+        background-color: $light-gray;
+        border-color: $black;
+        color: $black;
+
+        &:hover,
+        &:focus {
+            background: $black;
+            color: $white;
+        }
+    }
 }

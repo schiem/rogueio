@@ -1,0 +1,37 @@
+$header-height: $spacing-text + (2 * $spacing-xs);
+.wb-header {
+    color: $black;
+    background: $light-gray;
+    height: $header-height;
+}
+
+.wb-title {
+    font-family: unset;
+    font-size: unset;
+    line-height: $header-height;
+}
+
+.wb-body {
+    background: $black;
+    color: $white;
+
+    .terminal {
+        padding: 0;
+    }
+
+    /** Turn off scrollable lists, the entire body scrolls **/
+    .scrollable-list {
+        max-height: none;
+        overflow-y: visible;
+    }
+}
+
+.wb-close {
+    vertical-align: top;
+    background: none;
+
+    &::after {
+        content: 'X';
+        line-height: $header-height;
+    }
+}

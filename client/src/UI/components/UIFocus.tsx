@@ -1,4 +1,4 @@
-import { Component } from "preact";
+import { Component, Fragment } from "preact";
 import { EventEmitter } from "../../../../common/src/events/EventEmitter";
 import { Dungeon } from "../../../../common/src/models/Dungeon";
 import { LocationSystem } from "../../../../common/src/systems/LocationSystem";
@@ -99,47 +99,42 @@ export class UIDescription extends Component<FocusProps, FocusState> {
     }
 
     render() {
-        return <div id="focus" class="ui-block">
-            <div class="terminal">
-                <div class="terminal-title">Focus</div>
-                <div class="terminal-content">
-                    { (!this.state.tileDescription && !this.state.entityDescription) && this.labels.nothingFocused }
+        return <Fragment>
+            { (!this.state.tileDescription && !this.state.entityDescription) && <p>{this.labels.nothingFocused}</p> }
 
-                    {this.state.tileDescription && 
-                        <div class="tile-description separated-row">
-                            <p>
-                                <b>{this.labels.tileDescription}:</b><br/>
-                                {this.state.tileDescription}
-                            </p>
-                        </div> 
-                    }
+            {this.state.tileDescription && 
+                <div class="tile-description separated-row">
+                    <p>
+                        <b>{this.labels.tileDescription}:</b><br/>
+                        {this.state.tileDescription}
+                    </p>
+                </div> 
+            }
 
-                    { this.state.entityDescription &&
-                        <div class="entity-description separated-row">
-                            <p>
-                                <b>{this.labels.entityDescription}:</b> { this.state.entityName }<br/>
-                                {this.state.entityDescription}
-                            </p>
-                        </div>
-                    }
-
-                    {(this.state.entityNames && !!Object.keys(this.state.entityNames).length) && 
-                        <div class="entities separated-row">
-                            <p>
-                                <b>{this.labels.otherEntities}:</b>
-                            </p>
-                            <ul class="entity-picker">
-                                {Object.keys(this.state.entityNames).map(entityId =>
-                                    <li class="separated-row">
-                                        <button class="icon" title={ this.labels.focus } onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}>{ Glyphs.focus }</button> 
-                                        <span>{(this.state.entityNames as Record<number, string>)[entityId as unknown as number]}</span>
-                                    </li>
-                                )}
-                            </ul>
-                        </div>
-                    }
+            { this.state.entityDescription &&
+                <div class="entity-description separated-row">
+                    <p>
+                        <b>{this.labels.entityDescription}:</b> { this.state.entityName }<br/>
+                        {this.state.entityDescription}
+                    </p>
                 </div>
-            </div>
-        </div>
+            }
+
+            {(this.state.entityNames && !!Object.keys(this.state.entityNames).length) && 
+                <div class="entities separated-row">
+                    <p>
+                        <b>{this.labels.otherEntities}:</b>
+                    </p>
+                    <ul class="entity-picker">
+                        {Object.keys(this.state.entityNames).map(entityId =>
+                            <li class="separated-row">
+                                <button class="icon" title={ this.labels.focus } onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}>{ Glyphs.focus }</button> 
+                                <span>{(this.state.entityNames as Record<number, string>)[entityId as unknown as number]}</span>
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            }
+        </Fragment>
     }
 }

@@ -60,6 +60,10 @@
     "inventory": {
         "empty": "Your inventory is empty."
     },
+    "ui": {
+        "float": "Float",
+        "anchor": "Anchor"
+    },
     "misc": {
         "unknown": "Unknown"
     }

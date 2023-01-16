@@ -13,8 +13,10 @@ $spacing-sm: $spacing * 2;
 $spacing-md: $spacing * 3;
 $spacing-xl: $spacing * 6;
 
+
 $font-base: 16px;
 $font: 'Fira Code', monospace;
+$spacing-text: 1.5 * $font-base;
 
 $box-shadow: 3px 3px 5px $gray;
 $border-radius: 2px;

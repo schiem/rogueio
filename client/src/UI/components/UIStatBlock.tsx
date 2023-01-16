@@ -1,6 +1,6 @@
 import { localize } from "../../lang/Lang";
 import { StatComponent } from "../../../../common/src/components/StatComponent";
-import { Component } from "preact";
+import { Component, Fragment } from "preact";
 import { HealthComponent } from "../../../../common/src/components/HealthComponent";
 import { StatSystem } from "../../../../common/src/systems/StatSystem";
 import { HealthSystem } from "../../../../common/src/systems/HealthSystem";
@@ -74,18 +74,13 @@ export class UIStatBlock extends Component<StatProps, StatState> {
     }
 
     render() {
-        return <div id="stats" class="ui-block">
-          <div class="terminal">
-            <div class="terminal-title">Stats</div>
-            <div class="terminal-content">
-              <ul>
-                  <li class="columned"><span>{this.healthLang}</span><span>{this.state.health?.current + ' / ' + this.state.health?.max}</span></li>
-                  {this.state.stats && Object.keys(this.statLang).map(key => 
-                    <li class="columned"><span>{this.statLang[key]}</span><span>{(this.state.stats.current as Record<string, number>)[key] + ' / ' + (this.state.stats.max as Record<string, number>)[key]}</span></li>
-                  )}
-              </ul>
-            </div>
-          </div>
-        </div>
+        return <Fragment>
+            <ul>
+                <li class="columned"><span>{this.healthLang}</span><span>{this.state.health?.current + ' / ' + this.state.health?.max}</span></li>
+                {this.state.stats && Object.keys(this.statLang).map(key => 
+                <li class="columned"><span>{this.statLang[key]}</span><span>{(this.state.stats.current as Record<string, number>)[key] + ' / ' + (this.state.stats.max as Record<string, number>)[key]}</span></li>
+                )}
+            </ul>
+        </Fragment>
     }
 }

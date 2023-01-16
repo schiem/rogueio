@@ -1,4 +1,4 @@
-import { Component, ComponentChild } from "preact"
+import { Component, ComponentChild, Fragment } from "preact"
 import { InventoryComponent } from "../../../../common/src/components/InventoryComponent";
 import { DescriptionSystem } from "../../../../common/src/systems/DescriptionSystem"
 import { InventorySystem } from "../../../../common/src/systems/InventorySystem";
@@ -44,7 +44,6 @@ export class UIInventory extends Component<InventoryProps, InventoryState> {
             return {
                 name: this.props.descriptionSystem.getLocalizedName(item.id),
                 weight: item.weight
-
             }
         });
         this.setState({
@@ -53,20 +52,15 @@ export class UIInventory extends Component<InventoryProps, InventoryState> {
     }
 
     render(): ComponentChild {
-        return <div id="inventory" class="ui-block">
-            <div class="terminal">
-                <div class="terminal-title">Inventory</div>
-                <div class="terminal-content">
-                    {   this.state.items?.length ? 
-                        <ul>
-                            {this.state.items.map((item) =>
-                                <li class="columned"><span>{item.name}</span><span>{item.weight.toFixed(1)}</span></li>
-                            )}
-                        </ul> : 
-                        <p>{ this.labels.emptyInventory }</p>
-                    }
-                </div>
-            </div>
-        </div>
+        return <Fragment>
+            {this.state.items?.length ? 
+                <ul>
+                    {this.state.items.map((item) =>
+                        <li class="columned"><span>{item.name}</span><span>{item.weight.toFixed(1)}</span></li>
+                    )}
+                </ul> : 
+                <p>{ this.labels.emptyInventory }</p>
+            }
+        </Fragment>
     }
 }

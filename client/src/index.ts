@@ -8,6 +8,9 @@ import { SpriteColor } from "../../common/src/types/Sprite";
 import { decode } from "messagepack";
 import { ServerEventType } from "../../common/src/events/server/ServerEvent";
 
+// Use this to include winbox in the global scope
+import 'winbox';
+
 const viewportCanvas: HTMLCanvasElement = document.getElementById('viewport') as HTMLCanvasElement;
 const spriteWidth = 14;
 const spriteHeight = 25;

@@ -1,41 +1,10 @@
 .terminal {
-    font-family: $font;
-    font-size: $font-base;
     background: $black;
     color: $white;
     min-width: 300px;
     border-radius: $border-radius;
     overflow: hidden;
     margin: 0 $spacing $spacing $spacing;
-
-    .terminal-title {
-        padding: $spacing-xs $spacing;
-        color: $black;
-        background: $light-gray;
-    }
-
-    .terminal-content {
-        padding: $spacing;
-
-        .scrollable-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .scroll-bottom {
-            & > * {
-                overflow-anchor: none;
-            }
-
-            .pin-to-bottom {
-                overflow-anchor: auto;
-                height: 1px;
-                margin: 0;
-                padding: 0;
-            }
-        }
-    }
-
 
     & * {
         /* Works on Firefox */
@@ -59,3 +28,32 @@
         }
     }
 }
+
+.terminal-title {
+    padding: $spacing-xs $spacing;
+    color: $black;
+    background: $light-gray;
+}
+
+.terminal-content {
+    padding: $spacing;
+
+    .scrollable-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .scroll-bottom {
+        & > * {
+            overflow-anchor: none;
+        }
+
+        .pin-to-bottom {
+            overflow-anchor: auto;
+            height: 1px;
+            margin: 0;
+            padding: 0;
+        }
+    }
+}
+

@@ -1,4 +1,4 @@
-import { Component, ComponentChild } from "preact";
+import { Component, ComponentChild, Fragment } from "preact";
 import { Bus } from "../../../../common/src/bus/Buses";
 import { localize } from "../../lang/Lang";
 
@@ -33,21 +33,16 @@ export class UIMessages extends Component<{}, MessageState> {
     }
 
     render(): ComponentChild {
-        return <div id="messages" class="ui-block">
-            <div class="terminal">
-                <div class="terminal-title">Messages</div>
-                <div class="terminal-content">
-                    <ul class="scrollable-list scroll-bottom">
-                        { !this.state.messages.length && 
-                            <li class="separated-row">{ localize('messages/noMessages')}</li>
-                        }
-                        { this.state.messages.map(message => 
-                            <li class="separated-row">{ message }</li>
-                        )}
-                        <li class="pin-to-bottom"></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        return <Fragment>
+            <ul class="scrollable-list scroll-bottom">
+                { !this.state.messages.length && 
+                    <li class="separated-row">{ localize('messages/noMessages')}</li>
+                }
+                { this.state.messages.map(message => 
+                    <li class="separated-row">{ message }</li>
+                )}
+                <li class="pin-to-bottom"></li>
+            </ul>
+        </Fragment>
     }
 }
