@@ -300,10 +300,11 @@ export class ClientGame extends Game {
         }
 
         let highestComponent;
-        if (isVisible && (highestComponent = this.systems.location.getHighestComponentAtLocation(point))) {
+        let spriteComponent;
+        if (isVisible && (highestComponent = this.systems.location.getHighestComponentAtLocation(point)) && (spriteComponent = this.systems.sprite.getComponent(highestComponent.id))) {
             // draw an entity that's on the location
             // but only if the tile is visible - TODO: Draw already seen items
-            sprite = highestComponent.component.sprite;
+            sprite = spriteComponent.sprite;
         } else if (def) {
             sprite = def.sprite;
         } else {

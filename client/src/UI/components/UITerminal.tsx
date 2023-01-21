@@ -1,5 +1,6 @@
 import { Component, ComponentChild, createRef } from "preact";
 import { localize } from "../../lang/Lang";
+import { Glyphs } from "../Glyphs";
 
 export type TerminalProps = {
     title: string;
@@ -122,7 +123,7 @@ export class Terminal extends Component<TerminalProps, TerminalState> {
                 { !this.state.winbox && 
                     <div class="terminal-title columned">
                         <div>{this.props.title}</div>
-                        <div><button class="light icon" title={this.labels.float} onClick={() => this.floatWindow()}>↗</button></div>
+                        <div><button class="light icon" title={this.labels.float} onClick={() => this.floatWindow()}>{ Glyphs.float }</button></div>
                     </div> 
                 }
                 <div class="terminal-content">

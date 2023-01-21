@@ -5,6 +5,7 @@ import { CarryableSystem } from "./CarryableComponent";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
 import { Bus } from "../bus/Buses"
+import { LocationComponentLayer } from "../components/LocationComponent";
 
 export class InventorySystem extends ComponentSystem<InventoryComponent> {
     replicationMode: ReplicationMode = 'self';
@@ -43,12 +44,13 @@ export class InventorySystem extends ComponentSystem<InventoryComponent> {
 
     dropItem(entityId: number, entityToDrop: number): void {
         const component = this.getComponent(entityId);
+        const location = this.locationSystem.getComponent(entityId);
         if (!component) {
             return;
         }
 
         const idx = component.items.findIndex(x => x.id === entityToDrop);
-        if (idx > 0) {
+        if (idx > -1) {
             const item = component.items[idx];
             const oldWeight = component.currentWeight;
 
@@ -63,7 +65,15 @@ export class InventorySystem extends ComponentSystem<InventoryComponent> {
                     currentWeight: component.currentWeight,
                     removedItem: idx
                 }
-        });
+            });
+
+            if (location !== undefined) {
+                this.locationSystem.addComponentForEntity(entityToDrop, {
+                    movesThrough: [],
+                    layer: LocationComponentLayer.item,
+                    location: {...location.location}
+                });
+            }
         }
     }
 

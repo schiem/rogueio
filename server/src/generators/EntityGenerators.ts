@@ -3,8 +3,9 @@ import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { DescriptionComponent, CharacterType, EntityCategory, ItemType } from "../../../common/src/components/DescriptionComponent";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { InventoryComponent } from "../../../common/src/components/InventoryComponent";
-import { LocationComponent, LocationComponentLayers } from "../../../common/src/components/LocationComponent";
+import { LocationComponent, LocationComponentLayer } from "../../../common/src/components/LocationComponent";
 import { MovementComponent } from "../../../common/src/components/MovementComponent";
+import { SpriteComponent } from "../../../common/src/components/SpriteComponent";
 import { StatComponent } from "../../../common/src/components/StatComponent";
 import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { GameSystems } from "../../../common/src/models/Game";
@@ -20,10 +21,11 @@ export type ComponentBlock = {
     ally: AllyComponent;
     stats: StatComponent;
     ai: AIComponent;
-    action: ActionComponent,
-    health: HealthComponent,
-    description: DescriptionComponent
+    action: ActionComponent;
+    health: HealthComponent;
+    description: DescriptionComponent;
     inventory: InventoryComponent;
+    sprite: SpriteComponent;
 }
 
 export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> = {
@@ -32,13 +34,15 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             description: { id: CharacterType.player, category: EntityCategory.character },
             health: {current: 10, max: 10},
             ally: {group: 'players'},
-            location: {
+            sprite: {
                 sprite: {
                     name: SpriteName.player,
                     color: SpriteColor.beige
-                },
+                }
+            },
+            location: {
                 movesThrough: [MovementType.land, MovementType.water],
-                layer: LocationComponentLayers.character,
+                layer: LocationComponentLayer.character,
                 location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 100 },
@@ -83,13 +87,15 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             description: { id: CharacterType.bufonidWarrior, category: EntityCategory.character  },
             health: {current: 10, max: 10},
             ally: {group: 'enemies'},
-            location: {
+            sprite: {
                 sprite: {
                     name: SpriteName.bufonid,
                     color: SpriteColor.green
-                },
+                }
+            },
+            location: {
                 movesThrough: [MovementType.land, MovementType.water],
-                layer: LocationComponentLayers.character,
+                layer: LocationComponentLayer.character,
                 location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 400 },
@@ -115,13 +121,15 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             description: { id: CharacterType.bufonidQueen, category: EntityCategory.character  },
             health: {current: 10, max: 10},
             ally: {group: 'enemies'},
-            location: {
+            sprite: {
                 sprite: {
                     name: SpriteName.bufonid,
                     color: SpriteColor.red
-                },
+                }
+            },
+            location: {
                 movesThrough: [MovementType.land, MovementType.water],
-                layer: LocationComponentLayers.character,
+                layer: LocationComponentLayer.character,
                 location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 400 },
@@ -147,13 +155,15 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             description: { id: CharacterType.bufonidSpawn, category: EntityCategory.character  },
             health: {current: 1, max: 1},
             ally: {group: 'enemies'},
-            location: {
+            sprite: {
                 sprite: {
                     name: SpriteName.spawn,
                     color: SpriteColor.cyan
-                },
+                }
+            },
+            location: {
                 movesThrough: [MovementType.water],
-                layer: LocationComponentLayers.character,
+                layer: LocationComponentLayer.character,
                 location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 400 },
@@ -180,13 +190,15 @@ export const itemEntities: Record<ItemType, () => Partial<ComponentBlock>> = {
     [ItemType.dagger]: () => {
         return {
             description: { id: ItemType.dagger, category: EntityCategory.item },
-            location: {
+            sprite: {
                 sprite: {
                     name: SpriteName.dagger,
                     color: SpriteColor.grey
-                },
+                }
+            },
+            location: {
                 movesThrough: [],
-                layer: LocationComponentLayers.item,
+                layer: LocationComponentLayer.item,
                 location: { x: 0, y: 0}
             },
             carryable: {

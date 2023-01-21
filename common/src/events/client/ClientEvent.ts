@@ -3,7 +3,8 @@ import { NetworkEvent } from "../NetworkEvent";
 export enum ClientEventType {
     move,
     action,
-    grab
+    grab,
+    drop
 }
 export class ClientEvent extends NetworkEvent {
     type: ClientEventType;

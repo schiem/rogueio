@@ -11,6 +11,7 @@ import { HealthSystem } from "../systems/HealthSystem";
 import { DescriptionSystem } from "../systems/DescriptionSystem";
 import { InventorySystem } from "../systems/InventorySystem";
 import { CarryableSystem } from "../systems/CarryableComponent";
+import { SpriteSystem } from "../systems/SpriteSystem";
 
 export type GameSystems = {
     description: DescriptionSystem;
@@ -23,6 +24,7 @@ export type GameSystems = {
     health: HealthSystem;
     inventory: InventorySystem;
     carryable: CarryableSystem;
+    sprite: SpriteSystem;
 }
 
 export class Game {
@@ -41,6 +43,7 @@ export class Game {
 
     constructSystems(): void {
         this.systems.stats = new StatSystem(this.entityManager);
+        this.systems.sprite = new SpriteSystem(this.entityManager);
         this.systems.ally = new AllySystem(this.entityManager);
         this.systems.carryable = new CarryableSystem(this.entityManager);
         this.systems.movement = new MovementSystem(this.entityManager, this.systems.location);

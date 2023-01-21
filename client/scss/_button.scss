@@ -1,5 +1,6 @@
 button {
     font-family: $font;
+    cursor: pointer;
     border: 1px solid $white;
     background: $black;
     color: $white;
@@ -10,6 +11,12 @@ button {
     transition: color $transition-speed ease, background-color $transition-speed ease;
     display: inline-block;
     vertical-align: middle;
+
+    & + button,
+    & + span {
+        display: inline-block;
+        margin-left: $spacing-xs;
+    }
 
     &.icon {
         width: $spacing-sm;

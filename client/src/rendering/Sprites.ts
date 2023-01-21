@@ -13,7 +13,7 @@ export const Sprites: Record<SpriteName, number> = {
 
 export const SpriteColors: Record<SpriteColor, string> = {
     [SpriteColor.default]: '#dddddd', // the default color for the floor
-    [SpriteColor.grey]: '#8a8a8a', // the default 'out of vision color' - avoid it for other things
+    [SpriteColor.grey]: '#5a5a5a', // the default 'out of vision color' - avoid it for other things
     [SpriteColor.black]: '#222222', // the background color - anything on it will be invisible
     [SpriteColor.red]: '#ff356c', 
     [SpriteColor.green]: '#3cb44b', 

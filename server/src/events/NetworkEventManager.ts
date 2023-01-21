@@ -18,6 +18,7 @@ import { NetworkEvent } from '../../../common/src/events/NetworkEvent';
 import { Bus } from '../../../common/src/bus/Buses';
 import { MessageEventData, MessageEvent } from '../../../common/src/events/server/MessageEvent';
 import { GrabEvent } from '../../../common/src/events/client/GrabEvent';
+import { DropEvent } from '../../../common/src/events/client/DropEvent';
 
 /**
  * Handles both incoming and outgoing events.
@@ -40,6 +41,10 @@ export class NetworkEventManager {
         [ClientEventType.grab]: (playerId: string, game: ServerGame, event: GrabEvent) => {
             const characterId = game.players[playerId].characterId;
             game.systems.inventory.attemptPickUp(characterId, event.data.target);
+        },
+        [ClientEventType.drop]: (playerId: string, game: ServerGame, event: DropEvent) => {
+            const characterId = game.players[playerId].characterId;
+            game.systems.inventory.dropItem(characterId, event.data.target);
         }
     }
     constructor(

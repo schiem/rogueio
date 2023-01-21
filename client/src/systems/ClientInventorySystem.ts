@@ -8,6 +8,7 @@ export class ClientInventorySystem extends InventorySystem {
             return component.items;
         },
         removedItem: (id: number, component: InventoryComponent, idx: unknown) => {
+            console.log('removed');
             component.items.splice(idx as number, 1);
             return component.items;
         }

@@ -44,7 +44,8 @@
         "playerDidDamage": "You hurt the {0}",
         "playerDied": "You have died",
         "playerKilled": "You killed the {0}",
-        "focus": "Focus"
+        "focus": "Focus",
+        "drop": "Drop"
     },
     "messages": {
         "inventoryFull": "Your inventory is full.",
