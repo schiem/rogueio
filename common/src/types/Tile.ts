@@ -1,5 +1,3 @@
-import { Point } from "./Points";
-
 export enum MovementType {
     land = 1,
     water
@@ -7,8 +5,9 @@ export enum MovementType {
 
 export enum TileName {
     wall = 1,
-    rubble,
-    floor
+    floor,
+    constructedRubble,
+    naturalRubble,
 }
 
 export enum TileModifier {
@@ -17,7 +16,6 @@ export enum TileModifier {
 };
 
 export type Tile = {
-    coords: Point;
     // store a string reference to the definition - look it up when needed
     definition?: TileName;
 

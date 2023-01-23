@@ -3,6 +3,7 @@ import { LocationComponent } from "../../../common/src/components/LocationCompon
 import { GameSystems } from "../../../common/src/models/Game";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
+import { RoomType } from "../models/RoomType";
 import { ServerDungeon } from "../models/ServerDungeon";
 import { mobEntities, SpawnEntity } from "./EntityGenerators";
 
@@ -14,7 +15,7 @@ export const SpawnPlayerCharacter = (entityId: number, systems: GameSystems, dun
     // Find an appropriate spawn location
     while(location === undefined) {
         const roomsAvailable = dungeon.rooms.filter((room) => {
-            return room.spawnTiles.length > 0 && room.age < 3;
+            return room.spawnTiles.length > 0 && room.type === RoomType.active;
         });
         if (roomsAvailable.length === 0) {
             return;

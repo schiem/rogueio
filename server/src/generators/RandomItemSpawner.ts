@@ -3,12 +3,8 @@ import { itemEntities, SpawnEntity } from "./EntityGenerators";
 import { Spawner } from "./Spawner";
 
 export const RandomItemSpawner: Spawner = {
-    ageRange: {
-        min: 1,
-        max: 4
-    },
-    spawnInFeatures: [],
-    doSpawn: (dungeon, room, entityManager, systems) => {
+    requires: [],
+    doSpawn: (room, dungeon, entityManager, systems) => {
         const point = room.spawnTiles[0];
         if (point === undefined) {
             return;

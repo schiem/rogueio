@@ -1,5 +1,5 @@
 import { AllyGroup } from "../../../common/src/components/AllyComponent";
-import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
+import { TileLocation, VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { Dungeon } from "../../../common/src/models/Dungeon";
@@ -9,7 +9,6 @@ import { InventorySystem } from "../../../common/src/systems/InventorySystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
-import { Tile } from "../../../common/src/types/Tile";
 import { GetVisibleTiles } from "../utils/ShadowCast";
 
 export class ServerVisbilitySystem extends VisibilitySystem {
@@ -47,12 +46,12 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         this.recalculateVisibility(id);
     }
 
-    getSeenTilesForEntity(entityId: number): Tile[] | undefined {
+    getSeenTilesForEntity(entityId: number): TileLocation[] | undefined {
         const component = this.getSharedVisibilityComponent(entityId);
         if (!component) {
             return;
         }
-        const seen: Tile[] = [];
+        const seen: TileLocation[] = [];
         for(let x = 0; x < component.seen.length; x++) {
             for(let y = 0; y < component.seen[x].length; y++) {
                 if (!component.seen[x][y]) {
@@ -61,7 +60,10 @@ export class ServerVisbilitySystem extends VisibilitySystem {
 
                 const tile = this.dungeon.tiles[x]?.[y];
                 if (tile) {
-                    seen.push(tile);
+                    seen.push({
+                        loc: { x, y },
+                        tile
+                    });
                 }
             }
         }
@@ -89,7 +91,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         const currentVision = component.visible;
         const toDelete: Point[] = [];
         const toAdd: Point[] = [];
-        const newSeen: Tile[] = [];
+        const newSeen: TileLocation[] = [];
 
         const allyComponent = this.allySystem.getComponent(entityId);
         const allies = allyComponent ? this.allySystem.getAlliesForGroup(allyComponent.group) : [entityId];
@@ -126,7 +128,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
                 }
                 if (!sharedComponent.seen[point.x][point.y]) {
                     sharedComponent.seen[point.x][point.y] = true;
-                    newSeen.push(this.dungeon.tiles[point.x][point.y]);
+                    newSeen.push({ tile: this.dungeon.tiles[point.x][point.y], loc: { x: point.x, y: point.y } });
                 }
             }
         );

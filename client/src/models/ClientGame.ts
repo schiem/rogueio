@@ -104,7 +104,7 @@ export class ClientGame extends Game {
         this.systems.visibility.visionPointsChanged.subscribe((data) =>  {
             data.forEach((pointData) => {
                 if (pointData.tile) {
-                    this.currentLevel.setTile(pointData.tile);
+                    this.currentLevel.setTile(pointData.tile, pointData.point);
                 }
                 this.renderDungeonTileAtLocation(pointData.point);
             });
@@ -129,8 +129,8 @@ export class ClientGame extends Game {
         this.currentPlayerId = event.data.playerId;
         this.players = event.data.gameData.players;
         this.currentLevel = new Dungeon({x: 0, y: 0});
-        event.data.gameData.tiles?.forEach((tile) => {
-            this.currentLevel.setTile(tile);
+        event.data.gameData.tiles?.forEach((tileLocation) => {
+            this.currentLevel.setTile(tileLocation.tile, tileLocation.loc);
         });
         this.timeInitialized = event.ts;
 

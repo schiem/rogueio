@@ -36,7 +36,8 @@
     },
     "tiles": {
         "wall": "A rough hewn stone wall.",
-        "rubble": "A mix of earth and stone, clearly leftover from an old civilization.",
+        "constructedRubble": "A mix of earth and stone, clearly leftover from an old civilization.",
+        "naturalRubble": "Mud and debris from ages of natural wear.",
         "floor": "The earthen floor, littered with droppings and refuse." 
     },
     "action": {

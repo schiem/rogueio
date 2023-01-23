@@ -1,4 +1,4 @@
-import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
+import { TileLocation, VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
@@ -30,18 +30,18 @@ export class ClientVisibilitySystem extends VisibilitySystem {
             return old;
         },
         seen: (id: number, component: VisibilityComponent, newValue: unknown) => {
-            const seen = newValue as Tile[];
+            const seen = newValue as TileLocation[];
             const sharedComponent = this.getSharedVisibilityComponent(id);
             if (!sharedComponent) {
                 return;
             }
 
             const old = sharedComponent.seen;
-            const changed:{point: Point, tile?: Tile}[]  = [];
-            seen.forEach((tile) => {
-                sharedComponent.seen[tile.coords.x][tile.coords.y] = true;
+            const changed: {point: Point, tile?: Tile}[]  = [];
+            seen.forEach((tileLocation) => {
+                sharedComponent.seen[tileLocation.loc.x][tileLocation.loc.y] = true;
                 // TODO - consider uncoupling this, right now it's very heavily coupled
-                changed.push({point: tile.coords, tile});
+                changed.push({point: tileLocation.loc, tile: tileLocation.tile});
             });
             this.visionPointsChanged.emit(changed);
             return old;

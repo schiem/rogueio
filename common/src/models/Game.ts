@@ -28,7 +28,7 @@ export type GameSystems = {
 }
 
 export class Game {
-    dungeonX: number = 256;
+    dungeonX: number = 128;
     dungeonY: number = 128;
 
     currentLevel: Dungeon;

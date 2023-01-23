@@ -1,15 +1,15 @@
 import { ServerEvent, ServerEventType } from "./ServerEvent";
-import { Tile } from "../../types/Tile";
 import { Player } from "../../models/Player";
 import { ComponentSystem } from "../../systems/ComponentSystem";
 import { Game } from "../../models/Game";
 import { EntityManager } from "../../entities/EntityManager";
+import { TileLocation } from "../../components/VisibilityComponent";
 
 type InitData = {
     gameData: { 
         dungeonX: number, 
         dungeonY: number, 
-        tiles?: Tile[], 
+        tiles?: TileLocation[], 
         players: Record<string, Player>, 
         entities: Record<number, Record<string, unknown>>
         additionalSystemData: Record<string, unknown>;

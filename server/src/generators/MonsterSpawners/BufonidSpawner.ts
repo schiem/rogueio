@@ -1,19 +1,15 @@
-import { CharacterType } from "../../../common/src/components/DescriptionComponent";
-import { LocationComponent } from "../../../common/src/components/LocationComponent";
-import { Point } from "../../../common/src/types/Points";
-import { random } from "../../../common/src/utils/MathUtils";
-import { RoomFeatureNames } from "../models/RoomFeatures";
-import { mobEntities, SpawnEntity } from "./EntityGenerators";
-import { Spawner } from "./Spawner";
+import { CharacterType } from "../../../../common/src/components/DescriptionComponent";
+import { LocationComponent } from "../../../../common/src/components/LocationComponent";
+import { Point } from "../../../../common/src/types/Points";
+import { random } from "../../../../common/src/utils/MathUtils";
+import { RoomFeature } from "../../models/RoomFeatures";
+import { mobEntities, SpawnEntity } from "../EntityGenerators";
+import { Spawner } from "../Spawner";
 
 export const BufonidSpawner: Spawner = {
-    ageRange: {
-        min: 2,
-        max: 4
-    },
-    spawnInFeatures: [RoomFeatureNames.water],
-    doSpawn: (dungeon, room, entityManager, systems) => {
-        const startPoint = room.features[RoomFeatureNames.water]?.originTile
+    requires: [RoomFeature.water],
+    doSpawn: (room, dungeon, entityManager, systems) => {
+        const startPoint = room.features[RoomFeature.water];
         if (!startPoint) {
             return;
         }

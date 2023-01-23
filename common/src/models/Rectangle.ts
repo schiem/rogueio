@@ -6,7 +6,7 @@ export class Rectangle {
 
     get topLeft(): Point { return this.location };
     get bottomRight(): Point { return {x: this.location.x + this.size.x, y: this.location.y + this.size.y }};
-    get center(): Point { return {x: this.location.x + (this.size.x / 2), y: this.location.y + (this.size.y / 2)}};
+    get center(): Point { return {x: this.location.x + Math.floor(this.size.x / 2), y: this.location.y + Math.floor(this.size.y / 2)}};
     get id(): string { return `${this.location.x}x${this.location.y}x${this.size.x}x${this.size.y}` };
 
     constructor(location: Point, size: Point) {

@@ -11,11 +11,11 @@ export class Dungeon {
 
     constructor(public size: Point) {}
 
-    setTile(tile: Tile): void {
-        if (!this.tiles[tile.coords.x]) {
-            this.tiles[tile.coords.x] = new Array(this.size.y);
+    setTile(tile: Tile, location: Point): void {
+        if (!this.tiles[location.x]) {
+            this.tiles[location.x] = new Array(this.size.y);
         }
-        this.tiles[tile.coords.x][tile.coords.y] = tile;
+        this.tiles[location.x][location.y] = tile;
     }
 
     /**

@@ -109,5 +109,4 @@ export class VisibilitySystem extends ComponentSystem<VisibilityComponent> {
     entityHasNonLocationVision(entityId: number, otherEntity: number): boolean {
         return this.inventorySystem.entityIsCarrying(entityId, otherEntity);
     }
-
 }

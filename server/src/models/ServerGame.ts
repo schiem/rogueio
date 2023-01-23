@@ -6,7 +6,7 @@ import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
-import { random } from "../../../common/src/utils/MathUtils";
+import { randomList } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
 import { ServerActionSystem } from "../systems/ServerActionSystem";
 import { ServerDungeon } from "./ServerDungeon";
@@ -14,7 +14,8 @@ import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { DescriptionSystem } from "../../../common/src/systems/DescriptionSystem";
 import { SpawnPlayerCharacter } from "../generators/PlayerSpawner";
-import { Spawner, Spawners, SpawnerType } from "../generators/Spawner";
+import { MonsterSpawners, MonsterRoomSpawners } from "../generators/MonsterSpawners/MonsterSpawner";
+import { RoomFeatureSpawners } from "./RoomFeatures";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
@@ -36,12 +37,16 @@ export class ServerGame extends Game {
         super();
 
         this.tickSpeed = 1000 / this.fps;
-        const maxRoomSize = {x: 30, y: 16};
-        const minRoomSize = {x: 8, y: 4};
-        const minRoomSpacing = 6;
-        const maxRoomSpacing = 14;
+        const maxRoomSize = {x: 20, y: 12};
+        const minRoomSize = {x: 4, y: 4};
+        const minRoomSpacing = 4;
+        const maxRoomSpacing = 8;
+        // Tiles are 14x25.  The aspect ratio to produce visually square rooms is 25/14 = 1.786
+        const minAspectRatio = 1.286;
+        const maxAspectRatio = 2.286; 
+
         const dungeonSize = {x: this.dungeonX, y: this.dungeonY };
-        this.dungeonGenerator = new DungeonGenerator(dungeonSize, minRoomSize, maxRoomSize, minRoomSpacing, maxRoomSpacing, 500);
+        this.dungeonGenerator = new DungeonGenerator(dungeonSize, minRoomSize, maxRoomSize, minAspectRatio, maxAspectRatio, minRoomSpacing, maxRoomSpacing, 200);
 
         this.constructSystems();
 
@@ -86,24 +91,37 @@ export class ServerGame extends Game {
 
     newDungeon(): void {
         this.currentLevel = this.dungeonGenerator.generate();
-        this.spawnMobs();
+        this.spawnMonsters();
         this.spawnItems();
     }
 
-    spawnMobs(): void {
+    spawnMonsters(): void {
         this.currentLevel.rooms.forEach((room) => {
-            const possibleSpawners: Spawner[] = [];
-            for(let spawnName in Spawners) {
-                const spawner = Spawners[spawnName as unknown as SpawnerType];
-                if (room.spawnerIsValid(spawner)) {
-                    possibleSpawners.push(spawner);
-                }
-            }
-            if (!possibleSpawners.length) {
+            // Select an appropriate spawner
+            if (MonsterRoomSpawners[room.type].length === 0) {
                 return;
             }
-            const spawner = possibleSpawners[random(0, possibleSpawners.length)];
-            spawner.doSpawn(this.currentLevel, room, this.entityManager, this.systems);
+
+            const spawner = MonsterSpawners[randomList(MonsterRoomSpawners[room.type])];
+
+            // Make sure the room as all the necessary features for that spawner
+            for (let i = 0; i < spawner.requires.length; i++) {
+                const feature = spawner.requires[i];
+                
+                // Already haave this feature, skip it
+                if (room.features[feature] !== undefined) {
+                    continue;
+                }
+
+                const valid = RoomFeatureSpawners[feature](room, this.currentLevel);
+                if (!valid) {
+                    // TODO - handle not being able to spawn correctly
+                    return;
+                }
+            }
+
+            // Spawn things
+            spawner.doSpawn(room, this.currentLevel, this.entityManager, this.systems);
         });
     }
 
