@@ -13,7 +13,7 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         super(entityManager);
     }
 
-    attemptMove(id: number, direction: Point, dungeon: Dungeon): boolean {
+    attemptMove(id: number, direction: Point, dungeon: Dungeon, currentTime: number): boolean {
         const component = this.getComponent(id);
         if (component === undefined) {
             return false;
@@ -28,16 +28,20 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         direction.x = clamp(direction.x, -1, 1);
         direction.y = clamp(direction.y, -1, 1);
         const newLocation = { x: locationComponent.location.x + direction.x, y: locationComponent.location.y + direction.y };
-        const now = new Date().getTime();
-        const enoughTimeElapsed = component.lastMoveTime === undefined || now - component.lastMoveTime > component.minMovementDelay;
-        if (!enoughTimeElapsed) {
+        if (this.moveOnCooldown(component, currentTime)) {
+            console.log(component.lastMoveTime);
+            console.log(currentTime);
             return false;
         }
 
         const didMove = this.locationSystem.moveAndCollideEntity(id, newLocation, dungeon);
         if (didMove) {
-            component.lastMoveTime = now;
+            component.lastMoveTime = currentTime;
         }
         return didMove;
+    }
+
+    moveOnCooldown(component: MovementComponent, currentTime: number): boolean {
+        return component.lastMoveTime !== undefined && (currentTime - component.lastMoveTime) < component.minMovementDelay;
     }
 }

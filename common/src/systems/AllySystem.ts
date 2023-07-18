@@ -62,6 +62,25 @@ export class AllySystem extends ComponentSystem<AllyComponent> {
         return this.getAlliesForGroup(component.group);
     }
 
+    getEnemiesForEntity(id: number): number[] | undefined {
+        const component = this.getComponent(id); 
+        if (!component) {
+            return;
+        }
+
+        const enemies: number[] = [];
+        for (const group in this.groups) {
+            const allyGroup = group as AllyGroup;
+            if (group === component.group || !this.groups[allyGroup]) {
+                continue;
+            }
+
+            enemies.push(...this.groups[allyGroup] as number[]);
+        }
+
+        return enemies;
+    }
+
     getAlliesForGroup(group: AllyGroup): number[] {
         return this.groups[group] || [];
     }

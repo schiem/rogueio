@@ -1,13 +1,13 @@
 import { CharacterType } from "../../../common/src/components/DescriptionComponent";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
-import { GameSystems } from "../../../common/src/models/Game";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
 import { RoomType } from "../models/RoomType";
 import { ServerDungeon } from "../models/ServerDungeon";
+import { ServerGameSystems } from "../models/ServerGame";
 import { mobEntities, SpawnEntity } from "./EntityGenerators";
 
-export const SpawnPlayerCharacter = (entityId: number, systems: GameSystems, dungeon: ServerDungeon): void => {
+export const SpawnPlayerCharacter = (entityId: number, systems: ServerGameSystems, dungeon: ServerDungeon): void => {
     const components = mobEntities[CharacterType.player]();
     let location: Point | undefined = undefined;
     const locationComponent = components.location as LocationComponent;

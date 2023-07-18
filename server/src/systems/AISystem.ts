@@ -1,12 +1,12 @@
-import { AIComponent, AIFunctions } from "../components/AIComponent";
+import { AIComponent } from "../components/AIComponent";
 import { ComponentSystem, ReplicationMode } from "../../../common/src/systems/ComponentSystem";
 import { ServerGameSystems } from "../models/ServerGame";
-import { Dungeon } from "../../../common/src/models/Dungeon";
+import { ServerDungeon } from "../models/ServerDungeon";
 
 export class AISystem extends ComponentSystem<AIComponent> {
     replicationMode: ReplicationMode = 'none';
 
-    runAI(delta: number, systems: ServerGameSystems, dungeon: Dungeon): void {
+    runAI(currentTime: number, systems: ServerGameSystems, dungeon: ServerDungeon): void {
         for(let key in this.entities) {
             const entityId =  parseInt(key);
             const component = this.getComponent(entityId);
@@ -14,9 +14,7 @@ export class AISystem extends ComponentSystem<AIComponent> {
                 continue;
             }
 
-            const aiType = component.type;
-            const aiFunction = AIFunctions[aiType];
-            aiFunction(entityId, component, systems, dungeon);
+            component.tree.run(currentTime, systems, dungeon, entityId);
         }
     }
 }

@@ -45,7 +45,9 @@ export interface AttackEffect extends Effect {
 export type Action = {
     effects: Effect[];
     range: number;
-    targetType: SelfAction | CircleAction | EntityAction | LineAction
+    targetType: SelfAction | CircleAction | EntityAction | LineAction;
+    cooldown: number;
+    lastTime?: number;
 };
 
 export type ActionComponent = {

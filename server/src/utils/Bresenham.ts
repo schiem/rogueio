@@ -29,7 +29,13 @@ export const BresenhamCircle = (location: Point, radius: number): Point[] => {
     return points;
 };
 
-// Raycast a point out
+/**
+ * Raycast a point out
+ * @param start The place to start.
+ * @param end The place to end.
+ * @param fn A function to test whether the raycast was blocked. Expects the function to return true if there was a collision.
+ * @returns True if there was a collision, false if there was not.
+ */
 export const BresenhamRayCast = (start: Point, end: Point, fn: (point: Point) => boolean): boolean => {
     const steep = (Math.abs(end.y - start.y) > Math.abs(end.x - start.x));
 
@@ -67,7 +73,7 @@ export const BresenhamRayCast = (start: Point, end: Point, fn: (point: Point) =>
             current_point = {x, y};
         }
 
-        if (fn && !fn(current_point)) {
+        if (fn && fn(current_point)) {
             return true;
         }
 

@@ -27,16 +27,16 @@ export class NetworkEventManager {
     eventSendQueue: Record<string, NetworkEvent[]> = {};
     private playerEventQueue: Record<string, ClientEvent> = {};
 
-    private eventHandlers: Record<ClientEventType, (playerId: string, game: ServerGame, event: ClientEvent) => void> = {
-        [ClientEventType.move]: (playerId: string, game: ServerGame, event: MoveEvent) => {
+    private eventHandlers: Record<ClientEventType, (playerId: string, game: ServerGame, event: ClientEvent, currentTime: number) => void> = {
+        [ClientEventType.move]: (playerId: string, game: ServerGame, event: MoveEvent, currentTime: number) => {
             const characterId = game.players[playerId].characterId;
-            this.systems.movement.attemptMove(characterId, event.data.direction, game.currentLevel);
+            this.systems.movement.attemptMove(characterId, event.data.direction, game.currentLevel, currentTime);
         },
-        [ClientEventType.action]: (playerId: string, game: ServerGame, event: ActionEvent) => {
+        [ClientEventType.action]: (playerId: string, game: ServerGame, event: ActionEvent, currentTime: number) => {
             const characterId = game.players[playerId].characterId;
             // Do action handles all validation, so they can attmept to do an invalid action as much
             // as they would like
-            game.systems.action.doAction(characterId, event.data.id, event.data.target);
+            game.systems.action.attemptAction(characterId, event.data.id, event.data.target, currentTime);
         },
         [ClientEventType.grab]: (playerId: string, game: ServerGame, event: GrabEvent) => {
             const characterId = game.players[playerId].characterId;
@@ -193,10 +193,10 @@ export class NetworkEventManager {
     /**
      * Flushes received events
      */
-    doReceivedEvents(game: ServerGame): void {
+    doReceivedEvents(game: ServerGame, currentTime: number): void {
         for (const playerId in this.playerEventQueue) {
             const event = this.playerEventQueue[playerId];
-            this.eventHandlers[event.type](playerId, game, event);
+            this.eventHandlers[event.type](playerId, game, event, currentTime);
         }
 
         this.playerEventQueue = {};

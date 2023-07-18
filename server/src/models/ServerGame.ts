@@ -31,7 +31,7 @@ export class ServerGame extends Game {
     private clients: Record<string, WebSocket> = {};
     private fps = 15;
     private tickSpeed: number
-    private lastTick: number;
+    private currentTime: number;
 
     constructor() {
         super();
@@ -67,24 +67,25 @@ export class ServerGame extends Game {
         // set up the visibility system, after the dungeon has been created
         this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize, this.systems.inventory);
 
+        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health);
+
         // set up the AI system
         this.systems.ai = new AISystem(this.entityManager);
-        
 
         this.newDungeon();
 
-        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health, this.currentLevel);
         this.systems.visibility.setDungeon(this.currentLevel);
+        this.systems.action.setDungeon(this.currentLevel);
     }
 
     startTick(): void {
-        this.lastTick = performance.now();
+        this.currentTime = performance.now();
         setInterval(() => {
             const now = performance.now();
-            const delta = now - this.lastTick;
+            const delta = now - this.currentTime;
             if (delta > this.tickSpeed) {
-                this.lastTick = now;
-                this.tick(delta);
+                this.currentTime += delta;
+                this.tick();
             }
         }, 2);
     }
@@ -152,16 +153,16 @@ export class ServerGame extends Game {
         delete this.clients[playerId];
     }
 
-    private tick(delta: number): void {
+    private tick(): void {
         if (this.paused) {
             return;
         }
 
         // Run received events from player
-        this.networkEventManager.doReceivedEvents(this);
+        this.networkEventManager.doReceivedEvents(this, this.currentTime);
 
         // Run the AI
-        this.systems.ai.runAI(delta, this.systems, this.currentLevel);
+        this.systems.ai.runAI(this.currentTime, this.systems, this.currentLevel);
 
         // Send the modified state back to the player
         this.networkEventManager.flushSendEvents(this.clients);

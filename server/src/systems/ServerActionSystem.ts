@@ -1,4 +1,4 @@
-import { ActionTarget, AttackEffect, Effect, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
+import { Action, ActionTarget, AttackEffect, Effect, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { Dungeon } from "../../../common/src/models/Dungeon";
 import { ActionSystem } from "../../../common/src/systems/ActionSystem";
@@ -12,47 +12,52 @@ import { pointDistanceSquared } from "../../../common/src/utils/PointUtils";
 import { BresenhamRayCast } from "../utils/Bresenham";
 
 export class ServerActionSystem extends ActionSystem {
+    private dungeon: Dungeon;
     constructor(
         entityManager: EntityManager, 
         private locationSystem: LocationSystem, 
         private visibilitySystem: VisibilitySystem, 
         private allySystem: AllySystem, 
-        private healthSystem: HealthSystem,
-        private dungeon: Dungeon) {
+        private healthSystem: HealthSystem) {
         super(entityManager);
     }
 
-    doAction(entityId: number, actionId: number, target: number | Point | undefined): void {
+    setDungeon(dungeon: Dungeon): void {
+        this.dungeon = dungeon;
+    }
+
+    attemptAction(entityId: number, actionId: number, target: number | Point | undefined, currentTime: number): boolean {
         const component = this.getComponent(entityId);
         if(!component) {
-            return;
+            return false;
         }
 
         const action = component.actions[actionId];
-        if(!action) {
-            return;
+        if(!action || this.actionOnCooldown(action, currentTime)) {
+            return false;
         }
+        action.lastTime = currentTime;
         let entitiesToApplyTo: number[];
         switch (action.targetType.target) {
             case ActionTarget.entity:
                 if (typeof target !== 'number' || !this.validateTarget(entityId, target, action.range)) {
-                    return;
+                    return false;
                 }
                 entitiesToApplyTo = [target];
                 break;
             case ActionTarget.circle:
                 if (typeof target !== 'object' || !this.validateTarget(entityId, target, action.targetType.radius)) {
-                    return;
+                    return false;
                 }
                 entitiesToApplyTo = this.fetchEntitiesForCircle(target, action.targetType.radius);
                 break;
             case ActionTarget.line:
                 if (typeof target !== 'object' || !this.validateTarget(entityId, target, action.range)) {
-                    return;
+                    return false;
                 }
                 const location = this.locationSystem.getComponent(entityId);
                 if (!location) {
-                    return;
+                    return false;
                 }
                 entitiesToApplyTo = this.fetchEntitiesForLine(location.location, target, action.targetType.length);
                 break;
@@ -63,7 +68,7 @@ export class ServerActionSystem extends ActionSystem {
 
         // Nothing to do, ignore it
         if (!entitiesToApplyTo.length) {
-            return;
+            return false;
         }
         const affectedEntityCache: Partial<Record<EffectTarget, number[]>> = {};
         action.effects.forEach((effect) => {
@@ -81,6 +86,12 @@ export class ServerActionSystem extends ActionSystem {
                 this.applyEffect(entityId, affectedEntities, effect);
             }
         });
+
+        return true;
+    }
+
+    actionOnCooldown(action: Action, currentTime: number): boolean {
+        return action.lastTime !== undefined && (currentTime - action.lastTime) < action.cooldown;
     }
 
     applyEffect(entityId: number, entities: number[], effect: Effect): void {

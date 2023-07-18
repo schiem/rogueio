@@ -68,7 +68,7 @@ export class Dungeon {
     }
 
     /**
-     * Check whether a tile at a location blocks the given block layer.
+     * Check whether a tile can be moved through with any of the provided movement types.
      */
     tileIsBlocked(point: Point, moveType: MovementType[]): boolean {
         const def = this.getVisibleTileDefinition(point);

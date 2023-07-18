@@ -8,11 +8,12 @@ import { MovementComponent } from "../../../common/src/components/MovementCompon
 import { SpriteComponent } from "../../../common/src/components/SpriteComponent";
 import { StatComponent } from "../../../common/src/components/StatComponent";
 import { VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
-import { GameSystems } from "../../../common/src/models/Game";
 import { ComponentSystem } from "../../../common/src/systems/ComponentSystem";
 import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite";
 import { MovementType } from "../../../common/src/types/Tile";
-import { AIComponent, AIType } from "../components/AIComponent";
+import { AIComponent } from "../components/AIComponent";
+import { ServerGameSystems } from "../models/ServerGame";
+import { generateGenericAI } from "./AIGenerators/GenericAI";
 
 export type ComponentBlock = {
     location: LocationComponent;
@@ -61,6 +62,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             },
             action: {
                 actions: [{
+                    cooldown: 1000,
                     range: 1,
                     targetType: {
                         target: ActionTarget.entity,
@@ -111,9 +113,23 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                     dex: 4 
                 },
             },
-            ai: {
-                type: AIType.defensive
-            }
+            action: {
+                actions: [{
+                    cooldown: 1000,
+                    range: 1,
+                    targetType: {
+                        target: ActionTarget.entity,
+                    },
+                    effects: [
+                        {
+                            type: EffectType.attack,
+                            target: EffectTarget.enemy,
+                            damage: {min: 0, max: 2}
+                        }
+                    ]
+                }],
+            },
+            ai: generateGenericAI()
         };
     },
     [CharacterType.bufonidQueen]: () => {
@@ -145,9 +161,23 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                     dex: 8 
                 },
             },
-            ai: {
-                type: AIType.defensive
-            }
+            action: {
+                actions: [{
+                    cooldown: 1000,
+                    range: 1,
+                    targetType: {
+                        target: ActionTarget.entity,
+                    },
+                    effects: [
+                        {
+                            type: EffectType.attack,
+                            target: EffectTarget.enemy,
+                            damage: {min: 0, max: 4}
+                        }
+                    ]
+                }]
+            },
+            ai: generateGenericAI()
         };
     },
     [CharacterType.bufonidSpawn]: () => {
@@ -179,9 +209,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                     dex: 0
                 },
             },
-            ai: {
-                type: AIType.passive
-            }
+            ai: generateGenericAI()
         };
     },
 };
@@ -208,7 +236,7 @@ export const itemEntities: Record<ItemType, () => Partial<ComponentBlock>> = {
     }
 }
 
-export const SpawnEntity = (entityId: number, components: Record<string, unknown>, systems: GameSystems): void => {
+export const SpawnEntity = (entityId: number, components: Record<string, unknown>, systems: ServerGameSystems): void => {
     for(const system in components) {
         if(!(system in systems)) {
             throw new Error(`System does not exist: ${system}`);
