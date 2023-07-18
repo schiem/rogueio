@@ -37,6 +37,13 @@ export const BresenhamCircle = (location: Point, radius: number): Point[] => {
  * @returns True if there was a collision, false if there was not.
  */
 export const BresenhamRayCast = (start: Point, end: Point, fn: (point: Point) => boolean): boolean => {
+    // Copy the points so they don't get modified.
+    start = {
+        ...start
+    };
+    end = {
+        ...end
+    };
     const steep = (Math.abs(end.y - start.y) > Math.abs(end.x - start.x));
 
     if(steep) {

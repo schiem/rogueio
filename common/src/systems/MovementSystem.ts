@@ -29,8 +29,6 @@ export class MovementSystem extends ComponentSystem<MovementComponent> {
         direction.y = clamp(direction.y, -1, 1);
         const newLocation = { x: locationComponent.location.x + direction.x, y: locationComponent.location.y + direction.y };
         if (this.moveOnCooldown(component, currentTime)) {
-            console.log(component.lastMoveTime);
-            console.log(currentTime);
             return false;
         }
 
