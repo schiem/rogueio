@@ -1,6 +1,6 @@
 import { ViewPort } from "./rendering/ViewPort";
 import { SpriteSheet } from "./rendering/SpriteSheet";
-import { SpriteColors, Sprites } from "./rendering/Sprites";
+import { SpriteColors, SpriteIndexes } from "./rendering/Sprites";
 import { ClientGame } from "./models/ClientGame";
 import { NetworkEventHandler } from "./events/NetworkEventHandler";
 import { NetworkEvent } from "../../common/src/events/NetworkEvent";
@@ -15,7 +15,7 @@ const viewportCanvas: HTMLCanvasElement = document.getElementById('viewport') as
 const spriteWidth = 14;
 const spriteHeight = 25;
 const virtualCanvas = document.createElement('canvas');
-const spriteSheet = new SpriteSheet({ x: spriteWidth, y: spriteHeight }, '/dist/assets/img/fira_code_regular_14.png', Sprites, SpriteColors);
+const spriteSheet = new SpriteSheet({ x: spriteWidth, y: spriteHeight }, '/dist/assets/img/fira_code_regular_14.png', SpriteIndexes, SpriteColors);
 const viewport = new ViewPort({x: 64, y: 32}, viewportCanvas, spriteSheet, SpriteColors[SpriteColor.black]);
 
 const game = new ClientGame(virtualCanvas, spriteSheet, viewport);

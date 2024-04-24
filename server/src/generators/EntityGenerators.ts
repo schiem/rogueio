@@ -13,7 +13,7 @@ import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite";
 import { MovementType } from "../../../common/src/types/Tile";
 import { AIComponent } from "../components/AIComponent";
 import { ServerGameSystems } from "../models/ServerGame";
-import { generateGenericAI } from "./AIGenerators/GenericAI";
+import { generateGenericAI, generateWanderAI } from "./AIGenerators/GenericAI";
 
 export type ComponentBlock = {
     location: LocationComponent;
@@ -62,7 +62,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             },
             action: {
                 actions: [{
-                    cooldown: 1000,
+                    cooldown: 200,
                     range: 1,
                     targetType: {
                         target: ActionTarget.entity,
@@ -92,7 +92,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             sprite: {
                 sprite: {
                     name: SpriteName.bufonid,
-                    color: SpriteColor.green
+                    color: SpriteColor.green,
                 }
             },
             location: {
@@ -100,7 +100,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                 layer: LocationComponentLayer.character,
                 location: { x: 0, y: 0}
             },
-            movement: { minMovementDelay: 400 },
+            movement: { minMovementDelay: 100 },
             stats: {
                 current: {
                     str: 4,
@@ -148,7 +148,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                 layer: LocationComponentLayer.character,
                 location: { x: 0, y: 0}
             },
-            movement: { minMovementDelay: 400 },
+            movement: { minMovementDelay: 200 },
             stats: {
                 current: {
                     str: 8,
@@ -163,7 +163,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             },
             action: {
                 actions: [{
-                    cooldown: 1000,
+                    cooldown: 5000,
                     range: 1,
                     targetType: {
                         target: ActionTarget.entity,
@@ -172,7 +172,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                         {
                             type: EffectType.attack,
                             target: EffectTarget.enemy,
-                            damage: {min: 0, max: 4}
+                            damage: {min: 0, max: 1}
                         }
                     ]
                 }]
@@ -209,7 +209,7 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                     dex: 0
                 },
             },
-            ai: generateGenericAI()
+            ai: generateWanderAI()
         };
     },
 };

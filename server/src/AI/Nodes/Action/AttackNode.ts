@@ -17,6 +17,9 @@ export class AttackNode extends ActionNode {
         }
 
         while (state.systems.action.actionOnCooldown(actionComponent?.actions[attackActionIndex], state.currentTime)) {
+            if (!state.systems.action.validateTarget(state.id, blackboard.target, actionComponent.actions[attackActionIndex].range)) {
+                return false;
+            }
             yield;
         }
 

@@ -1,6 +1,6 @@
 import { SpriteColor, SpriteName } from "../../../common/src/types/Sprite"
 
-export const Sprites: Record<SpriteName, number> = {
+export const SpriteIndexes: Record<SpriteName, number> = {
     [SpriteName.wall]: 3,
     [SpriteName.rubble]: 10,
     [SpriteName.player]: 32,

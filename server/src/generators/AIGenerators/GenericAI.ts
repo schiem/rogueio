@@ -28,9 +28,12 @@ export const generateGenericAttackAI = (): BTNode => {
     ])
 }
 
-/**
- *  
- */
+export const generateWanderAI = (): AIComponent => {
+    return {
+        tree: new BehaviorTree(new MoveTowardNode())
+    }
+}
+
 export const generateGenericAI = (): AIComponent => {
     return {
         tree: new BehaviorTree(

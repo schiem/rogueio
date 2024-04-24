@@ -34,5 +34,5 @@ export enum SpriteColor {
 }
 export type Sprite = {
     name: SpriteName,
-    color: SpriteColor 
+    color: SpriteColor,
 };

@@ -20,7 +20,10 @@ export class ClientHealthSystem extends HealthSystem {
                         Bus.messageEmitter.emit({message: 'action/playerKilled', replacements: [name], entities: [] })
                     }
                 } else if(data.id === characterId) {
-                    Bus.messageEmitter.emit({message: 'action/playerTookDamage', entities: [] })
+                    if (data.triggeredBy) {
+                        const name = clientDescriptionSystem.getLocalizedName(data.triggeredBy);
+                        Bus.messageEmitter.emit({message: 'action/playerTookDamage', replacements: [name], entities: [] });
+                    }
                     if (data.props.current as number <= 0) {
                         Bus.messageEmitter.emit({message: 'action/playerDied', entities: [] })
                     }
