@@ -53,7 +53,7 @@ export const generateGenericAI = (): AIComponent => {
                     ])
                 ]),
                 //Randomly move
-                new MoveTowardNode()
+                //new MoveTowardNode()
             ])
         )
     }

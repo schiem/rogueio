@@ -7,7 +7,7 @@ import { ClientGame } from "../models/ClientGame"
 export const generateEventFromMovement = (game: ClientGame, direction: Point): MoveEvent | ActionEvent | undefined => {
     const entityId = game.players[game.currentPlayerId].characterId;
     const component = game.systems.location.getComponent(entityId);
-    if (!component) {
+    if (!component?.location) {
         return;
     }
     const newLocation = {x: component.location.x + direction.x, y: component.location.y + direction.y};
@@ -22,7 +22,7 @@ export const generateEventFromMovement = (game: ClientGame, direction: Point): M
         return new ActionEvent(0, enemyAtLocation);
     }
 
-    if(!game.systems.location.canMoveTo(component, newLocation, game.currentLevel)) {
+    if(!game.systems.location.canMoveTo(component, newLocation, game.dungeonProvider.dungeon)) {
         return;
     }
 

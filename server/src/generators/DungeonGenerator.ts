@@ -345,16 +345,7 @@ export class DungeonGenerator {
     private connectPoints(startPoint: Point, endPoint: Point, direction: Point, dungeon: ServerDungeon): void {
         let current = startPoint;
         while(current.x !== endPoint.x || current.y !== endPoint.y) {
-            try {
-                dungeon.tiles[current.x][current.y].definition = undefined;
-            }
-            catch (e) {
-                console.log(current);
-                console.log(startPoint);
-                console.log(endPoint);
-                console.log(direction);
-                throw e;
-            }
+            dungeon.tiles[current.x][current.y].definition = undefined;
             current = { x: current.x + direction.x, y: current.y + direction.y };
 
             if (direction.x !== 0 && current.x === endPoint.x) {

@@ -5,10 +5,10 @@ import { ConditionNode } from "./ConditionNode";
 export class CanRunAwayNode extends ConditionNode {
     *execute(state: BTState, blackboard: BTBlackboard): Generator<void, boolean, unknown> {
         const locationComponent = state.systems.location.getComponent(state.id);
-        if (!blackboard.target || !locationComponent) {
+        if (!blackboard.target || !locationComponent?.location) {
             return false;
         }
-        const location = locationComponent.location;
+        const location = locationComponent?.location;
         const enemyLocation = state.systems.location.getComponent(blackboard.target)?.location;
         if (!enemyLocation) {
             return false;

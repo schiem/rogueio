@@ -101,9 +101,6 @@ export abstract class ComponentSystem<T> {
         let oldProp: unknown;
         for(let i = 0; i < properties.length; i++) {
             const prop = properties[i];
-            if (currentObj[prop] === undefined) {
-                throw new Error(`Could not update non existent property ${property}`);
-            }
 
             if (i === properties.length - 1) {
                 oldProp = currentObj[prop];

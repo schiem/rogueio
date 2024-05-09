@@ -8,8 +8,6 @@ export class HealthIsLowNode extends ConditionNode {
             return false;
         }
 
-        console.log(healthComponent.current);
-        console.log(healthComponent.max);
         return (healthComponent.current / healthComponent.max) < 0.3;
     }
 }

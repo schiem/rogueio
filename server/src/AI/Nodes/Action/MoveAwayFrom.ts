@@ -6,12 +6,12 @@ export class MoveAwayFrom extends ActionNode {
     *execute(state: BTState, blackboard: BTBlackboard): Generator<void, boolean, unknown> {
         const moveComponent = state.systems.movement.getComponent(state.id);
         const locationComponent = state.systems.location.getComponent(state.id);
-        if (!moveComponent || !blackboard.target || !locationComponent) {
+        if (!moveComponent || !blackboard.target || !locationComponent?.location) {
             return false;
         }
 
         const location = locationComponent.location;
-        const targetLocation = state.systems.location.getComponent(blackboard.target);
+        const targetLocation = state.systems.location.getComponent(blackboard.target)?.location;
         if (!targetLocation) {
             return false;
         }
@@ -21,7 +21,7 @@ export class MoveAwayFrom extends ActionNode {
             yield;
         }
 
-        const originalDistance = pointDistance(location, targetLocation.location);
+        const originalDistance = pointDistance(location, targetLocation);
         const bestMove = [
             {x: -1, y: 0 },
             {x: 1, y: 0},
@@ -32,7 +32,7 @@ export class MoveAwayFrom extends ActionNode {
             if (!state.systems.location.canMoveTo(locationComponent, newPoint, state.dungeon)) {
                 return false;
             }
-            return pointDistance(newPoint, targetLocation.location) > originalDistance;
+            return pointDistance(newPoint, targetLocation) > originalDistance;
         });
 
         if (!bestMove) {

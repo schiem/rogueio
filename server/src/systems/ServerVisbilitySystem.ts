@@ -2,8 +2,9 @@ import { AllyGroup } from "../../../common/src/components/AllyComponent";
 import { TileLocation, VisibilityComponent } from "../../../common/src/components/VisibilityComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { EventEmitter } from "../../../common/src/events/EventEmitter";
-import { Dungeon } from "../../../common/src/models/Dungeon";
+import { DungeonProvider } from "../../../common/src/models/Game";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
+import { EquipmentSystem } from "../../../common/src/systems/EquipmentSystem";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { InventorySystem } from "../../../common/src/systems/InventorySystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
@@ -16,10 +17,9 @@ export class ServerVisbilitySystem extends VisibilitySystem {
      * Fires whenever an entity changes visibility.  This happens when an entity changes location, gains a location component, or loses a location component.
      */
     entityChangedVisibilityEmitter = new EventEmitter<{entityId: number, forEntities: number[], visible: boolean}>();
-    private dungeon: Dungeon;
 
-    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point, inventorySystem: InventorySystem) {
-        super(entityManager, allySystem, locationSystem, healthSystem, dungeonSize, inventorySystem);
+    constructor(entityManager: EntityManager, allySystem: AllySystem, locationSystem: LocationSystem, healthSystem: HealthSystem, dungeonSize: Point, inventorySystem: InventorySystem, equipmentSystem: EquipmentSystem, private dungeonProvider: DungeonProvider) {
+        super(entityManager, allySystem, locationSystem, healthSystem, dungeonSize, inventorySystem, equipmentSystem);
 
         // Modifying the location forces visibility to change
         locationSystem.componentUpdatedEmitter.subscribe((data) => {
@@ -35,10 +35,6 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         locationSystem.removedComponentEmitter.subscribe((data) => {
             this.entityChangedLocation(data.id, data.component.location, undefined);
         });
-    }
-
-    setDungeon(dungeon: Dungeon): void {
-        this.dungeon = dungeon;
     }
 
     addComponentForEntity(id: number, component: VisibilityComponent): void {
@@ -58,7 +54,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
                     continue;
                 }
 
-                const tile = this.dungeon.tiles[x]?.[y];
+                const tile = this.dungeonProvider.dungeon.tiles[x]?.[y];
                 if (tile) {
                     seen.push({
                         loc: { x, y },
@@ -78,7 +74,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
         
         // requires a location component to recalculate the visiblity
         const locationComponent = this.locationSystem.getComponent(entityId);
-        if (!locationComponent) {
+        if (!locationComponent?.location) {
             return;
         }
 
@@ -100,7 +96,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
             {...locationComponent.location}, 
             component.sightRadius, 
             (point) => {
-                return !this.dungeon.tileBlocksVision(point);
+                return !this.dungeonProvider.dungeon.tileBlocksVision(point);
             },
             (point) => {
                 if (!currentVision[point.x]?.[point.y]) {
@@ -128,7 +124,7 @@ export class ServerVisbilitySystem extends VisibilitySystem {
                 }
                 if (!sharedComponent.seen[point.x][point.y]) {
                     sharedComponent.seen[point.x][point.y] = true;
-                    newSeen.push({ tile: this.dungeon.tiles[point.x][point.y], loc: { x: point.x, y: point.y } });
+                    newSeen.push({ tile: this.dungeonProvider.dungeon.tiles[point.x][point.y], loc: { x: point.x, y: point.y } });
                 }
             }
         );

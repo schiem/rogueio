@@ -1,126 +1,79 @@
+import { Bus } from "../bus/Buses";
 import { InventoryComponent } from "../components/InventoryComponent";
 import { EntityManager } from "../entities/EntityManager";
 import { pointDistance } from "../types/Points";
 import { CarryableSystem } from "./CarryableComponent";
 import { ComponentSystem, ReplicationMode } from "./ComponentSystem";
 import { LocationSystem } from "./LocationSystem";
-import { Bus } from "../bus/Buses"
-import { LocationComponentLayer } from "../components/LocationComponent";
 
 export class InventorySystem extends ComponentSystem<InventoryComponent> {
     replicationMode: ReplicationMode = 'self';
 
-    constructor(entityManager: EntityManager, private locationSystem: LocationSystem, private carryableSystem: CarryableSystem) {
+    constructor(entityManager: EntityManager, protected locationSystem: LocationSystem, protected carryableSystem: CarryableSystem) {
         super(entityManager);
     }
 
-    attemptPickUp(entityId: number, entityToPickUp: number): void {
-        const component = this.getComponent(entityId);
-        const carryable = this.carryableSystem.getComponent(entityToPickUp);
-        if (!component || !carryable || !this.canPickUp(entityId, entityToPickUp)) {
-            return;
-        }
-
-        const oldWeight = component.currentWeight;
-        component.currentWeight += carryable.weight;
-        const item = {
-            id: entityToPickUp,
-            weight: carryable.weight
-        };
-        component.items.push(item);
-
-        this.locationSystem.removeComponentFromEntity(entityToPickUp);
-        this.componentUpdatedEmitter.emit({
-            id: entityId,
-            oldProps: {
-                weight: oldWeight
-            },
-            props: {
-                currentWeight: component.currentWeight,
-                addedItem: item 
-            }
-        });
-    }
-
-    dropItem(entityId: number, entityToDrop: number): void {
-        const component = this.getComponent(entityId);
-        const location = this.locationSystem.getComponent(entityId);
-        if (!component) {
-            return;
-        }
-
-        const idx = component.items.findIndex(x => x.id === entityToDrop);
-        if (idx > -1) {
-            const item = component.items[idx];
-            const oldWeight = component.currentWeight;
-
-            component.currentWeight -= item.weight;
-            component.items.splice(idx, 1);
-            this.componentUpdatedEmitter.emit({
-                id: entityId,
-                oldProps: {
-                    weight: oldWeight
-                },
-                props: {
-                    currentWeight: component.currentWeight,
-                    removedItem: idx
-                }
-            });
-
-            if (location !== undefined) {
-                this.locationSystem.addComponentForEntity(entityToDrop, {
-                    movesThrough: [],
-                    layer: LocationComponentLayer.item,
-                    location: {...location.location}
-                });
-            }
-        }
-    }
-
-    entityIsCarrying(entityId: number, itemId: number): boolean {
-        const component = this.getComponent(entityId);
-        const carryable = this.carryableSystem.getComponent(itemId);
-        if (!component || !carryable) {
-            return false;
-        }
-        return component.items.findIndex(x => x.id === itemId) > -1;
-    }
-
-    canPickUp(entityId: number, entityToPickUp: number): boolean {
+    canPickUpFromGround(entityId: number, entityToPickUp: number): boolean {
         const entityLocation = this.locationSystem.getComponent(entityId);
-        const inventoryComponent = this.getComponent(entityId);
         const itemLocation = this.locationSystem.getComponent(entityToPickUp);
-        const itemCarryable = this.carryableSystem.getComponent(entityToPickUp);
 
         if (
-            !itemLocation ||
-            !entityLocation ||
-            !itemCarryable ||
-            !inventoryComponent ||
+            !itemLocation?.location ||
+            !entityLocation?.location ||
             pointDistance(itemLocation.location, entityLocation.location) > 1
         ) {
             // No message needed
             return false;
         }
 
-        if ((inventoryComponent.currentWeight + itemCarryable.weight) > inventoryComponent.maxWeight) {
+        const inventoryState = this.canAddToInventory(entityId, entityToPickUp);
+
+        if (inventoryState === true) {
+            return true;
+        }
+
+        if (inventoryState === 'tooHeavy') {
             // Show an error
             Bus.messageEmitter.emit({
                 message: 'common/messages/objectTooHeavy',
                 entities: [entityId]
             });
-            return false;
         }
 
-        if (inventoryComponent.items.length >= inventoryComponent.maxSpace) {
+        if (inventoryState === 'full') {
             // Show an error
             Bus.messageEmitter.emit({
                 message: 'common/messages/inventoryFull',
                 entities: [entityId]
             });
-            return false;
+        }
+
+        return false;
+    }
+
+    canAddToInventory(entityId: number, itemId: number): 'doesNotExist' | 'tooHeavy' | 'full' | true {
+        const inventoryComponent = this.getComponent(entityId);
+        const itemCarryable = this.carryableSystem.getComponent(itemId);
+        if (!inventoryComponent || !itemCarryable) {
+            return 'doesNotExist';
+        }
+
+        if ((inventoryComponent.currentWeight + itemCarryable.weight) > inventoryComponent.maxWeight) {
+            return 'tooHeavy';
+        }
+
+        if (inventoryComponent.items.length >= inventoryComponent.maxSpace) {
+            return 'full';
         }
 
         return true;
+    }
+
+    entityIsCarrying(entityId: number, itemId: number): boolean {
+        const component = this.getComponent(entityId);
+        if (!component) {
+            return false;
+        }
+        return component.items.findIndex(x => x.id === itemId) > -1;
     }
 }

@@ -103,7 +103,7 @@ export class InputEventHandler {
             const entityId = this.game.players[this.game.currentPlayerId].characterId;
             const locationComponent = this.game.systems.location.getComponent(entityId);
             const inventoryComponent = this.game.systems.inventory.getComponent(entityId);
-            if (!locationComponent || !inventoryComponent) {
+            if (!locationComponent?.location || !inventoryComponent) {
                 return;
             }
 
@@ -113,7 +113,7 @@ export class InputEventHandler {
             }
 
             // TODO - add a way to choose which item to pick up
-            if (this.game.systems.inventory.canPickUp(entityId, locationEntities[0])) {
+            if (this.game.systems.inventory.canPickUpFromGround(entityId, locationEntities[0])) {
                 NetworkEventHandler.sendEvent(new GrabEvent(locationEntities[0]));
             }
         }

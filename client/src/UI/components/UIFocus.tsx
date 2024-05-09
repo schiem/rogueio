@@ -1,11 +1,11 @@
 import { Component, Fragment } from "preact";
 import { EventEmitter } from "../../../../common/src/events/EventEmitter";
-import { Dungeon } from "../../../../common/src/models/Dungeon";
 import { LocationSystem } from "../../../../common/src/systems/LocationSystem";
 import { Point } from "../../../../common/src/types/Points";
 import { localize } from "../../lang/Lang";
 import { ClientDescriptionSystem } from "../../systems/ClientDescriptionSystem";
 import { Glyphs } from "../Glyphs";
+import { DungeonProvider } from "../../../../common/src/models/Game";
 
 type FocusState = {
     tileDescription?: string,
@@ -19,7 +19,7 @@ type FocusProps = {
     changeFocusToEntity: (entityId: number) => void;
     descriptionSystem: ClientDescriptionSystem;
     locationSystem: LocationSystem;
-    dungeon: Dungeon;
+    dungeonProvider: DungeonProvider;
 };
 
 export class UIDescription extends Component<FocusProps, FocusState> {
@@ -80,7 +80,7 @@ export class UIDescription extends Component<FocusProps, FocusState> {
         }
 
         if (focusedPoint !== undefined) {
-            const definition = this.props.dungeon.getVisibleTileDefinition(focusedPoint);
+            const definition = this.props.dungeonProvider.dungeon.getVisibleTileDefinition(focusedPoint);
             if (definition) {
                 newState.tileDescription = localize(`tiles/${definition.name}`);
             }

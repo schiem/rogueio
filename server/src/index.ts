@@ -71,7 +71,7 @@ rog.bindFunction('teleportEntity', (entityId: number, x: number, y: number) => {
     if (!component) {
         return;
     }
-    return system.moveAndCollideEntity(entityId, { x, y }, game.currentLevel);
+    return system.moveAndCollideEntity(entityId, { x, y }, game.dungeonProvider.dungeon);
 }, 3);
 
 rog.bindFunction('teleportPlayersToEnemy', () => {
@@ -81,21 +81,21 @@ rog.bindFunction('teleportPlayersToEnemy', () => {
         return;
     }
 
-    const entityLocation = game.systems.location.getComponent(firstEnemy);
+    const entityLocation = game.systems.location.getComponent(firstEnemy)?.location;
     if (!entityLocation) {
         return;
     }
 
     characters.forEach((character) => {
-        const location = game.systems.location.getComponent(character);
+        const location = game.systems.location.getComponent(character)?.location;
         if (!location) {
             return;
         }
 
         outer_loop:
-        for (let x = entityLocation.location.x - 1; x <= entityLocation.location.x + 1; x++) {
-            for (let y = entityLocation.location.y - 1; y <= entityLocation.location.y + 1; y++) {
-                if (game.systems.location.moveAndCollideEntity(character, { x, y }, game.currentLevel)) {
+        for (let x = entityLocation.x - 1; x <= entityLocation.x + 1; x++) {
+            for (let y = entityLocation.y - 1; y <= entityLocation.y + 1; y++) {
+                if (game.systems.location.moveAndCollideEntity(character, { x, y }, game.dungeonProvider.dungeon)) {
                     break outer_loop;
                 }
             }

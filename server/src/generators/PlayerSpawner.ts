@@ -1,38 +1,40 @@
-import { CharacterType } from "../../../common/src/components/DescriptionComponent";
+import { CharacterType, ItemType } from "../../../common/src/components/DescriptionComponent";
+import { EquipmentSlot } from "../../../common/src/components/EquipmentComponent";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
-import { RoomType } from "../models/RoomType";
-import { ServerDungeon } from "../models/ServerDungeon";
-import { ServerGameSystems } from "../models/ServerGame";
-import { mobEntities, SpawnEntity } from "./EntityGenerators";
+import { itemEntities, mobEntities, SpawnEntity } from "./EntityGenerators";
+import { Spawner } from "./Spawner";
 
-export const SpawnPlayerCharacter = (entityId: number, systems: ServerGameSystems, dungeon: ServerDungeon): void => {
-    const components = mobEntities[CharacterType.player]();
-    let location: Point | undefined = undefined;
-    const locationComponent = components.location as LocationComponent;
+export const PlayerSpawner: Spawner = {
+    requires: [],
+    doSpawn: (room, dungeon, entityManager, systems) => {
+        const components = mobEntities[CharacterType.player]();
 
-    // Find an appropriate spawn location
-    while(location === undefined) {
-        const roomsAvailable = dungeon.rooms.filter((room) => {
-            return room.spawnTiles.length > 0 && room.type === RoomType.active;
-        });
-        if (roomsAvailable.length === 0) {
+        let location: Point | undefined = undefined;
+        const locationComponent = components.location as LocationComponent;
+        const tiles = room.spawnTiles.filter((tile) => !dungeon.tileIsBlocked(tile, locationComponent.movesThrough));
+        if (tiles.length) {
+            location = tiles[random(0, tiles.length)];
+        }
+        else {
+            // TODO - handle the player not actually spawning in 
             return;
         }
 
-        const maxTries = 4;
-        let tries = 0;
-        while(tries < maxTries && roomsAvailable.length > 0 && location === undefined) {
-            tries++;
-            const idx = random(0, roomsAvailable.length);
-            const room = roomsAvailable[idx];
-            const tiles = room.spawnTiles.filter((tile) => !dungeon.tileIsBlocked(tile, locationComponent.movesThrough));
-            if (tiles.length) {
-                location = tiles[random(0, tiles.length)];
-            }
-        }
+        const id = entityManager.addNextEntity();
+        locationComponent.location = location;
+        SpawnEntity(id, components, systems);
+
+        const daggerComponent = itemEntities[ItemType.dagger]();
+        const daggerId = entityManager.addNextEntity();
+        SpawnEntity(daggerId, daggerComponent, systems);
+
+        const daggerComponent2 = itemEntities[ItemType.dagger]();
+        const daggerId2 = entityManager.addNextEntity();
+        SpawnEntity(daggerId2, daggerComponent2, systems);
+
+        systems.inventory.addItem(id, daggerId);
+        systems.equipment.equip(id, daggerId2, EquipmentSlot.leftHand);
     }
-    locationComponent.location = location;
-    SpawnEntity(entityId, components, systems);
-}
+} 

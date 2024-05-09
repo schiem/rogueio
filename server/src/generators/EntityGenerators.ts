@@ -1,6 +1,8 @@
 import { ActionComponent, ActionTarget, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
 import { DescriptionComponent, CharacterType, EntityCategory, ItemType } from "../../../common/src/components/DescriptionComponent";
+import { EquipmentComponent, EquipmentSlot } from "../../../common/src/components/EquipmentComponent";
+import { EquippableComponent } from "../../../common/src/components/EquippableComponent";
 import { HealthComponent } from "../../../common/src/components/HealthComponent";
 import { InventoryComponent } from "../../../common/src/components/InventoryComponent";
 import { LocationComponent, LocationComponentLayer } from "../../../common/src/components/LocationComponent";
@@ -27,6 +29,8 @@ export type ComponentBlock = {
     description: DescriptionComponent;
     inventory: InventoryComponent;
     sprite: SpriteComponent;
+    equippable: EquippableComponent;
+    equipment: EquipmentComponent;
 }
 
 export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> = {
@@ -44,7 +48,6 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             location: {
                 movesThrough: [MovementType.land, MovementType.water],
                 layer: LocationComponentLayer.character,
-                location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 100 },
             visibility: { sightRadius: 6, visible: {} },
@@ -81,6 +84,9 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                 items: [],
                 maxSpace: 10,
                 maxWeight: 20
+            },
+            equipment: {
+                items: {}
             }
         };
     },
@@ -98,7 +104,6 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             location: {
                 movesThrough: [MovementType.land, MovementType.water],
                 layer: LocationComponentLayer.character,
-                location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 100 },
             stats: {
@@ -146,7 +151,6 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             location: {
                 movesThrough: [MovementType.land, MovementType.water],
                 layer: LocationComponentLayer.character,
-                location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 200 },
             stats: {
@@ -194,7 +198,6 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
             location: {
                 movesThrough: [MovementType.water],
                 layer: LocationComponentLayer.character,
-                location: { x: 0, y: 0}
             },
             movement: { minMovementDelay: 400 },
             stats: {
@@ -221,16 +224,18 @@ export const itemEntities: Record<ItemType, () => Partial<ComponentBlock>> = {
             sprite: {
                 sprite: {
                     name: SpriteName.dagger,
-                    color: SpriteColor.grey
+                    color: SpriteColor.blue
                 }
             },
             location: {
                 movesThrough: [],
                 layer: LocationComponentLayer.item,
-                location: { x: 0, y: 0}
             },
             carryable: {
                 weight: 2
+            },
+            equippable: {
+                slots: [EquipmentSlot.leftHand, EquipmentSlot.rightHand]
             }
         }
     }

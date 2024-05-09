@@ -1,14 +1,21 @@
-import { Component, ComponentChild, Fragment } from "preact";
+import { Component, ComponentChild, Fragment, createRef } from "preact";
 import { Bus } from "../../../../common/src/bus/Buses";
 import { localize } from "../../lang/Lang";
+import { ClientDescriptionSystem } from "../../systems/ClientDescriptionSystem";
 
 type MessageState = {
     messages: string[]
 }
 
-export class UIMessages extends Component<{}, MessageState> {
+type MessageProps = {
+    descriptionSystem: ClientDescriptionSystem
+}
+
+export class UIMessages extends Component<MessageProps, MessageState> {
     maxMessages = 50;
     messageSubscription: number;
+    hasScrolled = false;
+    scrollRef = createRef();
 
     constructor() {
         super();
@@ -20,7 +27,8 @@ export class UIMessages extends Component<{}, MessageState> {
     componentDidMount(): void {
         this.addMessage(localize('system/gameStart'));
         this.messageSubscription = Bus.messageEmitter.subscribe((data) => {
-            this.addMessage(localize(data.message, data.replacements));
+            const replacements = data.replacements?.map(x => typeof x === 'number' ? this.props.descriptionSystem.getLocalizedName(x) : x);
+            this.addMessage(localize(data.message, replacements));
         });
     }
 
@@ -29,12 +37,16 @@ export class UIMessages extends Component<{}, MessageState> {
         if (messages.length > this.maxMessages) {
             messages.splice(0, 1);
         }
-        this.setState({messages});
+        this.setState({messages}, () => {
+            if (!this.hasScrolled) {
+                this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight;
+            }
+        });
     }
 
     render(): ComponentChild {
         return <Fragment>
-            <ul class="scrollable-list scroll-bottom">
+            <ul class="scrollable-list scroll-bottom" onScroll={() => this.hasScrolled = true} ref={this.scrollRef}>
                 { !this.state.messages.length && 
                     <li class="separated-row">{ localize('messages/noMessages')}</li>
                 }

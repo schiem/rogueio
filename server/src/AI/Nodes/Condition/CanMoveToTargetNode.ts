@@ -5,7 +5,7 @@ import { ConditionNode } from "./ConditionNode";
 export class CanMoveToTargetNode extends ConditionNode {
     *execute(state: BTState, blackboard: BTBlackboard): Generator<void, boolean, unknown> {
         const locationComponent = state.systems.location.getComponent(state.id);
-        if (!blackboard.target || !locationComponent) {
+        if (!blackboard.target || !locationComponent?.location) {
             return false;
         }
         const location = locationComponent.location;

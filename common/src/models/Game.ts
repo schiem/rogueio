@@ -12,6 +12,8 @@ import { DescriptionSystem } from "../systems/DescriptionSystem";
 import { InventorySystem } from "../systems/InventorySystem";
 import { CarryableSystem } from "../systems/CarryableComponent";
 import { SpriteSystem } from "../systems/SpriteSystem";
+import { EquipmentSystem } from "../systems/EquipmentSystem";
+import { EquippableSystem } from "../systems/EquippableSystem";
 
 export type GameSystems = {
     description: DescriptionSystem;
@@ -25,18 +27,24 @@ export type GameSystems = {
     inventory: InventorySystem;
     carryable: CarryableSystem;
     sprite: SpriteSystem;
+    equipment: EquipmentSystem;
+    equippable: EquippableSystem;
+}
+
+export type DungeonProvider = {
+    dungeon: Dungeon;
 }
 
 export class Game {
     dungeonX: number = 128;
     dungeonY: number = 128;
 
-    currentLevel: Dungeon;
     players: Record<string, Player> = {};
 
     entityManager = new EntityManager();
 
     systems: GameSystems = {} as GameSystems;
+    dungeonProvider: DungeonProvider = {} as DungeonProvider;
 
     constructor() {
     }
@@ -46,7 +54,7 @@ export class Game {
         this.systems.sprite = new SpriteSystem(this.entityManager);
         this.systems.ally = new AllySystem(this.entityManager);
         this.systems.carryable = new CarryableSystem(this.entityManager);
-        this.systems.movement = new MovementSystem(this.entityManager, this.systems.location);
-        this.systems.inventory = new InventorySystem(this.entityManager, this.systems.location, this.systems.carryable);
+        this.systems.equippable = new EquippableSystem(this.entityManager);
+        this.systems.equipment = new EquipmentSystem(this.entityManager);
     }
 }

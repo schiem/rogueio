@@ -7,6 +7,7 @@ import { UIStatBlock } from "./components/UIStatBlock";
 import { UIDescription } from "./components/UIFocus";
 import { UIInventory } from "./components/UIInventory";
 import { Terminal } from "./components/UITerminal";
+import { UIEquipment } from "./components/UIEquipment";
 
 type UIProps = {
     game: ClientGame,
@@ -55,7 +56,7 @@ export class UI extends Component<UIProps, UIState> {
                     playerId={this.game.players[this.game.currentPlayerId].characterId} />
             </Terminal>
             <Terminal classes={['ui-block']} id='messages' title='Messages'>
-                <UIMessages />
+                <UIMessages descriptionSystem={this.game.systems.description}/>
             </Terminal>
             <Terminal classes={['ui-block']} id='inventory' title='Inventory'>
                 <UIInventory
@@ -69,7 +70,13 @@ export class UI extends Component<UIProps, UIState> {
                     focusChangedEmitter={this.game.focusMaybeChangedEmitter}
                     descriptionSystem={this.game.systems.description}
                     locationSystem={this.game.systems.location}
-                    dungeon={this.game.currentLevel} />
+                    dungeonProvider={this.game.dungeonProvider} />
+            </Terminal>
+            <Terminal classes={['ui-block']} id='equipment' title='Equipment'>
+                <UIEquipment
+                    descriptionSystem={this.game.systems.description}
+                    equipmentSystem={this.game.systems.equipment}
+                    playerId={this.game.players[this.game.currentPlayerId].characterId} />
             </Terminal>
         </Fragment>
     }

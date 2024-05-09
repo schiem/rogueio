@@ -8,6 +8,6 @@ export enum LocationComponentLayer {
 
 export type LocationComponent = {
     movesThrough: MovementType[];
-    location: Point;
+    location?: Point;
     layer: LocationComponentLayer;
 };

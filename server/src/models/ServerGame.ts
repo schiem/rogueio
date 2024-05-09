@@ -6,26 +6,38 @@ import { NetworkEventManager } from "../events/NetworkEventManager";
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { ServerVisbilitySystem } from "../systems/ServerVisbilitySystem";
-import { randomList } from "../../../common/src/utils/MathUtils";
+import { random, randomList } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
 import { ServerActionSystem } from "../systems/ServerActionSystem";
 import { ServerDungeon } from "./ServerDungeon";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { DescriptionSystem } from "../../../common/src/systems/DescriptionSystem";
-import { SpawnPlayerCharacter } from "../generators/PlayerSpawner";
+import { PlayerSpawner } from "../generators/PlayerSpawner";
 import { MonsterSpawners, MonsterRoomSpawners } from "../generators/MonsterSpawners/MonsterSpawner";
 import { RoomFeatureSpawners } from "./RoomFeatures";
+import { ServerInventorySystem } from "../systems/ServerInventorySystem";
+import { ServerMovementSystem } from "../systems/ServerMovementSystem";
+import { ServerEquipmentSystem } from "../systems/ServerEquipmentsystem";
+import { RoomType } from "./RoomType";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
     visibility: ServerVisbilitySystem;
     action: ServerActionSystem;
+    inventory: ServerInventorySystem;
+    movement: ServerMovementSystem;
+    equipment: ServerEquipmentSystem;
 }
+
+export type ServerDungeonProvider = {
+    dungeon: ServerDungeon;
+}
+
 export class ServerGame extends Game {
     systems: ServerGameSystems;
     dungeonGenerator: DungeonGenerator;
-    currentLevel: ServerDungeon;
+    dungeonProvider: ServerDungeonProvider;
     networkEventManager: NetworkEventManager;
     paused = false;
     private clients: Record<string, WebSocket> = {};
@@ -64,18 +76,18 @@ export class ServerGame extends Game {
         // Construct the common systems
         super.constructSystems();
 
-        // set up the visibility system, after the dungeon has been created
-        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize, this.systems.inventory);
+        this.systems.movement = new ServerMovementSystem(this.entityManager, this.systems.location);
+        this.systems.inventory = new ServerInventorySystem(this.entityManager, this.systems.location, this.systems.carryable, this.dungeonProvider);
+        this.systems.equipment = new ServerEquipmentSystem(this.entityManager, this.dungeonProvider, this.systems.equippable, this.systems.inventory, this.systems.location);
 
-        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health);
+        // set up the visibility system, after the dungeon has been created
+        this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize, this.systems.inventory, this.systems.equipment, this.dungeonProvider);
+        this.systems.action = new ServerActionSystem(this.entityManager, this.systems.location, this.systems.visibility, this.systems.ally, this.systems.health, this.dungeonProvider);
 
         // set up the AI system
         this.systems.ai = new AISystem(this.entityManager);
 
         this.newDungeon();
-
-        this.systems.visibility.setDungeon(this.currentLevel);
-        this.systems.action.setDungeon(this.currentLevel);
     }
 
     startTick(): void {
@@ -91,13 +103,13 @@ export class ServerGame extends Game {
     }
 
     newDungeon(): void {
-        this.currentLevel = this.dungeonGenerator.generate();
+        this.dungeonProvider.dungeon = this.dungeonGenerator.generate();
         this.spawnMonsters();
         this.spawnItems();
     }
 
     spawnMonsters(): void {
-        this.currentLevel.rooms.forEach((room) => {
+        this.dungeonProvider.dungeon.rooms.forEach((room) => {
             // Select an appropriate spawner
             if (MonsterRoomSpawners[room.type].length === 0) {
                 return;
@@ -114,7 +126,7 @@ export class ServerGame extends Game {
                     continue;
                 }
 
-                const valid = RoomFeatureSpawners[feature](room, this.currentLevel);
+                const valid = RoomFeatureSpawners[feature](room, this.dungeonProvider.dungeon);
                 if (!valid) {
                     // TODO - handle not being able to spawn correctly
                     return;
@@ -122,7 +134,7 @@ export class ServerGame extends Game {
             }
 
             // Spawn things
-            spawner.doSpawn(room, this.currentLevel, this.entityManager, this.systems);
+            spawner.doSpawn(room, this.dungeonProvider.dungeon, this.entityManager, this.systems);
         });
     }
 
@@ -140,8 +152,16 @@ export class ServerGame extends Game {
         this.networkEventManager.addPlayerEventQueue(playerId);
 
 
-        player.characterId = this.entityManager.addNextEntity();
-        SpawnPlayerCharacter(player.characterId, this.systems, this.currentLevel);
+        player.characterId = this.entityManager.peekNextEntity();
+        const roomsAvailable = this.dungeonProvider.dungeon.rooms.filter((room) => {
+            return room.spawnTiles.length > 0 && room.type === RoomType.active;
+        });
+        if (roomsAvailable.length > 0) {
+            const idx = random(0, roomsAvailable.length);
+            const room = roomsAvailable[idx];
+
+            PlayerSpawner.doSpawn(room, this.dungeonProvider.dungeon, this.entityManager, this.systems);
+        }
 
         return playerId;
     }
@@ -162,7 +182,7 @@ export class ServerGame extends Game {
         this.networkEventManager.doReceivedEvents(this, this.currentTime);
 
         // Run the AI
-        this.systems.ai.runAI(this.currentTime, this.systems, this.currentLevel);
+        this.systems.ai.runAI(this.currentTime, this.systems, this.dungeonProvider.dungeon);
 
         // Send the modified state back to the player
         this.networkEventManager.flushSendEvents(this.clients);

@@ -30,7 +30,7 @@ export class NetworkEventManager {
     private eventHandlers: Record<ClientEventType, (playerId: string, game: ServerGame, event: ClientEvent, currentTime: number) => void> = {
         [ClientEventType.move]: (playerId: string, game: ServerGame, event: MoveEvent, currentTime: number) => {
             const characterId = game.players[playerId].characterId;
-            this.systems.movement.attemptMove(characterId, event.data.direction, game.currentLevel, currentTime);
+            this.systems.movement.attemptMove(characterId, event.data.direction, game.dungeonProvider.dungeon, currentTime);
         },
         [ClientEventType.action]: (playerId: string, game: ServerGame, event: ActionEvent, currentTime: number) => {
             const characterId = game.players[playerId].characterId;
@@ -44,7 +44,13 @@ export class NetworkEventManager {
         },
         [ClientEventType.drop]: (playerId: string, game: ServerGame, event: DropEvent) => {
             const characterId = game.players[playerId].characterId;
+            console.log(`dropping ${event.data.target}`);
             game.systems.inventory.dropItem(characterId, event.data.target);
+        },
+        [ClientEventType.unequip]: function (playerId: string, game: ServerGame, event: ClientEvent, currentTime: number): void {
+            const characterId = game.players[playerId].characterId;
+            console.log(`unequipping ${event.data.slot}`);
+            game.systems.equipment.unequip(characterId, event.data.slot);
         }
     }
     constructor(
@@ -80,7 +86,7 @@ export class NetworkEventManager {
             for (let playerId in this.eventSendQueue) {
                 const entityId = this.players[playerId].characterId;
 
-                if (systems.visibility.tileIsVisible(entityId, data.component.location)) {
+                if (data.component.location && systems.visibility.tileIsVisible(entityId, data.component.location)) {
                     this.queueEventForPlayer(playerId, new RemoveEntityComponentEvent(data.id, 'location'));
                 }
             }

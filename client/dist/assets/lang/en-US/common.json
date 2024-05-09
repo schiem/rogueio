@@ -46,12 +46,16 @@
         "playerDied": "You have died",
         "playerKilled": "You killed the {0}",
         "focus": "Focus",
-        "drop": "Drop"
+        "drop": "Drop",
+        "unequip": "Unequip"
     },
     "messages": {
         "inventoryFull": "Your inventory is full.",
         "objectTooHeavy": "You cannot carry that much weight.",
-        "noMessages": "No messages received."
+        "noMessages": "No messages received.",
+        "itemSlipped": "The {0} slips out of your hands as you remove it.",
+        "itemCannotBeDropped": "You may not drop the {0}.",
+        "itemCannotBeDroppedHere": "You may not drop the {0} here."
     },
     "focus": {
         "currentFocus": "Current Focus",
@@ -62,11 +66,23 @@
     "inventory": {
         "empty": "Your inventory is empty."
     },
+    "equipment": {
+        "head": "Head",
+        "body": "Body",
+        "leftHand": "Left Hand",
+        "rightHand": "Right Hand",
+        "ring": "Ring",
+        "amulet": "Amulet",
+        "legs": "Legs",
+        "feet": "Feet",
+        "back": "Back"
+    },
     "ui": {
         "float": "Float",
         "anchor": "Anchor"
     },
     "misc": {
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "nothing": "Nothing"
     }
 }

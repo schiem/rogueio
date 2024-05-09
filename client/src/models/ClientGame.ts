@@ -19,6 +19,7 @@ import { ClientVisibilitySystem } from "../systems/ClientVisibilitySystem";
 import { ClientDescriptionSystem } from "../systems/ClientDescriptionSystem";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { ClientInventorySystem } from "../systems/ClientInventorySystem";
+import { MovementSystem } from "../../../common/src/systems/MovementSystem";
 
 export type ClientGameSystems = GameSystems & {
     location: ClientLocationSystem;
@@ -50,6 +51,9 @@ export class ClientGame extends Game {
         this.inputEventHandler = new InputEventHandler(this, viewPort.canvas);
 
         this.systems.location.removedComponentEmitter.subscribe((data) => {
+            if (!data.component.location) {
+                return;
+            }
             this.renderDungeonTileAtLocation(data.component.location);
             this.renderer.renderViewPort();
 
@@ -64,6 +68,9 @@ export class ClientGame extends Game {
         });
 
         this.systems.location.addedComponentEmitter.subscribe((data) => {
+            if (!data.component.location) {
+                return;
+            }
             this.renderDungeonTileAtLocation(data.component.location);
             this.renderer.renderViewPort();
 
@@ -83,17 +90,21 @@ export class ClientGame extends Game {
                     this.recenterViewPort();
                 }
 
-                const newLocation = data.props.location as Point;
-                const oldLocation = data.oldProps.location as Point;
+                const newLocation = data.props.location as Point | undefined;
+                const oldLocation = data.oldProps.location as Point | undefined;
 
-                this.renderDungeonTileAtLocation(newLocation);
-                this.renderDungeonTileAtLocation(oldLocation);
+                if (newLocation) {
+                    this.renderDungeonTileAtLocation(newLocation);
+                }
+                if (oldLocation) {
+                    this.renderDungeonTileAtLocation(oldLocation);
+                }
                 this.renderer.renderViewPort();
 
                 if (this.currentFocus !== undefined) {
                     const focusPoint = this.normalizeFocus(this.currentFocus);
                     if (focusPoint) {
-                        if (pointsAreEqual(focusPoint, newLocation) || pointsAreEqual(focusPoint, oldLocation)) {
+                        if ((newLocation && pointsAreEqual(focusPoint, newLocation)) || (oldLocation && pointsAreEqual(focusPoint, oldLocation))) {
                             this.focusMaybeChangedEmitter.emit(this.currentFocus);
                         }
                     }
@@ -104,7 +115,7 @@ export class ClientGame extends Game {
         this.systems.visibility.visionPointsChanged.subscribe((data) =>  {
             data.forEach((pointData) => {
                 if (pointData.tile) {
-                    this.currentLevel.setTile(pointData.tile, pointData.point);
+                    this.dungeonProvider.dungeon.setTile(pointData.tile, pointData.point);
                 }
                 this.renderDungeonTileAtLocation(pointData.point);
             });
@@ -120,7 +131,8 @@ export class ClientGame extends Game {
         // Construct the common systems
         super.constructSystems();
 
-        this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY }, this.systems.inventory);
+        this.systems.movement = new MovementSystem(this.entityManager);
+        this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY }, this.systems.inventory, this.systems.equipment);
         this.systems.inventory = new ClientInventorySystem(this.entityManager, this.systems.location, this.systems.carryable);
         this.systems.action = new ActionSystem(this.entityManager);
     }
@@ -128,9 +140,9 @@ export class ClientGame extends Game {
     postDeserialize(event: InitEvent) {
         this.currentPlayerId = event.data.playerId;
         this.players = event.data.gameData.players;
-        this.currentLevel = new Dungeon({x: 0, y: 0});
+        this.dungeonProvider.dungeon = new Dungeon({x: 0, y: 0});
         event.data.gameData.tiles?.forEach((tileLocation) => {
-            this.currentLevel.setTile(tileLocation.tile, tileLocation.loc);
+            this.dungeonProvider.dungeon.setTile(tileLocation.tile, tileLocation.loc);
         });
         this.timeInitialized = event.ts;
 
@@ -156,7 +168,7 @@ export class ClientGame extends Game {
 
     findClosestEntity(): number | undefined {
         const characterId = this.players[this.currentPlayerId].characterId;
-        const characterLocation = this.systems.location.getComponent(characterId);
+        const characterLocation = this.systems.location.getComponent(characterId)?.location;
         if (!characterLocation) {
             return;
         }
@@ -167,10 +179,10 @@ export class ClientGame extends Game {
         components.forEach((id) => {
             const locationComponent = this.systems.location.getComponent(id);
 
-            if (locationComponent === undefined) {
+            if (!locationComponent?.location) {
                 return;
             }
-            const distanceSquared = pointDistanceSquared(locationComponent.location, characterLocation.location);
+            const distanceSquared = pointDistanceSquared(locationComponent.location, characterLocation);
             if (bestLengthSqr === undefined || distanceSquared < bestLengthSqr) {
                 closestEntity = id;
                 bestLengthSqr = distanceSquared;
@@ -222,7 +234,7 @@ export class ClientGame extends Game {
 
     getSortedEnemyList(): number[] {
         const characterId = this.players[this.currentPlayerId].characterId;
-        const characterLocation = this.systems.location.getComponent(characterId);
+        const characterLocation = this.systems.location.getComponent(characterId)?.location;
         if (characterLocation === undefined) {
             return [];
         }
@@ -238,10 +250,10 @@ export class ClientGame extends Game {
         return componentIds.sort((a, b) => {
             const aLocation = this.systems.location.getComponent(a);
             const bLocation = this.systems.location.getComponent(b);
-            if (aLocation === undefined || bLocation === undefined) {
+            if (!aLocation?.location || !bLocation?.location) {
                 return 0;
             }
-            return pointDistanceSquared(aLocation.location, characterLocation.location) - pointDistanceSquared(bLocation.location, characterLocation.location);
+            return pointDistanceSquared(aLocation.location, characterLocation) - pointDistanceSquared(bLocation.location, characterLocation);
         });
     }
 
@@ -276,7 +288,7 @@ export class ClientGame extends Game {
     }
 
     renderDungeonTileAtLocation(point: Point): void {
-        const dungeon = this.currentLevel;
+        const dungeon = this.dungeonProvider.dungeon;
         let sprite: Sprite | undefined;
         let drawOutline = false;
         if(this.currentFocus !== undefined) {
@@ -325,18 +337,17 @@ export class ClientGame extends Game {
     recenterViewPort(): void {
         const characterId = this.players[this.currentPlayerId].characterId;
         const characterLocation = this.systems.location.getComponent(characterId);
-        if (characterLocation) {
+        if (characterLocation?.location) {
             this.renderer.centerViewPortOn(characterLocation.location);
         }
     }
 
-    renderDungeon(dungeon: Dungeon): void {
-        this.currentLevel = dungeon;
-        for(let x = 0; x < this.currentLevel.tiles.length; x++) {
-            if (!this.currentLevel.tiles[x]) {
+    renderDungeon(): void {
+        for(let x = 0; x < this.dungeonProvider.dungeon.tiles.length; x++) {
+            if (!this.dungeonProvider.dungeon.tiles[x]) {
                 continue;
             }
-            for(let y = 0; y < this.currentLevel.tiles[x].length; y++) {
+            for(let y = 0; y < this.dungeonProvider.dungeon.tiles[x].length; y++) {
                 this.renderDungeonTileAtLocation({x, y});
             }
         }

@@ -7,7 +7,7 @@ export class MoveTowardNode extends ActionNode {
     *execute(state: BTState, blackboard: BTBlackboard): Generator<void, boolean, unknown> {
         const moveComponent = state.systems.movement.getComponent(state.id);
         const locationComponent = state.systems.location.getComponent(state.id);
-        if (!moveComponent || !locationComponent) {
+        if (!moveComponent || !locationComponent?.location) {
             return false;
         }
 
@@ -16,7 +16,7 @@ export class MoveTowardNode extends ActionNode {
             yield;
         }
 
-        const location = locationComponent.location;
+        const location = locationComponent?.location;
         const possibleMoves = [
             {x: -1, y: 0 },
             {x: 1, y: 0},
@@ -32,14 +32,14 @@ export class MoveTowardNode extends ActionNode {
             return state.systems.movement.attemptMove(state.id, randomList(possibleMoves), state.dungeon, state.currentTime);
         }
 
-        const targetLocation = state.systems.location.getComponent(blackboard.target);
+        const targetLocation = state.systems.location.getComponent(blackboard.target)?.location;
         if (!targetLocation) {
             return false;
         }
 
-        const originalDistance = pointDistance(location, targetLocation.location);
+        const originalDistance = pointDistance(location, targetLocation);
         const bestMove = possibleMoves.find((point) => {
-            return pointDistance(addPoints(location, point), targetLocation.location) < originalDistance;
+            return pointDistance(addPoints(location, point), targetLocation) < originalDistance;
         });
 
         if (!bestMove) {

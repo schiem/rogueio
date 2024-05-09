@@ -64,15 +64,19 @@ export class UIInventory extends Component<InventoryProps, InventoryState> {
     render(): ComponentChild {
         return <Fragment>
             {this.state.items?.length ? 
-                <ul>
+                <table>
                     {this.state.items.map((item) =>
-                        <li class="columned">
-                            <div>
-                                <button class="icon" onClick={() => this.dropItem(item.id)} title={this.labels.drop}>{Glyphs.drop}</button> <span>{item.name}</span>
-                            </div>
-                            <span>{item.weight.toFixed(1)}</span></li>
+                        <tr>
+                            <td class="collapse">
+                                <button class="icon" onClick={() => this.dropItem(item.id)} title={this.labels.drop}>{Glyphs.drop}</button>
+                            </td>
+                            <td class="grow">
+                                {item.name}
+                            </td>
+                            <td>{item.weight.toFixed(1)}</td>
+                        </tr>
                     )}
-                </ul> : 
+                </table> : 
                 <p>{ this.labels.emptyInventory }</p>
             }
         </Fragment>

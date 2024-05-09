@@ -55,5 +55,34 @@
             padding: 0;
         }
     }
+
+    table {
+        width: 100%;
+        color: $white;
+
+        tr {
+            &:not(:first-child) {
+                td {
+                    border-top: $border;
+                }
+            }
+        }
+
+
+        td {
+            padding: $spacing-xs;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            &.collapse {
+                width: fit-content;
+            }
+
+            &.grow {
+                width: 100%;
+            }
+        }
+    }
 }
 

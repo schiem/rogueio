@@ -44,7 +44,7 @@ export class NetworkEventHandler {
     private static eventHandlers: Record<ServerEventType, (game: ClientGame, event: ServerEvent) => void> = {
         [ServerEventType.init]: (game: ClientGame, event: InitEvent): void => {
             game.postDeserialize(event);
-            game.renderDungeon(game.currentLevel);
+            game.renderDungeon();
         },
         [ServerEventType.message]: (game: ClientGame, event: MessageEvent): void => {
             Bus.messageEmitter.emit({ message: event.data.message, replacements: event.data.replacements, entities: [] });

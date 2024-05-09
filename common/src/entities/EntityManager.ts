@@ -12,6 +12,10 @@ export class EntityManager {
     private entities: Record<number, boolean> = {};
     private currentEntity = 0;
 
+    peekNextEntity(): number {
+        return this.currentEntity;
+    }
+
     getNextEntity(): number {
         const entityId = this.currentEntity;
 

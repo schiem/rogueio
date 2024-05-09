@@ -77,11 +77,21 @@ export class Dungeon {
             return true;
         }
 
+        // Nothing is allowed to be in this tile
+        if (def.movement.length === 0) {
+            return true;
+        }
+
         // check to make sure that at least one of the components
         // movement types is in the tile
-        return moveType.find((type) => {
-            return def.movement.indexOf(type) !== -1;
-        }) === undefined;
+        // if the component doesn't have any movement types, then it can go anywhere (I guess)
+        if (moveType.length > 0) {
+            return moveType.find((type) => {
+                return def.movement.indexOf(type) !== -1;
+            }) === undefined;
+        }
+
+        return false;
     }
 
     hasOpenTileAround(point: Point): boolean {

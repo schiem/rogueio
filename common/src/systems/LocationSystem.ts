@@ -37,6 +37,10 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         super.removeComponentFromEntity(id);
     }
 
+    unsetLocation(id: number): void {
+        this.moveEntity(id, undefined);
+    }
+
     /**
      * Attempts to move an entity to a new location.
      * Returns whether the entity was successfully moved.
@@ -87,7 +91,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
         return !dungeon.tileIsBlocked(location, component.movesThrough) && !this.isCollision(component, location);
     }
 
-    protected moveEntity(id: number, newLocation: Point) {
+    protected moveEntity(id: number, newLocation: Point | undefined) {
         const component = this.getComponent(id);
         if (component === undefined) {
             return false;
@@ -113,9 +117,10 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     private addComponentToLocationCache(id: number, component?: LocationComponent): void {
         if (component === undefined) {
             component = this.getComponent(id);
-            if (component === undefined) {
-                return;
-            }
+        }
+
+        if (!component?.location) {
+            return;
         }
 
         if (this.locationCache[component.location.x][component.location.y] === undefined) {
@@ -127,7 +132,7 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
 
     private removeComponentFromLocationCache(id: number) {
         const component = this.getComponent(id);
-        if (component === undefined) {
+        if (!component?.location) {
             return;
         }
 

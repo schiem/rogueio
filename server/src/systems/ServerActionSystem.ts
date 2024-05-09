@@ -1,6 +1,6 @@
 import { Action, ActionTarget, AttackEffect, Effect, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { EntityManager } from "../../../common/src/entities/EntityManager";
-import { Dungeon } from "../../../common/src/models/Dungeon";
+import { DungeonProvider } from "../../../common/src/models/Game";
 import { ActionSystem } from "../../../common/src/systems/ActionSystem";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
 import { HealthSystem } from "../../../common/src/systems/HealthSystem";
@@ -12,18 +12,14 @@ import { pointDistanceSquared } from "../../../common/src/utils/PointUtils";
 import { BresenhamRayCast } from "../utils/Bresenham";
 
 export class ServerActionSystem extends ActionSystem {
-    private dungeon: Dungeon;
     constructor(
         entityManager: EntityManager, 
         private locationSystem: LocationSystem, 
         private visibilitySystem: VisibilitySystem, 
         private allySystem: AllySystem, 
-        private healthSystem: HealthSystem) {
+        private healthSystem: HealthSystem, 
+        private dungeonProvider: DungeonProvider) {
         super(entityManager);
-    }
-
-    setDungeon(dungeon: Dungeon): void {
-        this.dungeon = dungeon;
     }
 
     attemptAction(entityId: number, actionId: number, target: number | Point | undefined, currentTime: number): boolean {
@@ -56,7 +52,7 @@ export class ServerActionSystem extends ActionSystem {
                     return false;
                 }
                 const location = this.locationSystem.getComponent(entityId);
-                if (!location) {
+                if (!location?.location) {
                     return false;
                 }
                 entitiesToApplyTo = this.fetchEntitiesForLine(location.location, target, action.targetType.length);
@@ -165,7 +161,7 @@ export class ServerActionSystem extends ActionSystem {
         if (typeof target === 'number') {
 
             const targetLocation = this.locationSystem.getComponent(target);
-            if (!targetLocation) {
+            if (!targetLocation?.location) {
                 return false;
             } 
             point = targetLocation.location;
@@ -174,7 +170,7 @@ export class ServerActionSystem extends ActionSystem {
         }
         
         const locationComponent = this.locationSystem.getComponent(entityId);
-        if (!locationComponent) {
+        if (!locationComponent?.location) {
             return false;
         }
 
@@ -192,7 +188,7 @@ export class ServerActionSystem extends ActionSystem {
 
         // Check if we can cast to this tile
         const blocked = BresenhamRayCast(locationComponent.location, point, (bPoint) => {
-            return this.dungeon.tileBlocksVision(bPoint);
+            return this.dungeonProvider.dungeon.tileBlocksVision(bPoint);
         });
         return !blocked;
     }
