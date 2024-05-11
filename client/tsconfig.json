@@ -23,7 +23,7 @@
     "src/**/*",
     "external/**/*",
     "../common/src/**/*"
-, "../server/src/components/AIComponent.ts", "../server/src/systems/AISystem.ts"  ],
+  ],
   "exclude": [
     "../server/**/*",
     ".git",

@@ -1,0 +1,47 @@
+.icon {
+    display: inline-block;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    width: $spacing-md;
+    height: $spacing-md;
+    transition: background-color $transition-speed ease;
+
+    &.arrow {
+        &-left {
+            -webkit-mask-image: url('/dist/assets/icons/arrow_left.svg');
+            mask-image: url('/dist/assets/icons/arrow_left.svg');
+        }
+
+        &-right {
+            -webkit-mask-image: url('/dist/assets/icons/arrow_right.svg');
+            mask-image: url('/dist/assets/icons/arrow_right.svg');
+        }
+
+        &-top-right {
+            -webkit-mask-image: url('/dist/assets/icons/arrow_top_right.svg');
+            mask-image: url('/dist/assets/icons/arrow_top_right.svg');
+        }
+
+        &-bottom-left {
+            -webkit-mask-image: url('/dist/assets/icons/arrow_bottom_left.svg');
+            mask-image: url('/dist/assets/icons/arrow_bottom_left.svg');
+        }
+    }
+
+    &.curve-arrow {
+        -webkit-mask-image: url('/dist/assets/icons/curve_arrow_left.svg');
+        mask-image: url('/dist/assets/icons/curve_arrow_left.svg');
+    }
+
+    &.potion {
+        -webkit-mask-image: url('/dist/assets/icons/potion.svg');
+        mask-image: url('/dist/assets/icons/potion.svg');
+    }
+
+    &.scroll {
+        -webkit-mask-image: url('/dist/assets/icons/scroll.svg');
+        mask-image: url('/dist/assets/icons/scroll.svg');
+    }
+}

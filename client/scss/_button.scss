@@ -18,17 +18,25 @@ button {
         margin-left: $spacing-xs;
     }
 
-    &.icon {
-        width: $spacing-sm;
-        height: $spacing-sm;
-        line-height: $spacing-sm - 2px;
-        padding: 0;
+    &.icon-only {
+        width: $spacing-lg;
+        height: $spacing-lg;
+        line-height: $spacing-lg - 2px;
+        padding: 2px;
+    }
+
+    .icon {
+        background-color: $white;
     }
 
     &:hover,
     &:focus {
         background: $light-gray;
         color: $black;
+
+        .icon {
+            background-color: $black;
+        }
     }
 
     &.light {
@@ -36,10 +44,18 @@ button {
         border-color: $black;
         color: $black;
 
+        .icon {
+            background-color: $black;
+        }
+
         &:hover,
         &:focus {
-            background: $black;
+            background-color: $black;
             color: $white;
+
+            .icon {
+                background-color: $white;
+            }
         }
     }
 }

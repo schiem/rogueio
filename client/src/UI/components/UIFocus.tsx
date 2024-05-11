@@ -4,7 +4,6 @@ import { LocationSystem } from "../../../../common/src/systems/LocationSystem";
 import { Point } from "../../../../common/src/types/Points";
 import { localize } from "../../lang/Lang";
 import { ClientDescriptionSystem } from "../../systems/ClientDescriptionSystem";
-import { Glyphs } from "../Glyphs";
 import { DungeonProvider } from "../../../../common/src/models/Game";
 
 type FocusState = {
@@ -128,7 +127,7 @@ export class UIDescription extends Component<FocusProps, FocusState> {
                     <ul class="entity-picker">
                         {Object.keys(this.state.entityNames).map(entityId =>
                             <li class="separated-row">
-                                <button class="icon" title={ this.labels.focus } onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}>{ Glyphs.focus }</button> 
+                                <button class="icon-only" title={ this.labels.focus } onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}><i class='icon arrow-right'></i></button> 
                                 <span>{(this.state.entityNames as Record<number, string>)[entityId as unknown as number]}</span>
                             </li>
                         )}

@@ -6,7 +6,6 @@ import { InventorySystem } from "../../../../common/src/systems/InventorySystem"
 import { NetworkEventHandler } from "../../events/NetworkEventHandler";
 import { localize } from "../../lang/Lang";
 import { ClientDescriptionSystem } from "../../systems/ClientDescriptionSystem";
-import { Glyphs } from "../Glyphs";
 
 export type InventoryProps = {
     descriptionSystem: ClientDescriptionSystem;
@@ -68,7 +67,7 @@ export class UIInventory extends Component<InventoryProps, InventoryState> {
                     {this.state.items.map((item) =>
                         <tr>
                             <td class="collapse">
-                                <button class="icon" onClick={() => this.dropItem(item.id)} title={this.labels.drop}>{Glyphs.drop}</button>
+                                <button class="icon-only" onClick={() => this.dropItem(item.id)} title={this.labels.drop}><i class='icon curve-arrow'></i></button>
                             </td>
                             <td class="grow">
                                 {item.name}

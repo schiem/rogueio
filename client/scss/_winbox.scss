@@ -29,27 +29,44 @@ $header-height: $spacing-text + (2 * $spacing-xs);
 
 .wb-control {
     height: auto;
-    padding: $spacing-xs $spacing;
+    padding: $spacing-xs $spacing-sm;
 }
 
 .wb-close {
-    vertical-align: top;
+    box-sizing: border-box;
+    vertical-align: middle;
     background: none;
     border: 1px solid $black;
     background-color: $light-gray;
     color: $black;
     transition: color $transition-speed ease, background-color $transition-speed ease;
-    width: $spacing-sm;
-    height: $spacing-sm;
-    line-height: $spacing-sm - 2px;
+    width: $spacing-lg;
+    height: $spacing-lg;
+    line-height: $spacing-lg - 2px;
+    padding: 2px;
 
     &::after {
-        content: '↙';
+        content: '';
+        display: inline-block;
+        -webkit-mask-image: url('/dist/assets/icons/arrow_bottom_left.svg');
+        -webkit-mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-image: url('/dist/assets/icons/arrow_bottom_left.svg');
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        width: $spacing-md;
+        height: $spacing-md;
+        transition: background-color $transition-speed ease;
+        background-color: $black;
     }
 
     &:hover,
     &:focus {
         background: $black;
         color: $white;
+
+        &::after {
+            background-color: $white;
+        }
     }
 }

@@ -4,7 +4,7 @@
     min-width: 300px;
     border-radius: $border-radius;
     overflow: hidden;
-    margin: 0 $spacing $spacing $spacing;
+    margin: 0 $spacing-xs $spacing-xs $spacing-sm;
 
     & * {
         /* Works on Firefox */
@@ -30,13 +30,13 @@
 }
 
 .terminal-title {
-    padding: $spacing-xs $spacing;
+    padding: $spacing-xs $spacing-sm;
     color: $black;
     background: $light-gray;
 }
 
 .terminal-content {
-    padding: $spacing;
+    padding: $spacing-sm;
 
     .scrollable-list {
         max-height: 400px;
