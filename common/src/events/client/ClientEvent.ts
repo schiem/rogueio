@@ -5,7 +5,9 @@ export enum ClientEventType {
     action,
     grab,
     drop,
-    unequip
+    unequip,
+    equip,
+    consume
 }
 export class ClientEvent extends NetworkEvent {
     type: ClientEventType;

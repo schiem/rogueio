@@ -103,8 +103,13 @@ export abstract class ComponentSystem<T> {
             const prop = properties[i];
 
             if (i === properties.length - 1) {
+                if (value === null || value === undefined) {
+                    delete currentObj[prop];
+                }
+                else {
+                    currentObj[prop] = value;
+                }
                 oldProp = currentObj[prop];
-                currentObj[prop] = value;
             } else {
                 currentObj = currentObj[prop] as Record<string, unknown>;
             }

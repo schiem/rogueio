@@ -32,6 +32,16 @@
         "dagger": {
             "name": "Dagger",
             "description": "Stick them with the pointy end."
+        },
+        "healthPotion": {
+            "name": "Health Potion",
+            "description": "Restores some health."
+        },
+        "greater": {
+            "name": "(Greater)"
+        },
+        "lesser": {
+            "name": "(Lesser)"
         }
     },
     "tiles": {
@@ -47,7 +57,10 @@
         "playerKilled": "You killed the {0}",
         "focus": "Focus",
         "drop": "Drop",
-        "unequip": "Unequip"
+        "unequip": "Unequip",
+        "equip": "Equip",
+        "drink": "Drink",
+        "read": "Read"
     },
     "messages": {
         "inventoryFull": "Your inventory is full.",

@@ -1,6 +1,10 @@
+import { ConsumableType } from "./ConsumableComponent";
+// TODO - redo all of this, it's a garbage way to do it
+
 export enum EntityCategory {
     character = 1,
     item,
+    consumable // technically an item, but meh - this whole system is going to get replaced
 }
 
 export enum CharacterType {
@@ -17,17 +21,13 @@ export enum ItemType {
 export type EntityKeys<T> = {
     [EntityCategory.character]: Record<CharacterType, T>,
     [EntityCategory.item]: Record<ItemType, T>,
+    [EntityCategory.consumable]: Record<ConsumableType, T>,
 };
 
 export type DescriptionClass = {
     category: string;
     specific?: string;
 }
-
-export type DescriptionComponent = {
-    category: EntityCategory;
-    id: number;
-};
 
 export const entityDescriptions: EntityKeys<DescriptionClass> = {
     [EntityCategory.character]: {
@@ -51,5 +51,20 @@ export const entityDescriptions: EntityKeys<DescriptionClass> = {
         [ItemType.dagger]: {
             category: 'dagger',
         }
+    },
+    [EntityCategory.consumable]: {
+        [ConsumableType.greaterHealing]: {
+            category: 'healthPotion',
+            specific: 'greater'
+        },
+        [ConsumableType.lesserHealing]: {
+            category: 'healthPotion',
+            specific: 'lesser'
+        }
     }
+};
+
+export type DescriptionComponent = {
+    category: EntityCategory;
+    id: number;
 };

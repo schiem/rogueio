@@ -127,7 +127,7 @@ export class UIDescription extends Component<FocusProps, FocusState> {
                     <ul class="entity-picker">
                         {Object.keys(this.state.entityNames).map(entityId =>
                             <li class="separated-row">
-                                <button class="icon-only" title={ this.labels.focus } onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}><i class='icon arrow-right'></i></button> 
+                                <button type="button" class="icon-only" title={ this.labels.focus } onClick={() => { this.props.changeFocusToEntity(parseInt(entityId)) }}><i class='icon arrow-right'></i></button> 
                                 <span>{(this.state.entityNames as Record<number, string>)[entityId as unknown as number]}</span>
                             </li>
                         )}

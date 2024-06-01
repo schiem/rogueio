@@ -3,13 +3,13 @@ import { EntityManager } from "../../../common/src/entities/EntityManager";
 import { DungeonProvider } from "../../../common/src/models/Game";
 import { ActionSystem } from "../../../common/src/systems/ActionSystem";
 import { AllySystem } from "../../../common/src/systems/AllySystem";
-import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { VisibilitySystem } from "../../../common/src/systems/VisibilitySystem";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
 import { pointDistanceSquared } from "../../../common/src/utils/PointUtils";
 import { BresenhamRayCast } from "../utils/Bresenham";
+import { ServerHealthSystem } from "./ServerHealthSystem";
 
 export class ServerActionSystem extends ActionSystem {
     constructor(
@@ -17,7 +17,7 @@ export class ServerActionSystem extends ActionSystem {
         private locationSystem: LocationSystem, 
         private visibilitySystem: VisibilitySystem, 
         private allySystem: AllySystem, 
-        private healthSystem: HealthSystem, 
+        private healthSystem: ServerHealthSystem, 
         private dungeonProvider: DungeonProvider) {
         super(entityManager);
     }
@@ -101,7 +101,7 @@ export class ServerActionSystem extends ActionSystem {
                     }
 
                     const damage = random(attackEffect.damage.min, attackEffect.damage.max + 1);
-                    this.healthSystem.updateComponent(id, { current: Math.max(healthComponent.current - damage, 0) }, entityId);
+                    this.healthSystem.damage(id, damage, entityId);
                 });
                 break;
         }

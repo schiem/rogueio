@@ -4,7 +4,7 @@ import { InventorySystem } from "../../../common/src/systems/InventorySystem";
 export class ClientInventorySystem extends InventorySystem {
     componentPropertyUpdaters: Record<string, (id: number, component: InventoryComponent, newValue: unknown) => unknown> = {
         addedItem: (id: number, component: InventoryComponent, newValue: unknown) => {
-            component.items.push(newValue as { id: number, weight: number});
+            component.items.push(newValue as number);
             return component.items;
         },
         removedItem: (id: number, component: InventoryComponent, idx: unknown) => {

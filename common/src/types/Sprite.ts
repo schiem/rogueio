@@ -6,7 +6,8 @@ export enum SpriteName {
     spawn,
     bufonid,
     water,
-    dagger
+    dagger,
+    potion
 }
 export enum SpriteColor {
     default,

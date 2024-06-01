@@ -44,13 +44,19 @@ export class NetworkEventManager {
         },
         [ClientEventType.drop]: (playerId: string, game: ServerGame, event: DropEvent) => {
             const characterId = game.players[playerId].characterId;
-            console.log(`dropping ${event.data.target}`);
             game.systems.inventory.dropItem(characterId, event.data.target);
         },
         [ClientEventType.unequip]: function (playerId: string, game: ServerGame, event: ClientEvent, currentTime: number): void {
             const characterId = game.players[playerId].characterId;
-            console.log(`unequipping ${event.data.slot}`);
             game.systems.equipment.unequip(characterId, event.data.slot);
+        },
+        [ClientEventType.equip]: function (playerId: string, game: ServerGame, event: ClientEvent, currentTime: number): void {
+            const characterId = game.players[playerId].characterId;
+            game.systems.equipment.equip(characterId, event.data.target, event.data.slot);
+        },
+        [ClientEventType.consume]: function (playerId: string, game: ServerGame, event: ClientEvent, currentTime: number): void {
+            const characterId = game.players[playerId].characterId;
+            game.systems.consumable.attemptConsume(characterId, event.data.target);
         }
     }
     constructor(

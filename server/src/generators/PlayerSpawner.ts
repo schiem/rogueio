@@ -1,9 +1,10 @@
+import { ConsumableType } from "../../../common/src/components/ConsumableComponent";
 import { CharacterType, ItemType } from "../../../common/src/components/DescriptionComponent";
 import { EquipmentSlot } from "../../../common/src/components/EquipmentComponent";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { Point } from "../../../common/src/types/Points";
 import { random } from "../../../common/src/utils/MathUtils";
-import { itemEntities, mobEntities, SpawnEntity } from "./EntityGenerators";
+import { consumableEntities, itemEntities, mobEntities, SpawnEntity } from "./EntityGenerators";
 import { Spawner } from "./Spawner";
 
 export const PlayerSpawner: Spawner = {
@@ -34,7 +35,12 @@ export const PlayerSpawner: Spawner = {
         const daggerId2 = entityManager.addNextEntity();
         SpawnEntity(daggerId2, daggerComponent2, systems);
 
+        const lesserHealingPotion = consumableEntities[ConsumableType.lesserHealing]();
+        const healPotId = entityManager.addNextEntity();
+        SpawnEntity(healPotId, lesserHealingPotion, systems);
+
         systems.inventory.addItem(id, daggerId);
+        systems.inventory.addItem(id, healPotId);
         systems.equipment.equip(id, daggerId2, EquipmentSlot.leftHand);
     }
 } 

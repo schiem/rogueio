@@ -16,8 +16,8 @@ export class InputEvents {
         d: InputAction.moveRight,
         w: InputAction.moveUp,
         c: InputAction.focusClosestEntity,
-        Tab: InputAction.focusNextEntity,
-        'shift-Tab': InputAction.focusPreviousEntity,
+        e: InputAction.focusNextEntity,
+        q: InputAction.focusPreviousEntity,
         g: InputAction.grab
     }
     private static inputEventMap: Record<string, InputAction> = {}

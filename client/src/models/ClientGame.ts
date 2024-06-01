@@ -20,6 +20,7 @@ import { ClientDescriptionSystem } from "../systems/ClientDescriptionSystem";
 import { LocationComponent } from "../../../common/src/components/LocationComponent";
 import { ClientInventorySystem } from "../systems/ClientInventorySystem";
 import { MovementSystem } from "../../../common/src/systems/MovementSystem";
+import { ConsumableSystem } from "../../../common/src/systems/ConsumableSystem";
 
 export type ClientGameSystems = GameSystems & {
     location: ClientLocationSystem;
@@ -131,6 +132,7 @@ export class ClientGame extends Game {
         // Construct the common systems
         super.constructSystems();
 
+        this.systems.consumable = new ConsumableSystem(this.entityManager);
         this.systems.movement = new MovementSystem(this.entityManager);
         this.systems.visibility = new ClientVisibilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, { x: this.dungeonX, y: this.dungeonY }, this.systems.inventory, this.systems.equipment);
         this.systems.inventory = new ClientInventorySystem(this.entityManager, this.systems.location, this.systems.carryable);

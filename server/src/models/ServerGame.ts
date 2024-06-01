@@ -10,7 +10,6 @@ import { random, randomList } from "../../../common/src/utils/MathUtils";
 import { AISystem } from "../systems/AISystem";
 import { ServerActionSystem } from "../systems/ServerActionSystem";
 import { ServerDungeon } from "./ServerDungeon";
-import { HealthSystem } from "../../../common/src/systems/HealthSystem";
 import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { DescriptionSystem } from "../../../common/src/systems/DescriptionSystem";
 import { PlayerSpawner } from "../generators/PlayerSpawner";
@@ -20,6 +19,8 @@ import { ServerInventorySystem } from "../systems/ServerInventorySystem";
 import { ServerMovementSystem } from "../systems/ServerMovementSystem";
 import { ServerEquipmentSystem } from "../systems/ServerEquipmentsystem";
 import { RoomType } from "./RoomType";
+import { ServerHealthSystem } from "../systems/ServerHealthSystem";
+import { ServerConsumableSystem } from "../systems/ServerConsumableSystem";
 
 export type ServerGameSystems = GameSystems & {
     ai: AISystem;
@@ -28,6 +29,8 @@ export type ServerGameSystems = GameSystems & {
     inventory: ServerInventorySystem;
     movement: ServerMovementSystem;
     equipment: ServerEquipmentSystem;
+    health: ServerHealthSystem;
+    consumable: ServerConsumableSystem;
 }
 
 export type ServerDungeonProvider = {
@@ -70,7 +73,7 @@ export class ServerGame extends Game {
 
     constructSystems(): void {
         this.systems.description = new DescriptionSystem(this.entityManager);
-        this.systems.health = new HealthSystem(this.entityManager);
+        this.systems.health = new ServerHealthSystem(this.entityManager);
         this.systems.location = new LocationSystem(this.entityManager, { x: this.dungeonX, y: this.dungeonY });
 
         // Construct the common systems
@@ -79,6 +82,8 @@ export class ServerGame extends Game {
         this.systems.movement = new ServerMovementSystem(this.entityManager, this.systems.location);
         this.systems.inventory = new ServerInventorySystem(this.entityManager, this.systems.location, this.systems.carryable, this.dungeonProvider);
         this.systems.equipment = new ServerEquipmentSystem(this.entityManager, this.dungeonProvider, this.systems.equippable, this.systems.inventory, this.systems.location);
+
+        this.systems.consumable = new ServerConsumableSystem(this.entityManager, this.systems.location, this.systems.inventory, this.systems.health);
 
         // set up the visibility system, after the dungeon has been created
         this.systems.visibility = new ServerVisbilitySystem(this.entityManager, this.systems.ally, this.systems.location, this.systems.health, this.dungeonGenerator.dungeonSize, this.systems.inventory, this.systems.equipment, this.dungeonProvider);

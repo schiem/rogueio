@@ -1,6 +1,4 @@
 export type InventoryComponent = {
-    items: {id: number, weight: number}[];
-    currentWeight: number;
+    items: number[];
     maxSpace: number;
-    maxWeight: number;
 }

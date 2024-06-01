@@ -1,4 +1,4 @@
-import { LocationComponent } from "../components/LocationComponent";
+import { LocationComponent, LocationComponentLayer, layerCollisions } from "../components/LocationComponent";
 import { Dungeon } from "../models/Dungeon";
 import { EntityManager } from "../entities/EntityManager";
 import { Point } from "../types/Points";
@@ -108,7 +108,15 @@ export class LocationSystem extends ComponentSystem<LocationComponent> {
     private isCollision(component: LocationComponent, location: Point): boolean {
         const components = this.locationCache[location.x][location.y];
         // check if any of the components at this location collide with the current component
-        return components?.filter(x => this.getComponent(x)?.layer === component.layer).length > 0;
+        return components?.find(x => this.layersCollide(this.getComponent(x)?.layer, component.layer)) !== undefined;
+    }
+
+    private layersCollide(first: LocationComponentLayer | undefined, second: LocationComponentLayer | undefined): boolean {
+        if (first === undefined || second === undefined) {
+            return false;
+        }
+
+        return (layerCollisions[first] & second) > 0;
     }
 
     /**

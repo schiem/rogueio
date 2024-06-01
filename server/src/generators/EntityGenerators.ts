@@ -1,5 +1,6 @@
 import { ActionComponent, ActionTarget, EffectTarget, EffectType } from "../../../common/src/components/ActionComponent";
 import { AllyComponent } from "../../../common/src/components/AllyComponent";
+import { ConsumableCategory, ConsumableComponent, ConsumableType } from "../../../common/src/components/ConsumableComponent";
 import { DescriptionComponent, CharacterType, EntityCategory, ItemType } from "../../../common/src/components/DescriptionComponent";
 import { EquipmentComponent, EquipmentSlot } from "../../../common/src/components/EquipmentComponent";
 import { EquippableComponent } from "../../../common/src/components/EquippableComponent";
@@ -31,6 +32,7 @@ export type ComponentBlock = {
     sprite: SpriteComponent;
     equippable: EquippableComponent;
     equipment: EquipmentComponent;
+    consumable: ConsumableComponent;
 }
 
 export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> = {
@@ -80,10 +82,8 @@ export const mobEntities: Record<CharacterType, () => Partial<ComponentBlock>> =
                 }]
             },
             inventory: {
-                currentWeight: 0,
                 items: [],
                 maxSpace: 10,
-                maxWeight: 20
             },
             equipment: {
                 items: {}
@@ -232,13 +232,62 @@ export const itemEntities: Record<ItemType, () => Partial<ComponentBlock>> = {
                 layer: LocationComponentLayer.item,
             },
             carryable: {
-                weight: 2
+                stackable: false
             },
             equippable: {
                 slots: [EquipmentSlot.leftHand, EquipmentSlot.rightHand]
             }
         }
     }
+}
+
+export const consumableEntities: Record<ConsumableType, () => Partial<ComponentBlock>> = {
+    [ConsumableType.lesserHealing]: () => {
+        return {
+            description: { id: ConsumableType.lesserHealing, category: EntityCategory.consumable },
+            sprite: {
+                sprite: {
+                    name: SpriteName.potion,
+                    color: SpriteColor.red
+                }
+            },
+            location: {
+                movesThrough: [],
+                layer: LocationComponentLayer.item,
+            },
+            carryable: {
+                stackable: false
+            },
+            consumable: {
+                category: ConsumableCategory.potion,
+                effect: ConsumableType.lesserHealing,
+                uses: 1
+            }
+        }
+    },
+    [ConsumableType.greaterHealing]: () => {
+        return {
+            description: { id: ConsumableType.greaterHealing, category: EntityCategory.consumable },
+            sprite: {
+                sprite: {
+                    name: SpriteName.potion,
+                    color: SpriteColor.red
+                }
+            },
+            location: {
+                movesThrough: [],
+                layer: LocationComponentLayer.item,
+            },
+            carryable: {
+                stackable: false
+            },
+            consumable: {
+                category: ConsumableCategory.potion,
+                effect: ConsumableType.greaterHealing,
+                uses: 1
+            }
+        }
+    },
 }
 
 export const SpawnEntity = (entityId: number, components: Record<string, unknown>, systems: ServerGameSystems): void => {

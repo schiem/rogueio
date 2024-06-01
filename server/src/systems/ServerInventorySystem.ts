@@ -6,9 +6,15 @@ import { LocationSystem } from "../../../common/src/systems/LocationSystem";
 import { ServerDungeonProvider } from "../models/ServerGame";
 
 export class ServerInventorySystem extends InventorySystem {
-
     constructor(entityManager: EntityManager, locationSystem: LocationSystem, carryableSystem: CarryableSystem,  private dungeonProvider: ServerDungeonProvider) {
         super(entityManager, locationSystem, carryableSystem)
+
+        entityManager.entityWillBeRemovedEmitter.subscribe((entityId) => {
+            const component = this.carryableSystem.getComponent(entityId);
+            if (component?.carriedBy !== undefined) {
+                this.removeItem(component.carriedBy, entityId);
+            }
+        });
     }
 
     attemptPickUp(entityId: number, entityToPickUp: number): void {
@@ -27,13 +33,7 @@ export class ServerInventorySystem extends InventorySystem {
         if (!component || !carryable) {
             return;
         }
-        const oldWeight = component.currentWeight;
-        component.currentWeight += carryable.weight;
-        const item = {
-            id: entityToAdd,
-            weight: carryable.weight
-        };
-        component.items.push(item);
+        component.items.push(entityToAdd);
 
         // If the entity has a location set it to nothing
         this.locationSystem.unsetLocation(entityToAdd);
@@ -41,14 +41,15 @@ export class ServerInventorySystem extends InventorySystem {
         this.componentUpdatedEmitter.emit({
             id: entityId,
             oldProps: {
-                weight: oldWeight
             },
             props: {
-                currentWeight: component.currentWeight,
-                addedItem: item 
+                addedItem: entityToAdd
             }
         });
 
+        this.carryableSystem.updateComponent(entityToAdd, {
+            carriedBy: entityId
+        });
     }
 
     dropItem(entityId: number, entityToDrop: number): void {
@@ -58,32 +59,40 @@ export class ServerInventorySystem extends InventorySystem {
             return;
         }
 
-        const idx = component.items.findIndex(x => x.id === entityToDrop);
-        if (idx > -1) {
-            const item = component.items[idx];
-            const oldWeight = component.currentWeight;
-
-            if (!this.locationSystem.moveAndCollideEntity(entityToDrop, location.location, this.dungeonProvider.dungeon)) {
-                Bus.messageEmitter.emit({
-                    entities: [entityId],
-                    message: 'messages/itemCannotBeDroppedHere',
-                    replacements: [entityToDrop]
-                });
-                return;
-            }
-
-            component.currentWeight -= item.weight;
-            component.items.splice(idx, 1);
-            this.componentUpdatedEmitter.emit({
-                id: entityId,
-                oldProps: {
-                    weight: oldWeight
-                },
-                props: {
-                    currentWeight: component.currentWeight,
-                    removedItem: idx
-                }
+        if (!this.locationSystem.moveAndCollideEntity(entityToDrop, location.location, this.dungeonProvider.dungeon)) {
+            Bus.messageEmitter.emit({
+                entities: [entityId],
+                message: 'messages/itemCannotBeDroppedHere',
+                replacements: [entityToDrop]
             });
+            return;
         }
+
+        this.removeItem(entityId, entityToDrop);
     }
+
+    removeItem(entityId: number, entityToRemove: number): void {
+        const component = this.getComponent(entityId);
+        if (!component) {
+            return;
+        }
+        const idx = component.items.findIndex(x => x === entityToRemove);
+        if (idx < 0) {
+            return;
+        }
+
+        component.items.splice(idx, 1);
+        this.componentUpdatedEmitter.emit({
+            id: entityId,
+            oldProps: {
+            },
+            props: {
+                removedItem: idx
+            }
+        });
+
+        this.carryableSystem.updateComponent(entityToRemove, {
+            carriedBy: undefined 
+        });
+    } 
 }

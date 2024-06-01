@@ -58,10 +58,6 @@ export class InventorySystem extends ComponentSystem<InventoryComponent> {
             return 'doesNotExist';
         }
 
-        if ((inventoryComponent.currentWeight + itemCarryable.weight) > inventoryComponent.maxWeight) {
-            return 'tooHeavy';
-        }
-
         if (inventoryComponent.items.length >= inventoryComponent.maxSpace) {
             return 'full';
         }
@@ -74,6 +70,6 @@ export class InventorySystem extends ComponentSystem<InventoryComponent> {
         if (!component) {
             return false;
         }
-        return component.items.findIndex(x => x.id === itemId) > -1;
+        return component.items.findIndex(x => x === itemId) > -1;
     }
 }

@@ -78,6 +78,10 @@ export class UIEquipment extends Component<EquipmentProps, EquipmentState> {
         for (const key in component?.items) {
             const slot = key as unknown as EquipmentSlot;
             const item = component?.items[slot] as number;
+            if (!item) {
+                continue;
+            }
+
             items[slot] = {
                 id: item,
                 name: this.props.descriptionSystem.getLocalizedName(item)
@@ -99,7 +103,7 @@ export class UIEquipment extends Component<EquipmentProps, EquipmentState> {
                     const item = this.state.items[slot];
                     return (<tr>
                         <td class="collapse">
-                            { item ? <button class="icon-only" onClick={() => this.unequip(slot)} title={this.labels.unequip}><i class="icon curve-arrow"></i></button> : '' }
+                            { item ? <button type="button" class="icon-only" onClick={() => this.unequip(slot)} title={this.labels.unequip}><i class="icon curve-arrow"></i></button> : '' }
                         </td>
                         <td class="grow">
                             {this.equipmentNames[slot]}

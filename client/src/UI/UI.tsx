@@ -62,6 +62,8 @@ export class UI extends Component<UIProps, UIState> {
                 <UIInventory
                     descriptionSystem={this.game.systems.description}
                     inventorySystem={this.game.systems.inventory} 
+                    consumableSystem={this.game.systems.consumable}
+                    equippableSystem={this.game.systems.equippable}
                     playerId={this.game.players[this.game.currentPlayerId].characterId} />
             </Terminal>
             <Terminal classes={['ui-block']} id='description' title='Description'>

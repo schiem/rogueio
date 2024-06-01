@@ -122,7 +122,7 @@ export class Terminal extends Component<TerminalProps, TerminalState> {
                 { !this.state.winbox && 
                     <div class="terminal-title columned">
                         <div>{this.props.title}</div>
-                        <div><button class="light icon-only" title={this.labels.float} onClick={() => this.floatWindow()}><i class="icon arrow-top-right"></i></button></div>
+                        <div><button type="button" class="light icon-only" title={this.labels.float} onClick={() => this.floatWindow()}><i class="icon arrow-top-right"></i></button></div>
                     </div> 
                 }
                 <div class="terminal-content">

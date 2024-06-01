@@ -1,3 +1,4 @@
 export type CarryableComponent = {
-    weight: number;
+    stackable: boolean;
+    carriedBy?: number;
 }

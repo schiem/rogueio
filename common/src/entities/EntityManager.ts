@@ -8,6 +8,7 @@ import { ReplicationMode } from "../systems/ComponentSystem";
  */
 export class EntityManager {
     entityRemovedEmitter = new EventEmitter<number>();
+    entityWillBeRemovedEmitter = new EventEmitter<number>();
     entityAddedEmitter = new EventEmitter<number>();
     private entities: Record<number, boolean> = {};
     private currentEntity = 0;
@@ -35,6 +36,7 @@ export class EntityManager {
     }
 
     removeEntity(entityId: number): void {
+        this.entityWillBeRemovedEmitter.emit(entityId);
         delete this.entities[entityId];
         this.entityRemovedEmitter.emit(entityId);
     }

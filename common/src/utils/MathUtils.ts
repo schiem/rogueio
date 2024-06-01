@@ -9,6 +9,13 @@ export const randomList = <T>(list: ArrayLike<T>): T => {
     return list[random(0, list.length)];
 }
 
+export const shuffleList = (list: any[]): void => {
+    for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+    }
+}
+
 export const randomEnum = <T>(type: { [s: string]: T | string; }): T => {
     return randomList(Object.values(type).filter(x => typeof x === 'number')) as T;
 }

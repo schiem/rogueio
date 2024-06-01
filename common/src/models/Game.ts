@@ -14,6 +14,7 @@ import { CarryableSystem } from "../systems/CarryableComponent";
 import { SpriteSystem } from "../systems/SpriteSystem";
 import { EquipmentSystem } from "../systems/EquipmentSystem";
 import { EquippableSystem } from "../systems/EquippableSystem";
+import { ConsumableSystem } from "../systems/ConsumableSystem";
 
 export type GameSystems = {
     description: DescriptionSystem;
@@ -29,6 +30,7 @@ export type GameSystems = {
     sprite: SpriteSystem;
     equipment: EquipmentSystem;
     equippable: EquippableSystem;
+    consumable: ConsumableSystem;
 }
 
 export type DungeonProvider = {

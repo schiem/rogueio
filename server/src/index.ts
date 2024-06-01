@@ -1,5 +1,5 @@
 import * as WebSocket from 'ws';
-import { ServerGame } from './models/ServerGame';
+import { ServerGame, ServerGameSystems } from './models/ServerGame';
 import { InitEvent } from '../../common/src/events/server/InitEvent';
 import { ClientEvent } from '../../common/src/events/client/ClientEvent';
 import { decode } from "messagepack";
@@ -7,6 +7,8 @@ import * as readline from 'node:readline';
 import { stdin as input, stdout as output } from 'process';
 import { Rog } from './rog/Rog';
 import { ComponentSystem } from '../../common/src/systems/ComponentSystem';
+import { ComponentBlock } from './generators/EntityGenerators';
+import { GameSystems } from '../../common/src/models/Game';
 
 const game = new ServerGame();
 const wss = new WebSocket.Server({ port: 8888,   
@@ -115,6 +117,22 @@ rog.bindFunction('removeComponent', (systemName: string, entityId: number) => {
 rog.bindFunction('showPlayers', () => {
     return Object.keys(game.players).map(x => game.players[x].characterId);
 }, 0);
+
+rog.bindFunction('printEntityInfo', (entityId: number) => {
+    const components: Partial<ComponentBlock> = {};
+    for (const systemName in game.systems) {
+        const component = game.systems[systemName as keyof ServerGameSystems].getComponent(entityId);
+        if (component) {
+            (components[systemName as keyof ComponentBlock] as Record<string, unknown>) = component;
+        }
+    }
+
+    console.log(JSON.stringify(components, null, 2));
+}, 1)
+
+rog.bindFunction('updateComponent', (entityId: number, system: keyof GameSystems, key: string, value: any) => {
+    game.systems[system].updateComponent(entityId, { [key]: value });
+}, 4)
 
 rl.on('line', (line) => {
     const result = rog.run(line);

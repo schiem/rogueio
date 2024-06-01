@@ -8,7 +8,8 @@ export const SpriteIndexes: Record<SpriteName, number> = {
     [SpriteName.spawn]: 240,
     [SpriteName.bufonid]: 66,
     [SpriteName.water]: 243,
-    [SpriteName.dagger]: 108 
+    [SpriteName.dagger]: 108,
+    [SpriteName.potion]: 96
 }
 
 export const SpriteColors: Record<SpriteColor, string> = {
